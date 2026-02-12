@@ -1,38 +1,32 @@
 "use client";
 
+import UserList from "@/app/components/UserList/UserList";
+import { Users, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Loader2 } from "lucide-react";
-import UserList from "@/app/components/UserList/UserList";
-
-interface UserProfile {
-  id: string;
-  displayName: string;
-  photoURL: string | null;
-}
+import axios from "axios";
+import { IUser } from "@/app/utils/store/userSlice";
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleLoadUsers = async () => {
+    try {
+      const { data } = await axios.get("/api/users");
+      console.log(data);
+      setUsers(data.users || []);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Ошибка загрузки пользователей");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch("/api/users");
-        if (!res.ok) throw new Error("Ошибка получения пользователей");
-
-        const data = await res.json();
-        setUsers(data.users || []);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Ошибка загрузки пользователей");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+    handleLoadUsers();
   }, []);
 
   if (loading) {
@@ -56,12 +50,11 @@ const UsersPage = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
-      {/* Hero section – your existing code */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-gradient-to-br from-background to-muted/30"
+        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
       >
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="relative z-10">
@@ -78,7 +71,6 @@ const UsersPage = () => {
         </div>
       </motion.div>
 
-      {/* Stats */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,10 +83,8 @@ const UsersPage = () => {
           value={users.length.toString()}
           highlight
         />
-        {/* Add more stats if needed */}
       </motion.div>
 
-      {/* List */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -114,7 +104,6 @@ const UsersPage = () => {
   );
 };
 
-// Keep your StatCard function here or import it
 function StatCard({
   icon,
   label,

@@ -15,30 +15,7 @@ export async function GET() {
           ...tournamentDoc.data(),
         };
 
-        const participantsCollection = collection(
-          db,
-          "tournaments",
-          tournamentDoc.id,
-          "users",
-        );
-
-        const participantsQuery = query(
-          participantsCollection,
-          orderBy("joinedAt", "asc"), // or 'desc' — newest/oldest first
-        );
-
-        const participantsSnap = await getDocs(participantsQuery);
-
-        const users = participantsSnap.docs.map((pDoc) => ({
-          id: pDoc.id,
-          ...pDoc.data(),
-        }));
-
-        return {
-          ...tournamentData,
-          users,
-          usersAmount: users.length,
-        };
+        return tournamentData;
       }),
     );
 

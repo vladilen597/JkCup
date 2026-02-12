@@ -2,26 +2,31 @@
 
 import React from "react";
 import { motion } from "motion/react";
+import { useAppSelector } from "@/app/utils/store/hooks";
 
 interface UserLineProps {
-  id: string;
+  uid: string;
   displayName: string;
-  photoURL: string | null;
+  photoUrl: string | null;
   joinedAt?: any;
   status?: string;
   index?: number;
 }
 
 const UserLine: React.FC<UserLineProps> = ({
+  uid,
   displayName,
-  photoURL,
+  photoUrl,
   joinedAt,
   status = "registered",
   index = 0,
 }) => {
+  const { user: currentUser } = useAppSelector((state) => state.user);
   const joinedDate = joinedAt?.toDate?.()
     ? joinedAt.toDate().toLocaleDateString()
     : "—";
+
+  const isCurrentUser = uid === currentUser.uid;
 
   return (
     <motion.li
@@ -30,9 +35,9 @@ const UserLine: React.FC<UserLineProps> = ({
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 border border-border/50 transition-all duration-200 group"
     >
-      {photoURL ? (
+      {photoUrl ? (
         <img
-          src={photoURL}
+          src={photoUrl}
           alt={displayName}
           className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
           referrerPolicy="no-referrer"
@@ -44,9 +49,14 @@ const UserLine: React.FC<UserLineProps> = ({
       )}
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-foreground truncate text-sm">
-          {displayName}
-        </p>
+        <div>
+          <p className="font-semibold text-foreground truncate leading-4 text-sm">
+            {displayName}
+          </p>
+          {isCurrentUser && (
+            <span className="text-xs leading-0 text-orange-400">Вы</span>
+          )}
+        </div>
         {status !== "registered" && (
           <p className="text-xs text-secondary font-medium">{status}</p>
         )}

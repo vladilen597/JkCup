@@ -1,19 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { DoorClosed, Trophy, ChevronDown, Users } from "lucide-react";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { IUser, setUser } from "@/app/utils/store/userSlice";
-import { auth } from "@/app/utils/firebase";
+import { useGoogleSignIn } from "@/app/utils/useGoogleSignIn";
+import { AnimatePresence, motion } from "motion/react";
+import { setUser } from "@/app/utils/store/userSlice";
+import { useState } from "react";
 import Link from "next/link";
-
-const provider = new GoogleAuthProvider();
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user } = useAppSelector((state) => state.user);
+  const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
 
   const handleLogOut = () => {
@@ -21,20 +19,15 @@ const Header = () => {
       setUser({
         uid: "",
         displayName: "Anonymous",
-        photoURL: "",
+        photoUrl: "",
+        email: "",
       }),
     );
     setIsProfileOpen(false);
   };
 
   const handleGoogleSignIn = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        dispatch(setUser(result.user as any));
-      })
-      .catch((error) => {
-        console.error("Google sign-in failed:", error);
-      });
+    signIn();
   };
 
   return (
@@ -70,7 +63,7 @@ const Header = () => {
               </span>
               <img
                 className="h-8 w-8 rounded-full ring-2 ring-primary/30"
-                src={user.photoURL}
+                src={user.photoUrl}
                 alt={user.displayName}
                 referrerPolicy="no-referrer"
               />
