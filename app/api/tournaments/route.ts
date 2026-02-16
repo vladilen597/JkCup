@@ -1,5 +1,12 @@
-import { NextResponse } from "next/server";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 
 export async function GET() {
@@ -26,5 +33,27 @@ export async function GET() {
       { error: "Failed to load tournaments", details: error.message },
       { status: 500 },
     );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const newTournament = {
+      ...body,
+      createdAt: serverTimestamp(),
+      users: [], // for solo mode
+      usersAmount: 0,
+      teams: body.team_amount > 1 ? [] : undefined, // ← key line: create teams only for team tournaments
+      teamsAmount: 0,
+    };
+
+    const docRef = await addDoc(collection(db, "tournaments"), newTournament);
+
+    return NextResponse.json({ id: docRef.id, ...newTournament });
+  } catch (error: any) {
+    console.error("Create tournament error:", error);
+    return NextResponse.json({ error: "Failed to create" }, { status: 500 });
   }
 }

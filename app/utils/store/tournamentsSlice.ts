@@ -12,6 +12,14 @@ export interface ITournament {
   description: string;
   start_date: string;
   status: string;
+  teams: any[];
+}
+
+export interface ITeam {
+  uid: string;
+  creator_uid: string;
+  name?: string;
+  users: IUser[];
 }
 
 const initialState: { tournaments: ITournament[] } = {
@@ -24,6 +32,39 @@ const tournamentsSlice = createSlice({
   reducers: {
     setTournaments: (state, action: PayloadAction<ITournament[]>) => {
       state.tournaments = action.payload;
+    },
+    addTournamentTeam: (
+      state,
+      action: PayloadAction<{
+        uid: string;
+        tournamentId: string;
+        teamName: string;
+        currentUser: IUser;
+      }>,
+    ) => {
+      const { uid, tournamentId, teamName, currentUser } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+      if (tournament) {
+        tournament.teams.push({
+          uid,
+          name: teamName,
+          creator_uid: currentUser.uid,
+          users: [currentUser],
+        });
+        tournament.users_amount = tournament.users.length;
+      }
+    },
+    removeTeamParticipant: (
+      state,
+      action: PayloadAction<{ tournamentId: string; updatedTeams: ITeam[] }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+
+      if (tournament) {
+        tournament.teams = action.payload.updatedTeams;
+      }
     },
     addParticipant: (
       state,
@@ -58,7 +99,12 @@ const tournamentsSlice = createSlice({
   },
 });
 
-export const { setTournaments, addParticipant, removeParticipant } =
-  tournamentsSlice.actions;
+export const {
+  setTournaments,
+  addTournamentTeam,
+  addParticipant,
+  removeParticipant,
+  removeTeamParticipant,
+} = tournamentsSlice.actions;
 
 export default tournamentsSlice.reducer;

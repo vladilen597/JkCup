@@ -5,6 +5,10 @@ export interface IUser {
   displayName: string;
   photoUrl: string;
   email: string;
+  discord?: string;
+  createdAt?: string;
+  lastSignIn?: string;
+  role: "user" | "admin" | "superadmin";
 }
 
 const initialState: { user: IUser } = {
@@ -13,6 +17,8 @@ const initialState: { user: IUser } = {
     displayName: "Anonymous",
     photoUrl: "",
     email: "",
+    discord: "",
+    role: "user",
   },
 };
 

@@ -3,7 +3,7 @@
 import UserList from "@/app/components/UserList/UserList";
 import { useAppSelector, useAppDispatch } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Users,
   Calendar,
@@ -11,19 +11,37 @@ import {
   Loader2,
   AlertCircle,
   User,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { db } from "@/app/utils/firebase";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import {
   addParticipant,
   removeParticipant,
+  setTournaments,
 } from "@/app/utils/store/tournamentsSlice";
+import TeamList from "@/app/components/TeamsList/TeamsList";
+import EditModal from "@/app/components/EditModal/EditModal";
+import StatCard from "@/app/components/Shared/StatCard/StatCard";
+import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
+import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 
 const statuses = {
   open: "Открыт",
 };
+
+export interface IEditTournament {
+  name: string;
+  description: string;
+  game: string;
+  max_players: number;
+  team_amount: number;
+  start_date: string;
+  status: string;
+}
 
 const TournamentPage = () => {
   const params = useParams();
@@ -35,7 +53,55 @@ const TournamentPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState<IEditTournament>({
+    name: tournament?.name || "",
+    description: tournament?.description || "",
+    game: tournament?.game || "",
+    max_players: tournament?.max_players || 16,
+    team_amount: tournament?.team_amount || 1,
+    start_date: tournament?.start_date
+      ? new Date(tournament.start_date).toISOString().slice(0, 16)
+      : "",
+    status: tournament?.status || statuses.open,
+  });
 
+  const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
+    setEditForm({ ...editForm, [event.target.name]: event.target.value });
+  };
+
+  const handleUpdateTextField = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setEditForm({ ...editForm, description: event?.target.value });
+  };
+
+  const handleUpdateMaxPlayers = (value: number) => {
+    setEditForm({ ...editForm, max_players: value });
+  };
+
+  const handleUpdateTeamAmount = (value: number) => {
+    setEditForm({ ...editForm, team_amount: value });
+  };
+
+  const handleUpdateStatus = (value: string) => {
+    setEditForm({ ...editForm, status: value });
+  };
+
+  const handleUpdateStartDate = (value: string) => {
+    setEditForm({ ...editForm, start_date: value });
+  };
+
+  const handleOpenCreateTeamModal = () => {
+    setIsCreateTeamModalOpen(true);
+  };
+
+  const handleCloseCreateTeamModal = () => {
+    setIsCreateTeamModalOpen(false);
+  };
+
+  const isSuperAdmin = currentUser?.role === "superadmin";
+  const isTeamTournaments = (tournament?.team_amount || 1) > 1;
   const isJoined =
     tournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
 
@@ -55,8 +121,12 @@ const TournamentPage = () => {
     try {
       if (isJoined) {
         await updateDoc(tournamentRef, {
-          users: arrayRemove(currentUser),
+          ...tournament,
+          users: tournament.users.filter(
+            (user) => user.uid !== currentUser.uid,
+          ),
         });
+
         dispatch(
           removeParticipant({
             tournamentId: tournament.id,
@@ -76,9 +146,75 @@ const TournamentPage = () => {
       }
     } catch (err: any) {
       console.error("Error:", err);
-      setErrorMsg("Не получилось обновить. Попробуйте ещё раз.");
+      setErrorMsg("Не получилось обновить участие");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isSuperAdmin || !tournament?.id) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    const tournamentRef = doc(db, "tournaments", tournament.id);
+
+    try {
+      await updateDoc(tournamentRef, {
+        name: editForm.name,
+        description: editForm.description,
+        game: editForm.game,
+        max_players: editForm.max_players,
+        team_amount: editForm.team_amount,
+        start_date: editForm.start_date
+          ? new Date(editForm.start_date).toISOString()
+          : null,
+        status: editForm.status,
+      });
+
+      const updatedTournaments = tournaments.map((t) =>
+        t.id === tournament.id ? { ...t, ...editForm } : t,
+      );
+      dispatch(setTournaments(updatedTournaments));
+
+      setShowEditModal(false);
+    } catch (error: any) {
+      setErrorMsg("Не удалось обновить турнир");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDelete = async () => {
+    if (!isSuperAdmin || !tournament?.id) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      await deleteDoc(doc(db, "tournaments", tournament.id));
+
+      dispatch(
+        setTournaments(tournaments.filter((t) => t.id !== tournament.id)),
+      );
+
+      window.location.href = "/tournaments";
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      setErrorMsg("Не удалось удалить турнир");
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -87,7 +223,7 @@ const TournamentPage = () => {
   }
 
   const filledSlots = tournament.users?.length || 0;
-  const isTeam = (tournament.team_amount || 1) > 1;
+  const isTeamMode = (tournament.team_amount || 1) > 1;
 
   return (
     <main className="max-w-4xl mx-auto w-full px-4 py-8">
@@ -105,13 +241,34 @@ const TournamentPage = () => {
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
         <div className="relative">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-              Live
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-              {isTeam ? "Командный" : "Одиночный"}
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
+                {tournament.users.length === tournament.max_players
+                  ? "Live"
+                  : "Full"}
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                {isTeamMode ? "Командный" : "Одиночный"}
+              </span>
+            </div>
+
+            {currentUser?.role === "superadmin" && (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground mb-3">
@@ -133,14 +290,14 @@ const TournamentPage = () => {
           icon={<Users className="h-4 w-4" />}
           label="Формат"
           value={
-            isTeam
+            isTeamMode
               ? `${tournament.team_amount}v${tournament.team_amount}`
               : "1v1"
           }
         />
         <StatCard
           icon={<Hash className="h-4 w-4" />}
-          label={isTeam ? "Команд" : "Игроков"}
+          label={isTeamMode ? "Команд" : "Игроков"}
           value={`${filledSlots} / ${tournament.max_players || "∞"}`}
         />
         <StatCard
@@ -160,7 +317,6 @@ const TournamentPage = () => {
         />
       </motion.div>
 
-      {/* Progress bar */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -180,7 +336,7 @@ const TournamentPage = () => {
         </div>
         <div className="h-2 rounded-full bg-muted overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60"
+            className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
             initial={{ width: 0 }}
             animate={{
               width: `${((filledSlots || 0) / (tournament.max_players || 1)) * 100}%`,
@@ -190,7 +346,6 @@ const TournamentPage = () => {
         </div>
       </motion.div>
 
-      {/* Participants + button */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -199,19 +354,26 @@ const TournamentPage = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            Участники ({filledSlots} / {tournament.max_players || "∞"})
+            {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
+            {tournament.max_players || "∞"})
           </h2>
 
           {currentUser?.uid ? (
             <button
-              onClick={handleJoinLeave}
+              onClick={
+                isTeamTournaments ? handleOpenCreateTeamModal : handleJoinLeave
+              }
               disabled={isLoading}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors
                 ${isJoined ? "bg-red-600 hover:bg-red-700 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"}
                 disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isJoined ? "Покинуть" : "Вступить"}
+              {isJoined
+                ? "Покинуть"
+                : isTeamMode
+                  ? "Создать команду"
+                  : "Вступить"}
             </button>
           ) : (
             <button
@@ -230,38 +392,50 @@ const TournamentPage = () => {
           </div>
         )}
 
-        <UserList users={tournament.users || []} />
+        {isTeamMode ? (
+          <TeamList
+            teams={tournament.teams || []}
+            tournamentId={tournament.id}
+            maxPlayersPerTeam={tournament.team_amount}
+            currentUserUid={currentUser?.uid}
+            isLoading={isLoading}
+            onJoinTeam={(teamId) => console.log("Join team", teamId)}
+          />
+        ) : (
+          <UserList users={tournament.users || []} />
+        )}
       </motion.section>
+
+      {showEditModal && (
+        <EditModal
+          {...editForm}
+          isLoading={isLoading}
+          onInputChange={handleUpdateEditField}
+          onTextareaChange={handleUpdateTextField}
+          onMaxPlayersChange={handleUpdateMaxPlayers}
+          onTeamAmountChange={handleUpdateTeamAmount}
+          onStartDateChange={handleUpdateStartDate}
+          handleUpdateStatus={handleUpdateStatus}
+          onClose={handleCloseEditModal}
+          onSubmit={handleEdit}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <DeleteTournamentModal
+          isLoading={isLoading}
+          onClose={handleCloseDeleteModal}
+          onSubmit={handleDelete}
+        />
+      )}
+      {isCreateTeamModalOpen && (
+        <CreateTeamModal
+          tournamentId={tournament.id}
+          onClose={handleCloseCreateTeamModal}
+        />
+      )}
     </main>
   );
 };
-
-function StatCard({
-  icon,
-  label,
-  value,
-  highlight = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors">
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span className="text-muted-foreground">{icon}</span>
-        <span className="text-xs text-muted-foreground font-medium">
-          {label}
-        </span>
-      </div>
-      <span
-        className={`capitalize text-lg font-bold font-mono ${highlight ? "text-primary" : "text-foreground"}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
 
 export default TournamentPage;

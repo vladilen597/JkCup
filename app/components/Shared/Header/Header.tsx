@@ -14,6 +14,8 @@ const Header = () => {
   const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
 
+  console.log(user);
+
   const handleLogOut = () => {
     dispatch(
       setUser({
@@ -21,6 +23,7 @@ const Header = () => {
         displayName: "Anonymous",
         photoUrl: "",
         email: "",
+        role: "user",
       }),
     );
     setIsProfileOpen(false);
