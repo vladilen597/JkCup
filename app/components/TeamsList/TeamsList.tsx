@@ -6,16 +6,8 @@ import {
   removeTeam,
   removeTeamParticipant,
 } from "@/app/utils/store/tournamentsSlice";
-import { IUser } from "@/app/utils/store/userSlice";
 import { doc, updateDoc } from "firebase/firestore";
-import {
-  DoorClosed,
-  DoorOpen,
-  Loader2,
-  Plus,
-  Trash,
-  Trash2,
-} from "lucide-react";
+import { ClockFading, DoorOpen, Loader2, Plus, Trash2 } from "lucide-react";
 
 interface TeamListProps {
   teams: ITeam[];
@@ -82,14 +74,23 @@ const TeamList = ({
       const teamToJoin = teams.find((team) => team.uid === teamId);
 
       if (teamToJoin) {
+        const newTeam = [...teamToJoin?.users, currentUser];
         await updateDoc(tournamentRef, {
-          users: [...teamToJoin.users, currentUser],
+          teams: teams.map((team) => {
+            if (team.uid === teamId) {
+              return {
+                ...team,
+                users: newTeam,
+              };
+            }
+          }),
         });
 
         dispatch(
           addTeamParticipant({ tournamentId, teamId, user: currentUser }),
         );
       }
+      console.log("nigga");
     } catch (error) {
       console.log(error);
     }
@@ -175,7 +176,7 @@ const TeamList = ({
                   )}
                 </div>
               ))}
-              {maxPlayersPerTeam > users.length && (
+              {maxPlayersPerTeam > users.length && !isMyTeam && (
                 <div>
                   <button
                     onClick={() => handleJoinTeam(team.uid)}

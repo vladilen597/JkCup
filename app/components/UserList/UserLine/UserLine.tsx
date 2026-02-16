@@ -102,7 +102,9 @@ const UserLine: React.FC<UserLineProps> = ({
 
         {showRoles && (
           <>
-            {isSuperAdmin && currentUser.uid !== uid ? (
+            {isSuperAdmin &&
+            currentUser.uid !== uid &&
+            role !== "superadmin" ? (
               <select
                 className="text-xs font-mono outline-0"
                 onClick={(e) => {

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Dispatch, SetStateAction, SubmitEvent } from "react";
+import { SubmitEvent } from "react";
 
 interface ICreateTournamentModalProps {
   formData: {
