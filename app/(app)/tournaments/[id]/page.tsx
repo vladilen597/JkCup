@@ -217,6 +217,8 @@ const TournamentPage = () => {
       setShowDeleteConfirm(false);
     }
   };
+  const canEditTournament =
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
   if (!tournament) {
     return <div className="p-8 text-center">Турнир не найден</div>;
@@ -253,7 +255,7 @@ const TournamentPage = () => {
               </span>
             </div>
 
-            {currentUser?.role === "superadmin" && (
+            {canEditTournament && (
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowEditModal(true)}
