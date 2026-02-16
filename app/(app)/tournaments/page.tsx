@@ -1,5 +1,6 @@
 "use client";
 
+import CreateTournamentModal from "@/app/components/CreateTournamentModal/CreateTournamentModal";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { setTournaments } from "@/app/utils/store/tournamentsSlice";
 import Tournament from "@/app/utils/Tournament";
@@ -23,7 +24,8 @@ const page = () => {
     start_date: "",
   });
 
-  const isSuperAdmin = user?.role === "superadmin";
+  const canCreateTournament =
+    user?.role === "admin" || user?.role === "superadmin";
 
   const handleLoadTournaments = async () => {
     try {
@@ -40,7 +42,7 @@ const page = () => {
 
   const handleCreateTournament = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isSuperAdmin) return;
+    if (!canCreateTournament) return;
 
     try {
       const newTournament = {
@@ -48,7 +50,7 @@ const page = () => {
         status: "open",
         users: [],
         users_amount: 0,
-        teams: formData.team_amount > 1 ? [] : undefined,
+        teams: [],
         teams_amount: 0,
         createdAt: new Date().toISOString(),
         start_date: "",
@@ -66,6 +68,10 @@ const page = () => {
       console.error(err);
       alert("Ошибка при создании");
     }
+  };
+
+  const handleCloseCreateTournamentModal = () => {
+    setShowForm(false);
   };
 
   return (
@@ -86,8 +92,7 @@ const page = () => {
               </h1>
             </div>
 
-            {/* Button only for superadmin */}
-            {isSuperAdmin && (
+            {canCreateTournament && (
               <button
                 onClick={() => setShowForm(!showForm)}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
@@ -104,125 +109,15 @@ const page = () => {
         </div>
       </motion.div>
 
-      {isSuperAdmin && showForm && (
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 p-6 bg-card rounded-xl border border-border/50"
+      {canCreateTournament && showForm && (
+        <CreateTournamentModal
+          formData={formData}
+          handleChange={setFormData}
+          onClose={handleCloseCreateTournamentModal}
           onSubmit={handleCreateTournament}
-        >
-          <h3 className="text-xl font-bold mb-4">Новый турнир</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Название</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Игра</label>
-              <input
-                type="text"
-                value={formData.game}
-                onChange={(e) =>
-                  setFormData({ ...formData, game: e.target.value })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border"
-                required
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Описание</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border min-h-[100px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Макс. игроков
-              </label>
-              <input
-                type="number"
-                value={formData.max_players}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    max_players: Number(e.target.value),
-                  })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border"
-                min="2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Командный (игроков в команде)
-              </label>
-              <input
-                type="number"
-                value={formData.team_amount}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    team_amount: Number(e.target.value),
-                  })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border"
-                min="1"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Дата начала
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.start_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, start_date: e.target.value })
-                }
-                className="w-full p-2 rounded-lg bg-muted border border-border"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-4">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-            >
-              Создать
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-6 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80"
-            >
-              Отмена
-            </button>
-          </div>
-        </motion.form>
+        />
       )}
 
-      {/* List of tournaments */}
       {tournaments?.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">
           Турниров пока нет.

@@ -4,11 +4,13 @@ import { Users } from "lucide-react";
 import UserLine from "./UserLine/UserLine";
 
 interface UserListProps {
+  showRoles?: boolean;
   users: any[];
   emptyMessage?: string;
 }
 
 const UserList = ({
+  showRoles,
   users,
   emptyMessage = "Пока нет участников",
 }: UserListProps) => {
@@ -24,7 +26,7 @@ const UserList = ({
   return (
     <ul className="flex flex-col gap-2">
       {users.map((user, i) => (
-        <UserLine key={user.id} {...user} index={i} />
+        <UserLine key={user.id} {...user} index={i} showRoles={showRoles} />
       ))}
     </ul>
   );

@@ -35,7 +35,6 @@ export function useGoogleSignIn() {
           email: userSnap.data().email || firebaseUser.email || null,
           discord: userSnap.data().discord || "",
           createdAt: userSnap.data().createdAt,
-          lastSignIn: serverTimestamp(),
           role: userSnap.data().role,
         };
 
@@ -48,18 +47,15 @@ export function useGoogleSignIn() {
         userData = {
           uid: firebaseUser.uid,
           displayName: firebaseUser.displayName || "Anonymous",
-          photoUrl: firebaseUser.photoURL || null,
-          email: firebaseUser.email || null,
+          photoUrl: firebaseUser.photoURL || "",
+          email: firebaseUser.email || "",
           discord: "",
-          createdAt: serverTimestamp(),
-          lastSignIn: serverTimestamp(),
-          role: "user",
+          role: "user" as "user" | "admin" | "superadmin",
         };
 
         await setDoc(userRef, userData);
       }
 
-      // 3. Dispatch the Firestore version to Redux
       dispatch(setUser(userData));
 
       return { success: true, user: userData };

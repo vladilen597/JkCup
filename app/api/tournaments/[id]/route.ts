@@ -4,11 +4,12 @@ import { db } from "@/app/utils/firebase";
 
 export const PUT = async (
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) => {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const ref = doc(db, "tournaments", params.id);
+    const ref = doc(db, "tournaments", id);
 
     await updateDoc(ref, body);
     return NextResponse.json({ success: true });
@@ -19,10 +20,11 @@ export const PUT = async (
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const ref = doc(db, "tournaments", params.id);
+    const { id } = await params;
+    const ref = doc(db, "tournaments", id);
     await deleteDoc(ref);
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,12 +1,14 @@
 "use client";
 
-import { DoorClosed, Trophy, ChevronDown, Users } from "lucide-react";
+import { DoorClosed, Trophy, ChevronDown, Users, Settings } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { useGoogleSignIn } from "@/app/utils/useGoogleSignIn";
 import { AnimatePresence, motion } from "motion/react";
 import { setUser } from "@/app/utils/store/userSlice";
 import { useState } from "react";
 import Link from "next/link";
+import Discord from "../../Icons/Discord";
+import ProfileDropdown from "../ProfileDropdown/ProfileDropdown";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -14,7 +16,9 @@ const Header = () => {
   const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
 
-  console.log(user);
+  const handleCloseProfileDropdown = () => {
+    setIsProfileOpen(false);
+  };
 
   const handleLogOut = () => {
     dispatch(
@@ -53,6 +57,17 @@ const Header = () => {
               Пользователи
             </span>
           </Link>
+          <Link
+            href="https://discord.gg/Xat3sm6wC4"
+            className="flex items-center gap-2 group"
+          >
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+              <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-extrabold text-lg tracking-tight text-foreground">
+              Discord
+            </span>
+          </Link>
         </div>
 
         {user.uid ? (
@@ -77,21 +92,11 @@ const Header = () => {
 
             <AnimatePresence>
               {isProfileOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute top-full right-0 mt-2 w-48 p-1.5 rounded-xl glass-panel neon-border z-50"
-                >
-                  <button
-                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                    onClick={handleLogOut}
-                  >
-                    <DoorClosed className="h-4 w-4" />
-                    Выйти
-                  </button>
-                </motion.div>
+                <ProfileDropdown
+                  userId={user.uid}
+                  handleClickLogout={handleLogOut}
+                  onClose={handleCloseProfileDropdown}
+                />
               )}
             </AnimatePresence>
           </div>

@@ -4,18 +4,16 @@ import { db } from "@/app/utils/firebase";
 
 export async function GET(request: NextRequest) {
   try {
-    const usersQuery = query(
-      collection(db, "users"),
-      orderBy("createdAt", "desc"),
-    );
+    const usersQuery = query(collection(db, "users"));
 
     const snapshot = await getDocs(usersQuery);
 
     const users = snapshot.docs.map((doc) => ({
-      id: doc.id,
+      uid: doc.id,
       displayName: doc.data().displayName || "Anonymous",
       photoUrl: doc.data().photoUrl || null,
       discord: doc.data().discord || "",
+      role: doc.data().role,
       createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || null,
     }));
 

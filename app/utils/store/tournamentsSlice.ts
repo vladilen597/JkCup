@@ -12,7 +12,7 @@ export interface ITournament {
   description: string;
   start_date: string;
   status: string;
-  teams: any[];
+  teams: ITeam[];
 }
 
 export interface ITeam {
@@ -54,6 +54,20 @@ const tournamentsSlice = createSlice({
         tournament.users_amount = tournament.users.length;
       }
     },
+    removeTeam: (
+      state,
+      action: PayloadAction<{ tournamentId: string; teamId: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+
+      if (tournament) {
+        tournament.teams = tournament.teams.filter(
+          (team) => team.uid !== action.payload.teamId,
+        );
+      }
+    },
     removeTeamParticipant: (
       state,
       action: PayloadAction<{ tournamentId: string; updatedTeams: ITeam[] }>,
@@ -64,6 +78,25 @@ const tournamentsSlice = createSlice({
 
       if (tournament) {
         tournament.teams = action.payload.updatedTeams;
+      }
+    },
+    addTeamParticipant: (
+      state,
+      action: PayloadAction<{
+        tournamentId: string;
+        teamId: string;
+        user: IUser;
+      }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+
+      if (tournament) {
+        const team = tournament.teams.find(
+          (team) => team.uid === action.payload.teamId,
+        );
+        team?.users.push(action.payload.user);
       }
     },
     addParticipant: (
@@ -103,6 +136,8 @@ export const {
   setTournaments,
   addTournamentTeam,
   addParticipant,
+  removeTeam,
+  addTeamParticipant,
   removeParticipant,
   removeTeamParticipant,
 } = tournamentsSlice.actions;

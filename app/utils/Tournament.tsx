@@ -1,4 +1,4 @@
-import { ChevronRight, User, Users } from "lucide-react";
+import { ChevronRight, Gamepad2, User, Users } from "lucide-react";
 import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -11,6 +11,7 @@ interface ITournamentProps {
   max_players: number;
   team_amount: number;
   index: number;
+  game: string;
   currentPlayers: number;
   isFull: boolean;
   description: string;
@@ -27,6 +28,7 @@ const Tournament = ({
   team_amount,
   currentPlayers,
   index,
+  game,
   isFull,
   description,
 }: ITournamentProps) => {
@@ -40,7 +42,7 @@ const Tournament = ({
         <div className="group relative rounded-xl border border-border/50 bg-card p-5 hover:border-primary/30 hover:shadow-[var(--neon-shadow)] transition-all duration-300 cursor-pointer">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-foreground truncate">
                   {name}
                 </h3>
@@ -59,7 +61,10 @@ const Tournament = ({
                   />
                 )}
               </div>
-              <p className="text-sm text-muted-foreground line-clamp-1">
+              <div className="flex gap-1 items-center text-sm text-neutral-300 line-clamp-1">
+                <Gamepad2 /> {game}
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 {description}
               </p>
             </div>

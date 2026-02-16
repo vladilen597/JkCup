@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
     const newTournament = {
       ...body,
       createdAt: serverTimestamp(),
-      users: [], // for solo mode
+      users: [],
       usersAmount: 0,
-      teams: body.team_amount > 1 ? [] : undefined, // ← key line: create teams only for team tournaments
+      teams: [],
       teamsAmount: 0,
     };
 

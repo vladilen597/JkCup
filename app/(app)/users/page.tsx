@@ -97,6 +97,7 @@ const UsersPage = () => {
 
         <UserList
           users={users}
+          showRoles
           emptyMessage="Пока нет зарегистрированных пользователей"
         />
       </motion.section>

@@ -226,7 +226,7 @@ const TournamentPage = () => {
   const isTeamMode = (tournament.team_amount || 1) > 1;
 
   return (
-    <main className="max-w-4xl mx-auto w-full px-4 py-8">
+    <main className="max-w-5xl mx-auto w-full px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -397,9 +397,7 @@ const TournamentPage = () => {
             teams={tournament.teams || []}
             tournamentId={tournament.id}
             maxPlayersPerTeam={tournament.team_amount}
-            currentUserUid={currentUser?.uid}
             isLoading={isLoading}
-            onJoinTeam={(teamId) => console.log("Join team", teamId)}
           />
         ) : (
           <UserList users={tournament.users || []} />
