@@ -15,6 +15,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 const page = () => {
   const { tournaments } = useAppSelector((state) => state.tournaments);
@@ -22,7 +23,7 @@ const page = () => {
   const dispatch = useAppDispatch();
 
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     name: "",
     game: "",
     type: {
@@ -33,8 +34,9 @@ const page = () => {
     description: "",
     max_players: 6,
     max_teams: 6,
-    players_per_team: 1,
+    players_per_team: 2,
     start_date: "",
+    rewards: [],
   });
 
   const canCreateTournament =
@@ -63,8 +65,15 @@ const page = () => {
     }
   };
 
+  const handleAddReward = () => {
+    setFormData((prevState: any) => ({
+      ...prevState,
+      rewards: [...formData.rewards, { id: uuidv4(), value: "" }],
+    }));
+  };
+
   const handleUpdateTournamentType = (value: ISelectOption) => {
-    setFormData((prevState) => ({
+    setFormData((prevState: any) => ({
       ...prevState,
       type: value,
     }));
@@ -148,6 +157,7 @@ const page = () => {
           handleChangeTournamentType={handleUpdateTournamentType}
           onClose={handleCloseCreateTournamentModal}
           onSubmit={handleCreateTournament}
+          handleAddReward={handleAddReward}
         />
       )}
 

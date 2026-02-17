@@ -15,6 +15,7 @@ export interface ITournament {
   start_date: string;
   status: string;
   teams: ITeam[];
+  rewards: { id: string; value: string }[];
 }
 
 export interface ITeam {

@@ -1,4 +1,4 @@
-import { ChevronRight, Gamepad2, User, Users } from "lucide-react";
+import { ChevronRight, Gamepad2, Trophy, User, Users } from "lucide-react";
 import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -17,7 +17,14 @@ interface ITournamentProps {
   description: string;
   start_date: string;
   status: string;
+  rewards: { id: string; value: string }[];
 }
+
+const trophyIndexes = {
+  1: <Trophy className="h-3 w-3 text-[#EFBF04]" />,
+  2: <Trophy className="h-3 w-3 text-[#C4C4C4]" />,
+  3: <Trophy className="h-3 w-3 text-[#CE8946]" />,
+};
 
 const Tournament = ({
   id,
@@ -31,8 +38,10 @@ const Tournament = ({
   index,
   game,
   isFull,
+  rewards,
   description,
 }: ITournamentProps) => {
+  console.log(rewards);
   return (
     <motion.li
       initial={{ opacity: 0, y: 10 }}
@@ -70,6 +79,22 @@ const Tournament = ({
               <p className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 {description}
               </p>
+              {!!rewards?.length && (
+                <ul className="mt-2">
+                  {rewards?.map((reward, index) => (
+                    <div className="flex items-center gap-1" key={reward.id}>
+                      <span className="text-xs gap-2 w-3 text-center">
+                        {trophyIndexes[
+                          (index + 1) as keyof typeof trophyIndexes
+                        ] || index + 1}
+                      </span>
+                      <span className="text-sm text-neutral-400">
+                        {reward.value}
+                      </span>
+                    </div>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />

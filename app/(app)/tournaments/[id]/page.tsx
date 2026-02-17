@@ -13,6 +13,7 @@ import {
   User,
   Edit,
   Trash2,
+  Trophy,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -56,6 +57,12 @@ export interface IEditTournament {
   status: string;
   type: ISelectOption;
 }
+
+const trophyIndexes = {
+  1: <Trophy className="h-3 w-3 text-[#EFBF04]" />,
+  2: <Trophy className="h-3 w-3 text-[#C4C4C4]" />,
+  3: <Trophy className="h-3 w-3 text-[#CE8946]" />,
+};
 
 const TournamentPage = () => {
   const params = useParams();
@@ -218,6 +225,20 @@ const TournamentPage = () => {
     setShowDeleteConfirm(false);
   };
 
+  const handleChangeMaxTeamsOrPlayers = (value: number) => {
+    if (editForm.type.value === "team") {
+      setEditForm((prevState) => ({
+        ...prevState,
+        max_teams: value,
+      }));
+    } else {
+      setEditForm((prevState) => ({
+        ...prevState,
+        max_players: value,
+      }));
+    }
+  };
+
   const handleUpdateTournamentType = (value: ISelectOption) => {
     setEditForm((prevState) => ({
       ...prevState,
@@ -334,6 +355,23 @@ const TournamentPage = () => {
           <p className="text-muted-foreground max-w-2xl leading-relaxed">
             {tournament.description}
           </p>
+
+          <span className="block mt-2 font-bold">Награды</span>
+          {!!tournament.rewards?.length && (
+            <ul className="mt-2">
+              {tournament.rewards?.map((reward, index) => (
+                <div className="flex items-center gap-1" key={reward.id}>
+                  <span className="text-xs gap-2 w-3 text-center">
+                    {trophyIndexes[(index + 1) as keyof typeof trophyIndexes] ||
+                      index + 1}
+                  </span>
+                  <span className="text-sm text-neutral-400">
+                    {reward.value}
+                  </span>
+                </div>
+              ))}
+            </ul>
+          )}
         </div>
       </motion.div>
 
@@ -355,7 +393,7 @@ const TournamentPage = () => {
         <StatCard
           icon={<Hash className="h-4 w-4" />}
           label={isTeamMode ? "Команд" : "Игроков"}
-          value={`${filledSlots} / ${tournament.max_players || "∞"}`}
+          value={`${filledSlots} / ${isTeamMode ? tournament.max_teams : tournament.max_players}`}
         />
         <StatCard
           icon={<Calendar className="h-4 w-4" />}
@@ -414,7 +452,7 @@ const TournamentPage = () => {
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
-            {tournament.max_players || "∞"})
+            {isTeamMode ? tournament.max_teams : tournament.max_players})
           </h2>
 
           <JoinTournamentButton
@@ -456,11 +494,11 @@ const TournamentPage = () => {
           isLoading={isLoading}
           onInputChange={handleUpdateEditField}
           onTextareaChange={handleUpdateTextField}
-          onMaxPlayersChange={handleUpdateMaxPlayers}
           onTeamAmountChange={handleUpdateTeamAmount}
           onStartDateChange={handleUpdateStartDate}
           handleUpdateStatus={handleUpdateStatus}
           onClose={handleCloseEditModal}
+          handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
           handleChangeTournamentType={handleUpdateTournamentType}
           onSubmit={handleEdit}
         />

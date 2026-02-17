@@ -12,17 +12,18 @@ interface IEditModalProps {
   game: string;
   start_date: string;
   max_players: number;
+  max_teams: number;
   players_per_team: number;
   isLoading: boolean;
   type: ISelectOption;
   status: string;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onTextareaChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
-  onMaxPlayersChange: (value: number) => void;
   onTeamAmountChange: (value: number) => void;
   onStartDateChange: (value: string) => void;
   handleUpdateStatus: (value: string) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
+  handleChangeMaxTeamsOrPlayers: (value: number) => void;
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }
@@ -33,17 +34,18 @@ const EditModal = ({
   game,
   start_date,
   max_players,
+  max_teams,
   players_per_team,
   isLoading,
   status,
   type,
   onInputChange,
   onTextareaChange,
-  onMaxPlayersChange,
   onTeamAmountChange,
   onStartDateChange,
   handleUpdateStatus,
   handleChangeTournamentType,
+  handleChangeMaxTeamsOrPlayers,
   onSubmit,
   onClose,
 }: IEditModalProps) => {
@@ -100,34 +102,35 @@ const EditModal = ({
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Макс. игроков
+            Макс. {type.value === "team" ? "команд" : "игроков"}
           </label>
           <input
-            name="max_players"
             type="number"
-            value={max_players}
-            onChange={(event) => onMaxPlayersChange(+event.target.value)}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border"
+            value={type.value === "team" ? max_teams : max_players}
+            onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
+            className="w-full p-2 rounded-lg bg-muted border border-border"
             min="2"
             required
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Игроков в команде
-            </label>
-            <input
-              name="players_per_team"
-              type="number"
-              value={players_per_team}
-              onChange={(event) => onTeamAmountChange(+event.target.value)}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border"
-              min="1"
-              required
-            />
-          </div>
+        <div>
+          {type.value === "team" && (
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Игроков в команде
+              </label>
+              <input
+                name="players_per_team"
+                type="number"
+                value={players_per_team}
+                onChange={(event) => onTeamAmountChange(+event.target.value)}
+                className="w-full p-2.5 rounded-lg bg-muted border border-border"
+                min="1"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-1">

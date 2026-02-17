@@ -3,6 +3,7 @@ import { SubmitEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
+import { Cross, X } from "lucide-react";
 
 export const selectTypeOptions = [
   {
@@ -24,11 +25,14 @@ interface ICreateTournamentModalProps {
     type: ISelectOption;
     description: string;
     max_players: number;
+    max_teams: number;
     players_per_team: number;
     start_date: string;
+    rewards: { id: string; value: string }[];
   };
   handleChange: (value: any) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
+  handleAddReward: () => void;
   onClose: () => void;
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 }
@@ -38,8 +42,14 @@ const CreateTournamentModal = ({
   handleChange,
   handleChangeTournamentType,
   onClose,
+  handleAddReward,
   onSubmit,
 }: ICreateTournamentModalProps) => {
+  const canAddMoreRewards =
+    formData.type.value === "team"
+      ? formData.max_teams > formData.rewards.length
+      : formData.max_players > formData.rewards.length;
+
   return (
     <motion.form
       initial={{ opacity: 0, y: 20 }}
@@ -50,30 +60,32 @@ const CreateTournamentModal = ({
       <h3 className="text-xl font-bold mb-4">Новый турнир</h3>
 
       <div className="space-y-2">
-        <div>
-          <label className="block text-sm font-medium mb-1">Название</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) =>
-              handleChange({ ...formData, name: e.target.value })
-            }
-            className="w-full p-2 rounded-lg bg-muted border border-border"
-            required
-          />
-        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">Название</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                handleChange({ ...formData, name: e.target.value })
+              }
+              className="w-full p-2 rounded-lg bg-muted border border-border"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Игра</label>
-          <input
-            type="text"
-            value={formData.game}
-            onChange={(e) =>
-              handleChange({ ...formData, game: e.target.value })
-            }
-            className="w-full p-2 rounded-lg bg-muted border border-border"
-            required
-          />
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">Игра</label>
+            <input
+              type="text"
+              value={formData.game}
+              onChange={(e) =>
+                handleChange({ ...formData, game: e.target.value })
+              }
+              className="w-full p-2 rounded-lg bg-muted border border-border"
+              required
+            />
+          </div>
         </div>
 
         <div>
@@ -91,7 +103,7 @@ const CreateTournamentModal = ({
           <span className="text-sm font-medium">Тип турнира</span>
           <CustomSelect
             containerClassName="mt-1  border-2 border-border text-lg rounded-lg bg-muted"
-            triggerClassName="pr-2 text-sm! text-left py-2"
+            triggerClassName="pl-2 text-sm! text-left py-2 text-left justify-start"
             options={selectTypeOptions}
             value={formData.type}
             onChange={handleChangeTournamentType}
@@ -104,13 +116,19 @@ const CreateTournamentModal = ({
           </label>
           <input
             type="number"
-            value={formData.max_players}
-            onChange={(e) =>
+            value={
+              formData.type.value === "team"
+                ? formData.max_teams
+                : formData.max_players
+            }
+            onChange={(e) => {
               handleChange({
                 ...formData,
-                max_players: Number(e.target.value),
-              })
-            }
+                ...(formData.type.value === "team"
+                  ? { max_teams: Number(e.target.value), rewards: [] }
+                  : { max_players: Number(e.target.value), rewards: [] }),
+              });
+            }}
             className="w-full p-2 rounded-lg bg-muted border border-border"
             min="2"
             required
@@ -132,10 +150,63 @@ const CreateTournamentModal = ({
                 })
               }
               className="w-full p-2 rounded-lg bg-muted border border-border"
-              min="1"
+              min="2"
               required
             />
           </div>
+        )}
+
+        {formData.rewards.map((reward, index) => {
+          return (
+            <div key={reward.id}>
+              <label className="block text-sm font-medium mb-1">
+                Награда за {index + 1} место
+              </label>
+              <div className="flex items-center w-full relative">
+                <input
+                  type="text"
+                  required
+                  value={reward.value}
+                  onChange={(e) =>
+                    handleChange((prevState: any) => ({
+                      ...prevState,
+                      rewards: prevState.rewards.map(
+                        (r: { id: string; value: string }, i: number) =>
+                          i === index ? { ...r, value: e.target.value } : r,
+                      ),
+                    }))
+                  }
+                  className="w-full p-2 rounded-lg bg-muted border border-border"
+                />
+                <button
+                  className="absolute right-2 cursor-pointer"
+                  type="button"
+                  onClick={() =>
+                    handleChange((prevState: any) => ({
+                      ...prevState,
+                      rewards: prevState.rewards.filter(
+                        (r: { id: string; value: string }, i: number) => {
+                          return r.id !== reward.id;
+                        },
+                      ),
+                    }))
+                  }
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {canAddMoreRewards && (
+          <button
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            type="button"
+            onClick={handleAddReward}
+          >
+            Добавить награду за {formData.rewards.length + 1} место
+          </button>
         )}
 
         <div>
