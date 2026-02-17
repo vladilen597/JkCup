@@ -30,7 +30,7 @@ const PortalModal = ({
       <div className="absolute top-0 left-0 bg-black/50 h-full w-full"></div>
       <div
         className={cn(
-          "relative bg-card rounded-xl p-6 z-10 max-w-2xl w-full",
+          "relative max-h-[90vh] overflow-y-auto bg-card rounded-xl p-6 z-10 max-w-2xl w-full",
           fullscreen ? "w-full h-full" : "",
           contentClassName,
         )}

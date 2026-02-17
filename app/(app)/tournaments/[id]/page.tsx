@@ -40,6 +40,7 @@ import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
+import { v4 as uuidv4 } from "uuid";
 
 const statuses = {
   open: "Открыт",
@@ -56,6 +57,7 @@ export interface IEditTournament {
   start_date: string;
   status: string;
   type: ISelectOption;
+  rewards: { id: string; value: string }[];
 }
 
 const trophyIndexes = {
@@ -94,6 +96,7 @@ const TournamentPage = () => {
       value: "team",
       label: "Командный",
     },
+    rewards: tournament?.rewards || [],
   });
 
   const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
@@ -201,6 +204,7 @@ const TournamentPage = () => {
           ? new Date(editForm.start_date).toISOString()
           : null,
         status: editForm.status,
+        rewards: editForm.rewards, // Add this line to save rewards
       });
 
       const updatedTournaments = tournaments.map((t) =>
@@ -266,6 +270,29 @@ const TournamentPage = () => {
     handleLoadTournament();
   }, []);
 
+  const handleRewardChange = (index: number, value: string) => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      rewards: prevState.rewards.map((reward, i) =>
+        i === index ? { ...reward, value } : reward,
+      ),
+    }));
+  };
+
+  const handleAddReward = () => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      rewards: [...prevState.rewards, { id: uuidv4(), value: "" }],
+    }));
+  };
+
+  const handleDeleteReward = (id: string) => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      rewards: prevState.rewards.filter((reward) => reward.id !== id),
+    }));
+  };
+
   const handleDelete = async () => {
     if (!canEdit || !tournament?.id) return;
 
@@ -288,6 +315,7 @@ const TournamentPage = () => {
       setShowDeleteConfirm(false);
     }
   };
+
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
@@ -500,6 +528,9 @@ const TournamentPage = () => {
           onClose={handleCloseEditModal}
           handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
           handleChangeTournamentType={handleUpdateTournamentType}
+          handleRewardChange={handleRewardChange} // Add this
+          handleAddReward={handleAddReward} // Add this
+          handleDeleteReward={handleDeleteReward} // Add this
           onSubmit={handleEdit}
         />
       </CustomModal>
