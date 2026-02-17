@@ -15,11 +15,19 @@ interface ICreateTeamModalProps {
 const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
   const [teamData, setTeamData] = useState({
     name: "",
+    is_private: false,
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const dispatch = useAppDispatch();
+
+  const handleToggleChecked = () => {
+    setTeamData((prevState) => ({
+      name: teamData.name,
+      is_private: !prevState.is_private,
+    }));
+  };
 
   const handleCreateTeam = async () => {
     setIsLoading(true);
@@ -36,6 +44,7 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
             uid,
             creator_uid: currentUser.uid,
             name: teamData.name,
+            is_private: teamData.is_private,
             users: [currentUser],
           },
         ],
@@ -46,6 +55,7 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
           uid,
           tournamentId,
           teamName: teamData.name,
+          is_private: teamData.is_private,
           currentUser: currentUser,
         }),
       );
@@ -70,59 +80,62 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-card rounded-xl p-6 w-full max-w-md border border-border"
-      >
-        <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Создать команду
-        </h3>
-        <p className="text-muted-foreground mb-6">
-          Это действие нельзя отменить. Все данные турнира будут удалены
-          навсегда.
-        </p>
+    <>
+      <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
+        <Users className="h-5 w-5" />
+        Создать команду
+      </h3>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Название команды
-          </label>
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Название команды
+        </label>
+        <input
+          name="name"
+          type="name"
+          value={teamData.name}
+          onChange={handleUpdateField}
+          className="w-full p-2 rounded-lg bg-muted border border-border"
+          required
+        />
+      </div>
+      <label className="block mt-2">
+        <div className="flex items-center gap-2">
           <input
-            name="name"
-            type="name"
-            value={teamData.name}
-            onChange={handleUpdateField}
-            className="w-full p-2 rounded-lg bg-muted border border-border"
-            required
+            type="checkbox"
+            checked={teamData.is_private}
+            onChange={handleToggleChecked}
           />
+          <span className="">Приватная команда</span>
         </div>
+        <p className="text-xs text-neutral-400">
+          В приватную команду новых игроков может добавлять только капитан
+        </p>
+      </label>
 
-        {error && (
-          <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-sm text-red-400">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
-        )}
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80"
-          >
-            Отмена
-          </button>
-          <button
-            onClick={handleCreateTeam}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg  disabled:opacity-60"
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Создать
-          </button>
+      {error && (
+        <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-sm text-red-400">
+          <AlertCircle className="h-4 w-4" />
+          {error}
         </div>
-      </motion.div>
-    </div>
+      )}
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80"
+        >
+          Отмена
+        </button>
+        <button
+          onClick={handleCreateTeam}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg  disabled:opacity-60"
+        >
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Создать
+        </button>
+      </div>
+    </>
   );
 };
 

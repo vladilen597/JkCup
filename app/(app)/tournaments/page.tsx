@@ -1,10 +1,17 @@
 "use client";
 
 import CreateTournamentModal from "@/app/components/CreateTournamentModal/CreateTournamentModal";
+import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
+import { db } from "@/app/utils/firebase";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { setTournaments } from "@/app/utils/store/tournamentsSlice";
+import {
+  ITournament,
+  setTournaments,
+  updateTournamentStatus,
+} from "@/app/utils/store/tournamentsSlice";
 import Tournament from "@/app/utils/Tournament";
 import axios from "axios";
+import { doc, updateDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -18,9 +25,15 @@ const page = () => {
   const [formData, setFormData] = useState({
     name: "",
     game: "",
+    type: {
+      id: 1,
+      value: "single",
+      label: "Одиночный",
+    },
     description: "",
-    max_players: 16,
-    team_amount: 1,
+    max_players: 6,
+    max_teams: 6,
+    players_per_team: 1,
     start_date: "",
   });
 
@@ -30,10 +43,31 @@ const page = () => {
   const handleLoadTournaments = async () => {
     try {
       const { data } = await axios.get("/api/tournaments");
+      data.forEach((tournament: ITournament) => {
+        if (new Date(tournament.start_date) < new Date()) {
+          const tournamentRef = doc(db, "tournaments", tournament.id);
+          updateDoc(tournamentRef, {
+            status: "closed",
+          });
+          dispatch(
+            updateTournamentStatus({
+              tournamentId: tournament.id,
+              status: "closed",
+            }),
+          );
+        }
+      });
       dispatch(setTournaments(data));
     } catch (err) {
       console.error("Failed to load tournaments:", err);
     }
+  };
+
+  const handleUpdateTournamentType = (value: ISelectOption) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      type: value,
+    }));
   };
 
   useEffect(() => {
@@ -49,14 +83,12 @@ const page = () => {
         ...formData,
         status: "open",
         users: [],
-        users_amount: 0,
         teams: [],
-        teams_amount: 0,
         createdAt: new Date().toISOString(),
         start_date: "",
       };
 
-      const res = await axios.post("/api/tournaments", newTournament);
+      const res = await axios.post("/api/tournaments", formData);
 
       dispatch(
         setTournaments([...tournaments, { id: res.data.id, ...newTournament }]),
@@ -113,6 +145,7 @@ const page = () => {
         <CreateTournamentModal
           formData={formData}
           handleChange={setFormData}
+          handleChangeTournamentType={handleUpdateTournamentType}
           onClose={handleCloseCreateTournamentModal}
           onSubmit={handleCreateTournament}
         />
@@ -125,7 +158,7 @@ const page = () => {
       ) : (
         <ul className="space-y-3">
           {tournaments?.map((tournament, index) => {
-            const isTeam = tournament.team_amount > 1;
+            const isTeam = tournament.type.value === "team";
             const usersAmount = tournament.users?.length || 0;
             const fillPercent = Math.round(
               (usersAmount / tournament.max_players) * 100,

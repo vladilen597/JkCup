@@ -9,7 +9,7 @@ interface ITournamentProps {
   isTeam: boolean;
   fillPercent: number;
   max_players: number;
-  team_amount: number;
+  players_per_team: number;
   index: number;
   game: string;
   currentPlayers: number;
@@ -25,7 +25,8 @@ const Tournament = ({
   isTeam,
   fillPercent,
   max_players,
-  team_amount,
+  players_per_team,
+  status,
   currentPlayers,
   index,
   game,
@@ -47,11 +48,13 @@ const Tournament = ({
                   {name}
                 </h3>
                 <Badge
-                  text={isTeam ? `${team_amount}v${team_amount}` : "1v1"}
+                  text={
+                    isTeam ? `${players_per_team}v${players_per_team}` : "1v1"
+                  }
                   className="bg-primary/10 text-primary border border-primary/20"
                 />
                 <Badge
-                  text="Open"
+                  text={status}
                   className="bg-primary/10 text-primary border border-primary/20"
                 />
                 {isFull && (

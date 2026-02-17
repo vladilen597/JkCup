@@ -2,10 +2,18 @@ import { ChevronDown } from "lucide-react";
 import { MouseEvent, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
+export interface ISelectOption {
+  id: number;
+  value: string;
+  label: string;
+}
+
 interface ICustomSelectProps {
-  value: { id: number; value: string; label: string };
-  onChange: (value: { id: number; value: string; label: string }) => void;
-  options: { id: number; value: string; label: string }[];
+  value: ISelectOption;
+  containerClassName?: string;
+  triggerClassName?: string;
+  onChange: (value: ISelectOption) => void;
+  options: ISelectOption[];
 }
 
 const containerVariants = {
@@ -31,7 +39,13 @@ const contentVariants = {
   },
 };
 
-const CustomSelect = ({ value, onChange, options }: ICustomSelectProps) => {
+const CustomSelect = ({
+  value,
+  containerClassName,
+  triggerClassName,
+  onChange,
+  options,
+}: ICustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggleIsOpen = (e: MouseEvent<HTMLLabelElement>) => {
@@ -46,10 +60,12 @@ const CustomSelect = ({ value, onChange, options }: ICustomSelectProps) => {
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className="relative"
+      className={`block relative ${containerClassName}`}
       onClick={handleToggleIsOpen}
     >
-      <div className="text-xs font-mono flex items-center gap-2 justify-end py-2">
+      <div
+        className={`text-xs font-mono flex items-center gap-2 justify-end py-2 ${triggerClassName}`}
+      >
         {value.label || "Не выбрано"}
         <motion.div
           variants={labelVariants}
@@ -70,6 +86,7 @@ const CustomSelect = ({ value, onChange, options }: ICustomSelectProps) => {
           >
             {options.map((option) => (
               <li
+                key={option.id}
                 className="p-2 px-4  hover:bg-primary-foreground"
                 onClick={() => onChange(option)}
               >

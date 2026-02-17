@@ -1,14 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { IUser } from "./userSlice";
+import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 
 export interface ITournament {
   id: string;
   game: string;
   max_players: number;
   name: string;
-  team_amount: number;
   users: IUser[];
-  users_amount: number;
+  type: ISelectOption;
+  max_teams: number;
+  players_per_team: number;
   description: string;
   start_date: string;
   status: string;
@@ -20,6 +22,7 @@ export interface ITeam {
   creator_uid: string;
   name?: string;
   users: IUser[];
+  is_private: boolean;
 }
 
 const initialState: { tournaments: ITournament[] } = {
@@ -33,6 +36,26 @@ const tournamentsSlice = createSlice({
     setTournaments: (state, action: PayloadAction<ITournament[]>) => {
       state.tournaments = action.payload;
     },
+    updateTournament: (state, action: PayloadAction<ITournament>) => {
+      state.tournaments = state.tournaments.map((tournament) => {
+        if (tournament.id === action.payload.id) {
+          return action.payload;
+        } else {
+          return tournament;
+        }
+      });
+    },
+    updateTournamentStatus: (
+      state,
+      action: PayloadAction<{ tournamentId: string; status: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      if (tournament) {
+        tournament.status = action.payload.status;
+      }
+    },
     addTournamentTeam: (
       state,
       action: PayloadAction<{
@@ -40,18 +63,20 @@ const tournamentsSlice = createSlice({
         tournamentId: string;
         teamName: string;
         currentUser: IUser;
+        is_private: boolean;
       }>,
     ) => {
-      const { uid, tournamentId, teamName, currentUser } = action.payload;
+      const { uid, tournamentId, teamName, is_private, currentUser } =
+        action.payload;
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
         tournament.teams.push({
           uid,
           name: teamName,
+          is_private,
           creator_uid: currentUser.uid,
           users: [currentUser],
         });
-        tournament.users_amount = tournament.users.length;
       }
     },
     removeTeam: (
@@ -111,7 +136,6 @@ const tournamentsSlice = createSlice({
       if (tournament) {
         if (!tournament.users.some((u) => u.uid === participant.uid)) {
           tournament.users.push(participant);
-          tournament.users_amount = tournament.users.length;
         }
       }
     },
@@ -126,7 +150,6 @@ const tournamentsSlice = createSlice({
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
         tournament.users = tournament.users.filter((u) => u.uid !== userId);
-        tournament.users_amount = tournament.users.length;
       }
     },
   },
@@ -138,6 +161,8 @@ export const {
   addParticipant,
   removeTeam,
   addTeamParticipant,
+  updateTournament,
+  updateTournamentStatus,
   removeParticipant,
   removeTeamParticipant,
 } = tournamentsSlice.actions;

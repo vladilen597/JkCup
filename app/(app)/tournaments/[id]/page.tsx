@@ -15,32 +15,46 @@ import {
   Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { db } from "@/app/utils/firebase";
-import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+  getDoc,
+} from "firebase/firestore";
 import {
   addParticipant,
+  ITournament,
   removeParticipant,
   setTournaments,
+  updateTournament,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
 import EditModal from "@/app/components/EditModal/EditModal";
 import StatCard from "@/app/components/Shared/StatCard/StatCard";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
 import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
+import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
+import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
+import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
 
 const statuses = {
   open: "Открыт",
+  closed: "Закрыт",
 };
 
 export interface IEditTournament {
   name: string;
   description: string;
   game: string;
+  max_teams: number;
   max_players: number;
-  team_amount: number;
+  players_per_team: number;
   start_date: string;
   status: string;
+  type: ISelectOption;
 }
 
 const TournamentPage = () => {
@@ -48,6 +62,7 @@ const TournamentPage = () => {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { tournaments } = useAppSelector((state) => state.tournaments);
+  const tournamentid = params.id as string;
 
   const tournament = tournaments.find((t) => t.id === params.id);
 
@@ -60,12 +75,18 @@ const TournamentPage = () => {
     name: tournament?.name || "",
     description: tournament?.description || "",
     game: tournament?.game || "",
-    max_players: tournament?.max_players || 16,
-    team_amount: tournament?.team_amount || 1,
+    max_players: tournament?.max_players || 6,
+    max_teams: tournament?.max_teams || 6,
+    players_per_team: tournament?.players_per_team || 2,
     start_date: tournament?.start_date
       ? new Date(tournament.start_date).toISOString().slice(0, 16)
       : "",
     status: tournament?.status || statuses.open,
+    type: tournament?.type || {
+      id: 1,
+      value: "team",
+      label: "Командный",
+    },
   });
 
   const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +102,7 @@ const TournamentPage = () => {
   };
 
   const handleUpdateTeamAmount = (value: number) => {
-    setEditForm({ ...editForm, team_amount: value });
+    setEditForm({ ...editForm, players_per_team: value });
   };
 
   const handleUpdateStatus = (value: string) => {
@@ -100,8 +121,8 @@ const TournamentPage = () => {
     setIsCreateTeamModalOpen(false);
   };
 
-  const isSuperAdmin = currentUser?.role === "superadmin";
-  const isTeamTournaments = (tournament?.team_amount || 1) > 1;
+  const canEdit =
+    currentUser?.role === "superadmin" || currentUser?.role === "admin";
   const isJoined =
     tournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
 
@@ -154,7 +175,7 @@ const TournamentPage = () => {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isSuperAdmin || !tournament?.id) return;
+    if (!canEdit || !tournament?.id) return;
 
     setIsLoading(true);
     setErrorMsg("");
@@ -167,7 +188,8 @@ const TournamentPage = () => {
         description: editForm.description,
         game: editForm.game,
         max_players: editForm.max_players,
-        team_amount: editForm.team_amount,
+        max_teams: editForm.max_teams,
+        players_per_team: editForm.players_per_team,
         start_date: editForm.start_date
           ? new Date(editForm.start_date).toISOString()
           : null,
@@ -181,6 +203,7 @@ const TournamentPage = () => {
 
       setShowEditModal(false);
     } catch (error: any) {
+      console.log(error);
       setErrorMsg("Не удалось обновить турнир");
     } finally {
       setIsLoading(false);
@@ -195,8 +218,35 @@ const TournamentPage = () => {
     setShowDeleteConfirm(false);
   };
 
+  const handleUpdateTournamentType = (value: ISelectOption) => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      type: value,
+    }));
+  };
+
+  const handleLoadTournament = async () => {
+    const tournamentRef = doc(db, "tournaments", params.id as string);
+    try {
+      const data = (await getDoc(tournamentRef)).data();
+      if (data) {
+        if (tournaments.length) {
+          dispatch(updateTournament(data as ITournament));
+        } else {
+          dispatch(setTournaments([data as ITournament]));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    handleLoadTournament();
+  }, []);
+
   const handleDelete = async () => {
-    if (!isSuperAdmin || !tournament?.id) return;
+    if (!canEdit || !tournament?.id) return;
 
     setIsLoading(true);
     setErrorMsg("");
@@ -224,13 +274,13 @@ const TournamentPage = () => {
     return <div className="p-8 text-center">Турнир не найден</div>;
   }
 
-  const isTeamMode = (tournament.team_amount || 1) > 1;
+  const isTeamMode = tournament.type.value === "team";
   const filledSlots = isTeamMode
     ? tournament.teams?.length || 0
     : tournament.users?.length || 0;
 
   const isFull =
-    tournament.team_amount > 1
+    tournament.players_per_team > 1
       ? tournament.teams.length === tournament.max_players
       : tournament.users.length === tournament.max_players;
 
@@ -253,7 +303,7 @@ const TournamentPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-                {isFull ? "Full" : "Live"}
+                {tournament.status}
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 {isTeamMode ? "Командный" : "Одиночный"}
@@ -298,7 +348,7 @@ const TournamentPage = () => {
           label="Формат"
           value={
             isTeamMode
-              ? `${tournament.team_amount}v${tournament.team_amount}`
+              ? `${tournament.players_per_team}v${tournament.players_per_team}`
               : "1v1"
           }
         />
@@ -336,7 +386,9 @@ const TournamentPage = () => {
           </span>
           <span className="text-xs font-mono text-primary">
             {Math.round(
-              ((filledSlots || 0) / (tournament.max_players || 1)) * 100,
+              isTeamMode
+                ? (tournament.teams.length / tournament.max_teams) * 100
+                : (tournament.users.length / tournament.max_players) * 100,
             )}
             %
           </span>
@@ -365,31 +417,18 @@ const TournamentPage = () => {
             {tournament.max_players || "∞"})
           </h2>
 
-          {currentUser?.uid ? (
-            <button
-              onClick={
-                isTeamTournaments ? handleOpenCreateTeamModal : handleJoinLeave
-              }
-              disabled={isLoading}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors
-                ${isJoined ? "bg-red-600 hover:bg-red-700 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"}
-                disabled:opacity-60 disabled:cursor-not-allowed`}
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isJoined
-                ? "Покинуть"
-                : isTeamMode
-                  ? "Создать команду"
-                  : "Вступить"}
-            </button>
-          ) : (
-            <button
-              disabled
-              className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-muted text-muted-foreground cursor-not-allowed"
-            >
-              Войдите, чтобы участвовать
-            </button>
-          )}
+          <JoinTournamentButton
+            isFull={isFull}
+            handleOpenCreateTeamModal={handleOpenCreateTeamModal}
+            handleJoinLeave={handleJoinLeave}
+            isTeamMode={isTeamMode}
+            isLoading={isLoading}
+            isJoinedSingleTournament={
+              !isTeamMode
+                ? tournament.users.some((user) => user.uid === currentUser.uid)
+                : undefined
+            }
+          />
         </div>
 
         {errorMsg && (
@@ -403,7 +442,7 @@ const TournamentPage = () => {
           <TeamList
             teams={tournament.teams || []}
             tournamentId={tournament.id}
-            maxPlayersPerTeam={tournament.team_amount}
+            maxPlayersPerTeam={tournament.players_per_team}
             isLoading={isLoading}
           />
         ) : (
@@ -411,7 +450,7 @@ const TournamentPage = () => {
         )}
       </motion.section>
 
-      {showEditModal && (
+      <CustomModal isOpen={showEditModal} onClose={handleCloseEditModal}>
         <EditModal
           {...editForm}
           isLoading={isLoading}
@@ -422,23 +461,28 @@ const TournamentPage = () => {
           onStartDateChange={handleUpdateStartDate}
           handleUpdateStatus={handleUpdateStatus}
           onClose={handleCloseEditModal}
+          handleChangeTournamentType={handleUpdateTournamentType}
           onSubmit={handleEdit}
         />
-      )}
+      </CustomModal>
 
-      {showDeleteConfirm && (
+      <CustomModal isOpen={showDeleteConfirm} onClose={handleCloseDeleteModal}>
         <DeleteTournamentModal
           isLoading={isLoading}
           onClose={handleCloseDeleteModal}
           onSubmit={handleDelete}
         />
-      )}
-      {isCreateTeamModalOpen && (
+      </CustomModal>
+
+      <CustomModal
+        isOpen={isCreateTeamModalOpen}
+        onClose={handleCloseCreateTeamModal}
+      >
         <CreateTeamModal
           tournamentId={tournament.id}
           onClose={handleCloseCreateTeamModal}
         />
-      )}
+      </CustomModal>
     </main>
   );
 };

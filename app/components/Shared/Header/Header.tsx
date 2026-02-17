@@ -30,6 +30,7 @@ const Header = () => {
         photoUrl: "",
         email: "",
         role: "user",
+        discord: "",
       }),
     );
     setIsProfileOpen(false);
@@ -79,7 +80,7 @@ const Header = () => {
             </span>
           </Link>
           <Link
-            href="https://discord.gg/Xat3sm6wC4"
+            href="https://discord.gg/S6QMcETh4d"
             className="flex items-center gap-2 group"
           >
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">

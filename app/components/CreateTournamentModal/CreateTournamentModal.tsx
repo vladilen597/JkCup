@@ -1,23 +1,34 @@
 import { motion } from "motion/react";
 import { SubmitEvent } from "react";
+import CustomSelect, {
+  ISelectOption,
+} from "../Shared/CustomSelect/CustomSelect";
+
+export const selectTypeOptions = [
+  {
+    id: 1,
+    value: "team",
+    label: "Командный",
+  },
+  {
+    id: 2,
+    value: "single",
+    label: "Одиночный",
+  },
+];
 
 interface ICreateTournamentModalProps {
   formData: {
     name: string;
     game: string;
+    type: ISelectOption;
     description: string;
     max_players: number;
-    team_amount: number;
+    players_per_team: number;
     start_date: string;
   };
-  handleChange: (value: {
-    name: string;
-    game: string;
-    description: string;
-    max_players: number;
-    team_amount: number;
-    start_date: string;
-  }) => void;
+  handleChange: (value: any) => void;
+  handleChangeTournamentType: (value: ISelectOption) => void;
   onClose: () => void;
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 }
@@ -25,6 +36,7 @@ interface ICreateTournamentModalProps {
 const CreateTournamentModal = ({
   formData,
   handleChange,
+  handleChangeTournamentType,
   onClose,
   onSubmit,
 }: ICreateTournamentModalProps) => {
@@ -37,7 +49,7 @@ const CreateTournamentModal = ({
     >
       <h3 className="text-xl font-bold mb-4">Новый турнир</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
         <div>
           <label className="block text-sm font-medium mb-1">Название</label>
           <input
@@ -64,20 +76,31 @@ const CreateTournamentModal = ({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div>
           <label className="block text-sm font-medium mb-1">Описание</label>
           <textarea
             value={formData.description}
             onChange={(e) =>
               handleChange({ ...formData, description: e.target.value })
             }
-            className="w-full p-2 rounded-lg bg-muted border border-border min-h-[100px]"
+            className="w-full p-2 rounded-lg bg-muted border border-border min-h-25"
+          />
+        </div>
+
+        <div className="col-span-2">
+          <span className="text-sm font-medium">Тип турнира</span>
+          <CustomSelect
+            containerClassName="mt-1  border-2 border-border text-lg rounded-lg bg-muted"
+            triggerClassName="pr-2 text-sm! text-left py-2"
+            options={selectTypeOptions}
+            value={formData.type}
+            onChange={handleChangeTournamentType}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Макс. игроков
+            Макс. {formData.type.value === "team" ? "команд" : "игроков"}
           </label>
           <input
             type="number"
@@ -94,24 +117,26 @@ const CreateTournamentModal = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Командный (игроков в команде)
-          </label>
-          <input
-            type="number"
-            value={formData.team_amount}
-            onChange={(e) =>
-              handleChange({
-                ...formData,
-                team_amount: Number(e.target.value),
-              })
-            }
-            className="w-full p-2 rounded-lg bg-muted border border-border"
-            min="1"
-            required
-          />
-        </div>
+        {formData.type.value === "team" && (
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Игроков в команде
+            </label>
+            <input
+              type="number"
+              value={formData.players_per_team}
+              onChange={(e) =>
+                handleChange({
+                  ...formData,
+                  players_per_team: Number(e.target.value),
+                })
+              }
+              className="w-full p-2 rounded-lg bg-muted border border-border"
+              min="1"
+              required
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-1">Дата начала</label>

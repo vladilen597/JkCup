@@ -3,7 +3,6 @@ import {
   collection,
   getDocs,
   query,
-  orderBy,
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -44,9 +43,7 @@ export async function POST(req: NextRequest) {
       ...body,
       createdAt: serverTimestamp(),
       users: [],
-      usersAmount: 0,
       teams: [],
-      teamsAmount: 0,
     };
 
     const docRef = await addDoc(collection(db, "tournaments"), newTournament);

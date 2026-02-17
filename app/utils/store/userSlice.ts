@@ -5,7 +5,7 @@ export interface IUser {
   displayName: string;
   photoUrl: string;
   email: string;
-  discord?: string;
+  discord: string;
   createdAt?: string;
   lastSignIn?: string;
   role: "user" | "admin" | "superadmin";
