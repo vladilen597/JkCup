@@ -1,14 +1,16 @@
 "use client";
 
-import { DoorClosed, Trophy, ChevronDown, Users, Settings } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { useGoogleSignIn } from "@/app/utils/useGoogleSignIn";
-import { AnimatePresence, motion } from "motion/react";
-import { setUser } from "@/app/utils/store/userSlice";
-import { useState } from "react";
-import Link from "next/link";
-import Discord from "../../Icons/Discord";
 import ProfileDropdown from "../ProfileDropdown/ProfileDropdown";
+import { useGoogleSignIn } from "@/app/utils/useGoogleSignIn";
+import { Trophy, ChevronDown, Users } from "lucide-react";
+import { IUser, setUser } from "@/app/utils/store/userSlice";
+import { AnimatePresence } from "motion/react";
+import Discord from "../../Icons/Discord";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/app/utils/firebase";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -36,6 +38,25 @@ const Header = () => {
   const handleGoogleSignIn = () => {
     signIn();
   };
+
+  const handleGetUser = async () => {
+    try {
+      if (user.uid) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = (await getDoc(userRef)).data();
+
+        if (userSnap) {
+          dispatch(setUser(userSnap as IUser));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    handleGetUser();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">

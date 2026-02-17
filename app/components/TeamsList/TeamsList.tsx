@@ -90,7 +90,6 @@ const TeamList = ({
           addTeamParticipant({ tournamentId, teamId, user: currentUser }),
         );
       }
-      console.log("nigga");
     } catch (error) {
       console.log(error);
     }

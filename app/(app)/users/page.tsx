@@ -15,7 +15,7 @@ const UsersPage = () => {
   const handleLoadUsers = async () => {
     try {
       const { data } = await axios.get("/api/users");
-      console.log(data);
+
       setUsers(data.users || []);
     } catch (err: any) {
       console.error(err);

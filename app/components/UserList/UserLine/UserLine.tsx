@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import Link from "next/link";
@@ -8,6 +8,20 @@ import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import Discord from "../../Icons/Discord";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
+import CustomSelect from "../../Shared/CustomSelect/CustomSelect";
+
+const roleSelectOptions = [
+  {
+    id: 1,
+    value: "user",
+    label: "Пользователь",
+  },
+  {
+    id: 2,
+    value: "admin",
+    label: "Админ",
+  },
+];
 
 interface UserLineProps {
   uid: string;
@@ -32,7 +46,15 @@ const UserLine: React.FC<UserLineProps> = ({
   role,
   showRoles,
 }) => {
-  const [userRole, setUserRole] = useState(role);
+  const [userRole, setUserRole] = useState<{
+    id: number;
+    value: string;
+    label: string;
+  }>({
+    id: 1,
+    value: "user",
+    label: "Пользователь",
+  });
   const { user: currentUser } = useAppSelector((state) => state.user);
   const joinedDate = joinedAt?.toDate?.()
     ? joinedAt.toDate().toLocaleDateString()
@@ -41,20 +63,30 @@ const UserLine: React.FC<UserLineProps> = ({
   const isCurrentUser = uid === currentUser.uid;
   const isSuperAdmin = currentUser.role === "superadmin";
 
-  const handleUpdateRole = async (event: ChangeEvent<HTMLSelectElement>) => {
-    event.stopPropagation();
-    setUserRole(event.target.value);
+  const handleUpdateRole = async (value: {
+    id: number;
+    value: string;
+    label: string;
+  }) => {
+    setUserRole(value);
     try {
       const userRef = doc(db, "users", uid);
       await updateDoc(userRef, {
-        role: event.target.value,
+        role: value.value,
       });
     } catch (error) {
       console.log(error);
     }
   };
 
-  console.log(displayName, role);
+  useEffect(() => {
+    const loadedRole = roleSelectOptions.find(
+      (roleOption) => roleOption.value === role,
+    );
+    if (loadedRole) {
+      setUserRole(loadedRole);
+    }
+  }, []);
 
   return (
     <Link href={"/users/" + uid}>
@@ -100,7 +132,7 @@ const UserLine: React.FC<UserLineProps> = ({
           )}
         </div>
 
-        {showRoles && (
+        {/* {showRoles && (
           <>
             {isSuperAdmin &&
             currentUser.uid !== uid &&
@@ -124,6 +156,26 @@ const UserLine: React.FC<UserLineProps> = ({
                   Админ
                 </option>
               </select>
+            ) : (
+              <div
+                className={`text-right text-xs text-muted-foreground font-mono ${roleColors[role as keyof typeof roleColors]}`}
+              >
+                {roles[role as keyof typeof roles]}
+              </div>
+            )}
+          </>
+        )} */}
+
+        {showRoles && (
+          <>
+            {isSuperAdmin &&
+            currentUser.uid !== uid &&
+            role !== "superadmin" ? (
+              <CustomSelect
+                value={userRole}
+                onChange={handleUpdateRole}
+                options={roleSelectOptions}
+              />
             ) : (
               <div
                 className={`text-right text-xs text-muted-foreground font-mono ${roleColors[role as keyof typeof roleColors]}`}

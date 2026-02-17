@@ -138,13 +138,12 @@ const EditModal = ({
               />
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-1">Статус</label>
             <select
               value={status}
               onChange={(event) => handleUpdateStatus(event.target.value)}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border"
+              className="w-full p-2.5 rounded-lg bg-muted border border-border box-border"
             >
               <option value="open">Открыт</option>
               <option value="ongoing">В процессе</option>

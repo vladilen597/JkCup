@@ -224,8 +224,15 @@ const TournamentPage = () => {
     return <div className="p-8 text-center">Турнир не найден</div>;
   }
 
-  const filledSlots = tournament.users?.length || 0;
   const isTeamMode = (tournament.team_amount || 1) > 1;
+  const filledSlots = isTeamMode
+    ? tournament.teams?.length || 0
+    : tournament.users?.length || 0;
+
+  const isFull =
+    tournament.team_amount > 1
+      ? tournament.teams.length === tournament.max_players
+      : tournament.users.length === tournament.max_players;
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
@@ -246,9 +253,7 @@ const TournamentPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-                {tournament.users.length === tournament.max_players
-                  ? "Live"
-                  : "Full"}
+                {isFull ? "Full" : "Live"}
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 {isTeamMode ? "Командный" : "Одиночный"}
