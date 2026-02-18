@@ -23,6 +23,7 @@ interface ITeamItemProps extends ITeam {
   is_my_team: boolean;
   tournament_status: string;
   canJoin: boolean;
+  occupiedUserIds: Set<string>;
 }
 
 const TeamItem = ({
@@ -37,6 +38,7 @@ const TeamItem = ({
   canJoin,
   tournament_status,
   teams,
+  occupiedUserIds,
 }: ITeamItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
@@ -165,7 +167,7 @@ const TeamItem = ({
               canLeave={tournament_status === "open"}
             />
           ))}
-          {tournament_status === "open" && canJoin && (
+          {tournament_status === "open" && (
             <JoinTeamButton
               isTeamPrivate={is_private}
               isCurrentUserCreator={currentUser.uid === creator_uid}
@@ -173,6 +175,7 @@ const TeamItem = ({
               onJoinClick={handleJoinTeam}
               handleClickInvite={handleOpenAddTeammateModal}
               isMyTeam={is_my_team}
+              canJoin={canJoin}
               isTeamFull={players_per_team === users.length}
             />
           )}
@@ -182,7 +185,11 @@ const TeamItem = ({
         isOpen={isAddTeammateModalOpen}
         onClose={handleCloseAddTeammateModal}
       >
-        <UserAddList teamId={uid} handleClose={handleCloseAddTeammateModal} />
+        <UserAddList
+          teamId={uid}
+          handleClose={handleCloseAddTeammateModal}
+          occupiedUserIds={occupiedUserIds}
+        />
       </CustomModal>
     </>
   );

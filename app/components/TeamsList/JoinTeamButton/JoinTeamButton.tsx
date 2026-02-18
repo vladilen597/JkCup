@@ -7,6 +7,7 @@ interface IJoinTeamButtonProps {
   isLoading: boolean;
   isMyTeam: boolean;
   isTeamFull: boolean;
+  canJoin: boolean;
   onJoinClick: () => void;
   handleClickInvite: () => void;
 }
@@ -17,6 +18,7 @@ const JoinTeamButton = ({
   isLoading,
   isMyTeam,
   isTeamFull,
+  canJoin,
   onJoinClick,
   handleClickInvite,
 }: IJoinTeamButtonProps) => {
@@ -49,7 +51,13 @@ const JoinTeamButton = ({
     }
   }
 
-  if (!isMyTeam && !isTeamFull && currentUser.uid && !isTeamPrivate) {
+  if (
+    !isMyTeam &&
+    !isTeamFull &&
+    currentUser.uid &&
+    !isTeamPrivate &&
+    canJoin
+  ) {
     return (
       <div>
         <button

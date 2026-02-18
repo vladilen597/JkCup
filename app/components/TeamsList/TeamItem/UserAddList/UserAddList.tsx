@@ -2,19 +2,29 @@ import { IUser } from "@/app/utils/store/userSlice";
 import UserAddItem from "./UserAddItem/UserAddItem";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useAppSelector } from "@/app/utils/store/hooks";
 
 interface IUserAddListProps {
   teamId: string;
+  occupiedUserIds: Set<string>;
   handleClose: () => void;
 }
 
-const UserAddList = ({ teamId, handleClose }: IUserAddListProps) => {
+const UserAddList = ({
+  teamId,
+  occupiedUserIds,
+  handleClose,
+}: IUserAddListProps) => {
   const [users, setUsers] = useState<IUser[]>([]);
 
   const handleLoadUsers = async () => {
     try {
       const { data } = await axios.get("/api/users");
-      setUsers(data.users || []);
+
+      const filteredUsers = data.users.filter(
+        (user: IUser) => !occupiedUserIds.has(user.uid),
+      );
+      setUsers(filteredUsers);
     } catch (err: any) {
       console.error(err);
     }

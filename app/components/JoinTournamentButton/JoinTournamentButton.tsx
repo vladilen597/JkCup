@@ -6,6 +6,7 @@ interface IJoinTournamentButtonProps {
   isLoading: boolean;
   isFull: boolean;
   isJoinedSingleTournament: boolean | undefined;
+  canCreateTeam: boolean;
   handleOpenCreateTeamModal: () => void;
   handleJoinLeave: () => void;
 }
@@ -15,6 +16,7 @@ const JoinTournamentButton = ({
   isLoading,
   isFull,
   isJoinedSingleTournament,
+  canCreateTeam,
   handleOpenCreateTeamModal,
   handleJoinLeave,
 }: IJoinTournamentButtonProps) => {
@@ -31,7 +33,7 @@ const JoinTournamentButton = ({
     );
   }
 
-  if (isTeamMode && !isFull) {
+  if (isTeamMode && !isFull && canCreateTeam) {
     return (
       <button
         onClick={handleOpenCreateTeamModal}

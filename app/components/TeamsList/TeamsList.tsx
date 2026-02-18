@@ -19,9 +19,10 @@ const TeamList = ({
 }: TeamListProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
 
-  const isUserHasTeam = teams.some((team) =>
-    team.users?.some((user) => user.uid === currentUser.uid),
+  const occupiedUserIds = new Set(
+    teams.flatMap((team) => team.users?.map((user) => user.uid) || []),
   );
+  const isUserHasTeam = occupiedUserIds.has(currentUser?.uid || "");
 
   if (teams.length === 0) {
     return (
@@ -46,6 +47,7 @@ const TeamList = ({
             canJoin={!isUserHasTeam}
             players_per_team={maxPlayersPerTeam}
             tournament_status={tournament_status}
+            occupiedUserIds={occupiedUserIds}
           />
         );
       })}

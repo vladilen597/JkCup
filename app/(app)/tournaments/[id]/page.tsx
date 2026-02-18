@@ -392,6 +392,10 @@ const TournamentPage = () => {
       (tournament.createdAt?.nanoseconds || 0) / 1000000,
   );
 
+  const isUserHasTeam = tournament.teams.some((team) =>
+    team.users?.some((user) => user.uid === currentUser.uid),
+  );
+
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
       <motion.div
@@ -603,6 +607,7 @@ const TournamentPage = () => {
               handleJoinLeave={handleJoinLeave}
               isTeamMode={isTeamMode}
               isLoading={isLoading}
+              canCreateTeam={!isUserHasTeam}
               isJoinedSingleTournament={
                 !isTeamMode
                   ? tournament.users.some(
