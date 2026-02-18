@@ -107,6 +107,11 @@ const TournamentPage = () => {
     duration: tournament?.duration || 0,
   });
 
+  const handleOpenEditModal = () => {
+    console.log("first");
+    setShowEditModal(true);
+  };
+
   const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
     setEditForm({ ...editForm, [event.target.name]: event.target.value });
   };
@@ -386,6 +391,8 @@ const TournamentPage = () => {
     team.users?.some((user) => user.uid === currentUser.uid),
   );
 
+  console.log(showEditModal);
+
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
       <motion.div
@@ -398,9 +405,6 @@ const TournamentPage = () => {
             "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
         }}
       >
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
-
         <div className="flex items-center justify-between">
           <div>
             {canEditTournament && (
@@ -456,7 +460,8 @@ const TournamentPage = () => {
                 </button>
               )}
               <button
-                onClick={() => setShowEditModal(true)}
+                type="button"
+                onClick={handleOpenEditModal}
                 className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors cursor-pointer"
               >
                 <Edit className="h-4 w-4" />

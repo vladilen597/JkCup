@@ -106,7 +106,7 @@ const EditModal = ({
             name="description"
             value={description}
             onChange={onTextareaChange}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-[100px] focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-25 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -121,36 +121,38 @@ const EditModal = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Макс. {type.value === "team" ? "команд" : "игроков"}
-          </label>
-          <input
-            type="number"
-            value={type.value === "team" ? max_teams : max_players}
-            onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-            min="2"
-            required
-          />
-        </div>
-
-        {type.value === "team" && (
-          <div>
+        <div className="flex items-center gap-2">
+          <div className="w-full">
             <label className="block text-sm font-medium mb-1">
-              Игроков в команде
+              Макс. {type.value === "team" ? "команд" : "игроков"}
             </label>
             <input
-              name="players_per_team"
               type="number"
-              value={players_per_team}
-              onChange={(event) => onTeamAmountChange(+event.target.value)}
+              value={type.value === "team" ? max_teams : max_players}
+              onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
               className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              min="1"
+              min="2"
               required
             />
           </div>
-        )}
+
+          {type.value === "team" && (
+            <div className="w-full">
+              <label className="block text-sm font-medium mb-1">
+                Игроков в команде
+              </label>
+              <input
+                name="players_per_team"
+                type="number"
+                value={players_per_team}
+                onChange={(event) => onTeamAmountChange(+event.target.value)}
+                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                min="1"
+                required
+              />
+            </div>
+          )}
+        </div>
 
         <div>
           <label className="text-sm font-medium mb-1 flex items-center gap-2">

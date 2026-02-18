@@ -50,6 +50,7 @@ export function useGoogleSignIn() {
           photoUrl: firebaseUser.photoURL || "",
           email: firebaseUser.email || "",
           discord: "",
+          createdAt: new Date().toString(),
           role: "user" as "user" | "admin" | "superadmin",
         };
 

@@ -8,8 +8,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
-import { motion } from "motion/react";
-import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Clock, Loader2 } from "lucide-react";
+import { format } from "date-fns";
 
 export const roles = {
   user: "Пользователь",
@@ -41,17 +42,17 @@ const page = () => {
   const userDocRef = doc(db, "users", params.id as string);
 
   const handleUpdateInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setUserInfo((prevState) => {
-      return {
-        ...prevState,
-        [event.target.name]: event.target.value,
-      };
-    });
+    setUserInfo((prevState) => ({
+      ...prevState,
+      [event.target.name]: event.target.value,
+    }));
   };
 
   const handleLoadUser = async () => {
     const data = (await getDoc(userDocRef)).data();
-    setUserInfo(data as IUser);
+    if (data) {
+      setUserInfo(data as IUser);
+    }
   };
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -64,20 +65,19 @@ const page = () => {
       });
       dispatch(setUser(userInfo));
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    handleLoadUser();
     if (isCurrentUser) {
       setUserInfo(currentUser);
     } else {
       handleLoadUser();
     }
-  }, []);
+  }, [isCurrentUser, currentUser]);
 
   if (!userInfo.uid) {
     return (
@@ -96,78 +96,149 @@ const page = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
-      <div className="flex items-center gap-3">
-        {userInfo.photoUrl && (
-          <Image
-            width={128}
-            height={128}
-            className="w-20 h-20 rounded-full"
-            src={userInfo.photoUrl}
-            alt="Profile picture"
-          />
-        )}
-        <div>
-          <span className="block">{userInfo.displayName}</span>
-          <span className="block text-sm text-neutral-400">
-            {userInfo.email}
-          </span>
-          <span className={`text-sm font-mono ${roleColors[userInfo.role]}`}>
-            {roles[userInfo.role]}
-          </span>
-        </div>
-      </div>
-      <form className="mt-8 text-2xl max-w-100" onSubmit={handleSubmit}>
-        <h2>Информация о пользователе</h2>
-        <label className="block mt-4">
-          <span className="flex items-center gap-2 text-sm font-medium ">
-            Имя пользователя на сайте
-          </span>
-          <input
-            name="displayName"
-            type="text"
-            value={userInfo.displayName}
-            onChange={handleUpdateInput}
-            className="mt-1 w-full p-2 rounded-lg bg-muted border border-border text-sm"
-            disabled={!isCurrentUser}
-          />
-        </label>
-        <label className="block mt-4">
-          <span className="flex items-center gap-2 text-sm font-medium ">
-            <Discord /> Discord
-          </span>
-          <input
-            name="discord"
-            type="text"
-            value={userInfo.discord}
-            onChange={handleUpdateInput}
-            className="mt-1 w-full p-2 rounded-lg bg-muted border border-border text-sm"
-            disabled={!isCurrentUser}
-          />
-          {isCurrentUser && (
-            <span className="ml-2 block text-xs leading-5 text-neutral-400">
-              Скопируйте имя пользователя в Discord и вставьте сюда
-            </span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
+      >
+        <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+          {userInfo.photoUrl && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Image
+                width={128}
+                height={128}
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full ring-2 ring-primary/30 shadow-xl"
+                src={userInfo.photoUrl}
+                alt="Profile picture"
+              />
+            </motion.div>
           )}
-        </label>
+
+          <div className="space-y-2">
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-3xl md:text-4xl font-black tracking-tight"
+            >
+              {userInfo.displayName}
+            </motion.h1>
+
+            {currentUser.role !== "user" && (
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="text-muted-foreground"
+              >
+                {userInfo.email}
+              </motion.p>
+            )}
+
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className={`text-sm font-mono ${roleColors[userInfo.role]}`}
+            >
+              {roles[userInfo.role]}
+            </motion.span>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="mt-8 max-w-lg space-y-6"
+        onSubmit={handleSubmit}
+      >
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-2xl font-bold"
+        >
+          Информация о пользователе
+        </motion.h2>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Имя пользователя на сайте
+            </label>
+            <input
+              name="displayName"
+              type="text"
+              value={userInfo.displayName}
+              onChange={handleUpdateInput}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+              disabled={!isCurrentUser}
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Discord className="h-4 w-4" />
+              Discord
+            </label>
+            <input
+              name="discord"
+              type="text"
+              value={userInfo.discord}
+              onChange={handleUpdateInput}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+              disabled={!isCurrentUser}
+            />
+            {isCurrentUser && (
+              <span className="block text-xs leading-5 text-neutral-400 mt-1">
+                Скопируйте имя пользователя в Discord и вставьте сюда
+              </span>
+            )}
+          </div>
+
+          {/* <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Clock className="h-4 w-4" />
+              Зарегистрирован
+            </label>
+            <input
+              name="discord"
+              type="text"
+              value={format(userInfo.createdAt, "dd.MM.yyyy HH:mm")}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+              disabled
+            />
+          </div> */}
+        </motion.div>
+
         {isCurrentUser && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
-            className="flex items-center gap-2 mt-4 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+            className="flex items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60"
             disabled={isLoading}
           >
-            {isLoading && (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                className="text-accent"
-              >
-                <Loader2 color="black" className="h-4 w-4" />
-              </motion.div>
-            )}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             Обновить
-          </button>
+          </motion.button>
         )}
-      </form>
+      </motion.form>
     </main>
   );
 };
