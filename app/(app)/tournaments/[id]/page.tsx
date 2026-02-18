@@ -62,7 +62,6 @@ export interface IEditTournament {
   max_players: number;
   players_per_team: number;
   start_date: string;
-  status: string;
   type: ISelectOption;
   duration: number;
   rewards: { id: string; value: string }[];
@@ -99,7 +98,6 @@ const TournamentPage = () => {
     start_date: tournament?.start_date
       ? new Date(tournament.start_date).toISOString().slice(0, 16)
       : "",
-    status: tournament?.status || statuses.open,
     type: tournament?.type || {
       id: 1,
       value: "team",
@@ -119,10 +117,6 @@ const TournamentPage = () => {
 
   const handleUpdateTeamAmount = (value: number) => {
     setEditForm({ ...editForm, players_per_team: value });
-  };
-
-  const handleUpdateStatus = (value: string) => {
-    setEditForm({ ...editForm, status: value });
   };
 
   const handleUpdateStartDate = (value: string) => {
@@ -209,7 +203,6 @@ const TournamentPage = () => {
         start_date: editForm.start_date
           ? new Date(editForm.start_date).toISOString()
           : null,
-        status: editForm.status,
         rewards: editForm.rewards,
         duration: editForm.duration,
       });
@@ -647,7 +640,6 @@ const TournamentPage = () => {
           onTextareaChange={handleUpdateTextField}
           onTeamAmountChange={handleUpdateTeamAmount}
           onStartDateChange={handleUpdateStartDate}
-          handleUpdateStatus={handleUpdateStatus}
           onClose={handleCloseEditModal}
           handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
           handleChangeTournamentType={handleUpdateTournamentType}

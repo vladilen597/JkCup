@@ -37,6 +37,7 @@ const page = () => {
     players_per_team: 2,
     start_date: "",
     rewards: [],
+    status: "open",
     duration: 0,
   });
 

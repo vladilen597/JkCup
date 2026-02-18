@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Loader2, X, Plus, Clock } from "lucide-react";
 import { ChangeEvent, FormEvent } from "react";
-import { v4 as uuidv4 } from "uuid";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
@@ -21,13 +20,11 @@ interface IEditModalProps {
   duration: number;
   isLoading: boolean;
   type: ISelectOption;
-  status: string;
   rewards: { id: string; value: string }[];
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onTextareaChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onTeamAmountChange: (value: number) => void;
   onStartDateChange: (value: string) => void;
-  handleUpdateStatus: (value: string) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
   handleChangeMaxTeamsOrPlayers: (value: number) => void;
   handleRewardChange: (index: number, value: string) => void;
@@ -48,14 +45,12 @@ const EditModal = ({
   players_per_team,
   duration = 0,
   isLoading,
-  status,
   type,
   rewards,
   onInputChange,
   onTextareaChange,
   onTeamAmountChange,
   onStartDateChange,
-  handleUpdateStatus,
   handleChangeTournamentType,
   handleChangeMaxTeamsOrPlayers,
   handleRewardChange,
@@ -237,21 +232,6 @@ const EditModal = ({
             onChange={(event) => onStartDateChange(event.target.value)}
             className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Статус</label>
-          <select
-            value={status}
-            onChange={(event) => handleUpdateStatus(event.target.value)}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="open">Открыт</option>
-            <option value="about_to_start">Регистрация закрыта</option>
-            <option value="ongoing">В процессе</option>
-            <option value="finished">Завершён</option>
-            <option value="canceled">Отменён</option>
-          </select>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">

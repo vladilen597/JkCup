@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { doc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { AlertCircle, Loader2, Users } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { db } from "@/app/utils/firebase";
@@ -38,15 +38,13 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
       const uid = uuidv4();
 
       await updateDoc(tournamentRef, {
-        teams: [
-          {
-            uid,
-            creator_uid: currentUser.uid,
-            name: teamData.name,
-            is_private: teamData.is_private,
-            users: [currentUser],
-          },
-        ],
+        teams: arrayUnion({
+          uid,
+          creator_uid: currentUser.uid,
+          name: teamData.name,
+          is_private: teamData.is_private,
+          users: [currentUser],
+        }),
       });
 
       dispatch(
