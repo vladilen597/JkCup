@@ -45,12 +45,13 @@ import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect
 import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
 import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
-import axios from "axios";
+import TournamentDurationDisplay from "@/app/components/Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 
 export const statuses = {
   open: "Открыт",
   closed: "Закрыт",
   about_to_start: "Регистрация закрыта",
+  in_progress: "LIVE",
 };
 
 export interface IEditTournament {
@@ -71,10 +72,6 @@ const trophyIndexes = {
   1: <Trophy className="h-4 w-4 text-[#EFBF04]" />,
   2: <Trophy className="h-4 w-4 text-[#C4C4C4]" />,
   3: <Trophy className="h-4 w-4 text-[#CE8946]" />,
-};
-
-const convertMillisecondsToTime = (ms: number) => {
-  const timeString = new Date(ms).toISOString().slice(11, 19);
 };
 
 const TournamentPage = () => {
@@ -233,22 +230,39 @@ const TournamentPage = () => {
 
   const handleCloseRegistration = async () => {
     try {
-      const { data } = await axios.get("/api/tournaments");
-      data.forEach((tournament: ITournament) => {
-        if (new Date(tournament.start_date) < new Date()) {
-          const tournamentRef = doc(db, "tournaments", tournament.id);
-          updateDoc(tournamentRef, {
+      if (tournament) {
+        const tournamentRef = doc(db, "tournaments", tournament.id);
+        updateDoc(tournamentRef, {
+          status: "about_to_start",
+        });
+        dispatch(
+          updateTournamentStatus({
+            tournamentId: tournament.id,
             status: "about_to_start",
-          });
-          dispatch(
-            updateTournamentStatus({
-              tournamentId: tournament.id,
-              status: "about_to_start",
-            }),
-          );
-        }
-      });
-      dispatch(setTournaments(data));
+          }),
+        );
+      }
+    } catch (err) {
+      console.error("Failed to load tournaments:", err);
+    }
+  };
+
+  const handleStartTournament = async () => {
+    try {
+      if (tournament) {
+        const tournamentRef = doc(db, "tournaments", tournament.id);
+        updateDoc(tournamentRef, {
+          status: "in_progress",
+          startedAt: new Date().toString(),
+        });
+        dispatch(
+          updateTournamentStatus({
+            tournamentId: tournament.id,
+            status: "in_progress",
+            startedAt: new Date().toString(),
+          }),
+        );
+      }
     } catch (err) {
       console.error("Failed to load tournaments:", err);
     }
@@ -447,6 +461,15 @@ const TournamentPage = () => {
                     Закрыть регистрацию
                   </button>
                 )}
+                {tournament.status === "about_to_start" && (
+                  <button
+                    onClick={handleStartTournament}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Trophy className="h-4 w-4" />
+                    Начать турнир
+                  </button>
+                )}
                 <button
                   onClick={() => setShowEditModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors cursor-pointer"
@@ -463,12 +486,10 @@ const TournamentPage = () => {
             )}
           </div>
 
-          {tournament.duration && (
-            <div className="mt-1 flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4" />
-              {new Date(tournament.duration).toISOString().slice(11, 19)}
-            </div>
-          )}
+          <TournamentDurationDisplay
+            duration={tournament.duration}
+            startedAt={tournament.startedAt}
+          />
           <h1 className="mt-2 text-4xl md:text-5xl font-black tracking-tight text-foreground">
             {tournament.name}
           </h1>
@@ -625,9 +646,9 @@ const TournamentPage = () => {
           onClose={handleCloseEditModal}
           handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
           handleChangeTournamentType={handleUpdateTournamentType}
-          handleRewardChange={handleRewardChange} // Add this
-          handleAddReward={handleAddReward} // Add this
-          handleDeleteReward={handleDeleteReward} // Add this
+          handleRewardChange={handleRewardChange}
+          handleAddReward={handleAddReward}
+          handleDeleteReward={handleDeleteReward}
           handleChangeDuration={handleChangeDuration}
           onSubmit={handleEdit}
         />

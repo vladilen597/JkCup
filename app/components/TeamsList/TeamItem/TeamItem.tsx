@@ -156,6 +156,7 @@ const TeamItem = ({
         <div className="space-y-2">
           {users.map((user) => (
             <TeamUserItem
+              key={user.uid}
               {...user}
               isMyTeam={is_my_team}
               isLoading={isLoading}

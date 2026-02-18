@@ -20,6 +20,7 @@ export interface ITournament {
   rewards: { id: string; value: string }[];
   creator?: IUser;
   createdAt?: Timestamp;
+  startedAt?: string;
 }
 
 export interface ITeam {
@@ -52,13 +53,20 @@ const tournamentsSlice = createSlice({
     },
     updateTournamentStatus: (
       state,
-      action: PayloadAction<{ tournamentId: string; status: string }>,
+      action: PayloadAction<{
+        tournamentId: string;
+        status: string;
+        startedAt?: string;
+      }>,
     ) => {
       const tournament = state.tournaments.find(
         (t) => t.id === action.payload.tournamentId,
       );
       if (tournament) {
         tournament.status = action.payload.status;
+        if (action.payload.startedAt) {
+          tournament.startedAt = action.payload.startedAt;
+        }
       }
     },
     addTournamentTeam: (
