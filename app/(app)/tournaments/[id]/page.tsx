@@ -221,6 +221,8 @@ const TournamentPage = () => {
     }
   };
 
+  console.log(tournament);
+
   const handleCloseRegistration = async () => {
     try {
       if (tournament) {
@@ -380,11 +382,6 @@ const TournamentPage = () => {
       ? tournament.teams.length === tournament.max_players
       : tournament.users.length === tournament.max_players;
 
-  const createdAtConverted = new Date(
-    (tournament.createdAt?.seconds || 0) * 1000 +
-      (tournament.createdAt?.nanoseconds || 0) / 1000000,
-  );
-
   const isUserHasTeam = tournament.teams.some((team) =>
     team.users?.some((user) => user.uid === currentUser.uid),
   );
@@ -429,7 +426,7 @@ const TournamentPage = () => {
               <div className="">
                 <span className="text-sm">Время создания</span>
                 <div className="mt-1 flex gap-2 items-center">
-                  {format(new Date(createdAtConverted), "dd.MM.yyyy HH:mm")}
+                  {format(tournament.createdAt, "dd.MM.yyyy HH:mm")}
                 </div>
               </div>
             )}

@@ -48,7 +48,10 @@ const page = () => {
     try {
       const { data } = await axios.get("/api/tournaments");
       data.forEach((tournament: ITournament) => {
-        if (new Date(tournament.start_date) < new Date()) {
+        if (
+          tournament.start_date &&
+          new Date(tournament.start_date) < new Date()
+        ) {
           const tournamentRef = doc(db, "tournaments", tournament.id);
           updateDoc(tournamentRef, {
             status: "about_to_start",
@@ -96,7 +99,7 @@ const page = () => {
         status: "open",
         users: [],
         teams: [],
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         start_date: "",
       };
 

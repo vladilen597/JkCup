@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const newTournament = {
       ...body,
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
       users: [],
       teams: [],
     };
