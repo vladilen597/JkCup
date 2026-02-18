@@ -5798,6 +5798,11 @@ react-dom@19.2.3:
   dependencies:
     scheduler "^0.27.0"
 
+react-duration-input@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/react-duration-input/-/react-duration-input-1.0.8.tgz#5eb4522e88b78156c1c07749c153f816ae7703a2"
+  integrity sha512-ayS3Eb4BV8/qWigca2GM1ezRjQPcl7Hl6i9+m2gDBJKRiDC3WmQogQ12/dvedRVsf36lEBmfodtBhxNK/3A3mA==
+
 react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"

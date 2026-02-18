@@ -1,11 +1,14 @@
+"use client";
+
 import { motion } from "framer-motion";
-import { Loader2, X, Plus } from "lucide-react";
+import { Loader2, X, Plus, Clock } from "lucide-react";
 import { ChangeEvent, FormEvent } from "react";
 import { v4 as uuidv4 } from "uuid";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
 import { selectTypeOptions } from "../CreateTournamentModal/CreateTournamentModal";
+import { useDurationInput } from "react-duration-input";
 
 interface IEditModalProps {
   name: string;
@@ -15,6 +18,7 @@ interface IEditModalProps {
   max_players: number;
   max_teams: number;
   players_per_team: number;
+  duration: number;
   isLoading: boolean;
   type: ISelectOption;
   status: string;
@@ -29,6 +33,7 @@ interface IEditModalProps {
   handleRewardChange: (index: number, value: string) => void;
   handleAddReward: () => void;
   handleDeleteReward: (id: string) => void;
+  handleChangeDuration: (ms: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }
@@ -41,6 +46,7 @@ const EditModal = ({
   max_players,
   max_teams,
   players_per_team,
+  duration = 0,
   isLoading,
   status,
   type,
@@ -55,9 +61,18 @@ const EditModal = ({
   handleRewardChange,
   handleAddReward,
   handleDeleteReward,
+  handleChangeDuration,
   onSubmit,
   onClose,
 }: IEditModalProps) => {
+  const durationInputProps = useDurationInput({
+    timeInMilliseconds: duration,
+    isMilliseconds: false,
+    onTimeUpdate: (ms: number) => {
+      handleChangeDuration(ms);
+    },
+  });
+
   return (
     <>
       <div className="mb-6">
@@ -96,7 +111,7 @@ const EditModal = ({
             name="description"
             value={description}
             onChange={onTextareaChange}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-25 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-[100px] focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -119,29 +134,40 @@ const EditModal = ({
             type="number"
             value={type.value === "team" ? max_teams : max_players}
             onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
-            className="w-full p-2 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
             min="2"
             required
           />
         </div>
 
+        {type.value === "team" && (
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Игроков в команде
+            </label>
+            <input
+              name="players_per_team"
+              type="number"
+              value={players_per_team}
+              onChange={(event) => onTeamAmountChange(+event.target.value)}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              min="1"
+              required
+            />
+          </div>
+        )}
+
         <div>
-          {type.value === "team" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Игроков в команде
-              </label>
-              <input
-                name="players_per_team"
-                type="number"
-                value={players_per_team}
-                onChange={(event) => onTeamAmountChange(+event.target.value)}
-                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                min="1"
-                required
-              />
-            </div>
-          )}
+          <label className="text-sm font-medium mb-1 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            Длительность турнира
+          </label>
+
+          <input
+            {...durationInputProps}
+            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Например: 2:30 (2 часа 30 минут)"
+          />
         </div>
 
         <div className="space-y-3">

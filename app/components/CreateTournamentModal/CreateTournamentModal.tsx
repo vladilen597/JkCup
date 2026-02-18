@@ -1,9 +1,10 @@
+import { useDurationInput } from "react-duration-input";
 import { motion } from "motion/react";
 import { SubmitEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Clock, Users } from "lucide-react";
 
 export const selectTypeOptions = [
   {
@@ -28,6 +29,7 @@ interface ICreateTournamentModalProps {
     max_teams: number;
     players_per_team: number;
     start_date: string;
+    duration: number;
     rewards: { id: string; value: string }[];
   };
   handleChange: (value: any) => void;
@@ -45,6 +47,18 @@ const CreateTournamentModal = ({
   handleAddReward,
   onSubmit,
 }: ICreateTournamentModalProps) => {
+  const inputProps = useDurationInput({
+    timeInMilliseconds: formData.duration,
+    isMilliseconds: false,
+    onTimeUpdate: (value) =>
+      handleChange((prevState: any) => {
+        return {
+          ...prevState,
+          duration: value,
+        };
+      }),
+  });
+
   const canAddMoreRewards =
     formData.type.value === "team"
       ? formData.max_teams > formData.rewards.length
@@ -111,8 +125,9 @@ const CreateTournamentModal = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Макс. {formData.type.value === "team" ? "команд" : "игроков"}
+          <label className="flex items-center gap-2 text-sm font-medium mb-1">
+            <Users className="w-4 h-4" /> Макс.{" "}
+            {formData.type.value === "team" ? "команд" : "игроков"}
           </label>
           <input
             type="number"
@@ -131,6 +146,17 @@ const CreateTournamentModal = ({
             }}
             className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
             min="2"
+            required
+          />
+        </div>
+        <div>
+          <label className="flex gap-2 items-center text-sm font-medium mb-1">
+            <Clock className="w-4 h-4" /> Продолжительность
+          </label>
+          <input
+            {...inputProps}
+            onTimeUpdate={(value) => console.log(value)}
+            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
         </div>
@@ -156,7 +182,6 @@ const CreateTournamentModal = ({
           </div>
         )}
 
-        {/* Rewards Section - Styled like edit modal */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Награды</label>

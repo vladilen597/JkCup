@@ -37,6 +37,7 @@ const page = () => {
     players_per_team: 2,
     start_date: "",
     rewards: [],
+    duration: 0,
   });
 
   const canCreateTournament =
@@ -170,10 +171,13 @@ const page = () => {
           {tournaments?.map((tournament, index) => {
             const isTeam = tournament.type.value === "team";
             const usersAmount = tournament.users?.length || 0;
-            const fillPercent = Math.round(
-              (usersAmount / tournament.max_players) * 100,
-            );
-            const isFull = usersAmount >= tournament.max_players;
+            const teamsAmount = tournament.teams.length || 0;
+            const fillPercent = isTeam
+              ? Math.round((teamsAmount / tournament.max_teams) * 100)
+              : Math.round((usersAmount / tournament.max_players) * 100);
+            const isFull = isTeam
+              ? teamsAmount >= tournament.max_teams
+              : usersAmount >= tournament.max_players;
 
             return (
               <Tournament

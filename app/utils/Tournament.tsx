@@ -41,7 +41,6 @@ const Tournament = ({
   rewards,
   description,
 }: ITournamentProps) => {
-  console.log(rewards);
   return (
     <motion.li
       initial={{ opacity: 0, y: 10 }}

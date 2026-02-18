@@ -14,6 +14,7 @@ import {
   Edit,
   Trash2,
   Trophy,
+  Clock,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -57,13 +58,18 @@ export interface IEditTournament {
   start_date: string;
   status: string;
   type: ISelectOption;
+  duration: number;
   rewards: { id: string; value: string }[];
 }
 
 const trophyIndexes = {
-  1: <Trophy className="h-3 w-3 text-[#EFBF04]" />,
-  2: <Trophy className="h-3 w-3 text-[#C4C4C4]" />,
-  3: <Trophy className="h-3 w-3 text-[#CE8946]" />,
+  1: <Trophy className="h-4 w-4 text-[#EFBF04]" />,
+  2: <Trophy className="h-4 w-4 text-[#C4C4C4]" />,
+  3: <Trophy className="h-4 w-4 text-[#CE8946]" />,
+};
+
+const convertMillisecondsToTime = (ms: number) => {
+  const timeString = new Date(ms).toISOString().slice(11, 19);
 };
 
 const TournamentPage = () => {
@@ -97,6 +103,7 @@ const TournamentPage = () => {
       label: "Командный",
     },
     rewards: tournament?.rewards || [],
+    duration: tournament?.duration || 0,
   });
 
   const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
@@ -204,7 +211,8 @@ const TournamentPage = () => {
           ? new Date(editForm.start_date).toISOString()
           : null,
         status: editForm.status,
-        rewards: editForm.rewards, // Add this line to save rewards
+        rewards: editForm.rewards,
+        duration: editForm.duration,
       });
 
       const updatedTournaments = tournaments.map((t) =>
@@ -241,6 +249,13 @@ const TournamentPage = () => {
         max_players: value,
       }));
     }
+  };
+
+  const handleChangeDuration = (value: number) => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      duration: value,
+    }));
   };
 
   const handleUpdateTournamentType = (value: ISelectOption) => {
@@ -377,10 +392,16 @@ const TournamentPage = () => {
             )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground mb-3">
+          {tournament.duration && (
+            <div className="mt-1 flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4" />
+              {new Date(tournament.duration).toISOString().slice(11, 19)}
+            </div>
+          )}
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
             {tournament.name}
           </h1>
-          <p className="text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="mt-2 text-muted-foreground max-w-2xl leading-relaxed">
             {tournament.description}
           </p>
 
@@ -389,7 +410,7 @@ const TournamentPage = () => {
             <ul className="mt-2">
               {tournament.rewards?.map((reward, index) => (
                 <div className="flex items-center gap-1" key={reward.id}>
-                  <span className="text-xs gap-2 w-3 text-center">
+                  <span className="text-xs gap-2 w-4 text-center">
                     {trophyIndexes[(index + 1) as keyof typeof trophyIndexes] ||
                       index + 1}
                   </span>
@@ -531,6 +552,7 @@ const TournamentPage = () => {
           handleRewardChange={handleRewardChange} // Add this
           handleAddReward={handleAddReward} // Add this
           handleDeleteReward={handleDeleteReward} // Add this
+          handleChangeDuration={handleChangeDuration}
           onSubmit={handleEdit}
         />
       </CustomModal>
