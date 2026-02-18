@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { IUser } from "./userSlice";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
+import { Timestamp } from "firebase/firestore";
 
 export interface ITournament {
   id: string;
@@ -17,6 +18,8 @@ export interface ITournament {
   teams: ITeam[];
   duration: number;
   rewards: { id: string; value: string }[];
+  creator?: IUser;
+  createdAt?: Timestamp;
 }
 
 export interface ITeam {

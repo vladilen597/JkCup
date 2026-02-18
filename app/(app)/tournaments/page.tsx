@@ -50,12 +50,12 @@ const page = () => {
         if (new Date(tournament.start_date) < new Date()) {
           const tournamentRef = doc(db, "tournaments", tournament.id);
           updateDoc(tournamentRef, {
-            status: "closed",
+            status: "about_to_start",
           });
           dispatch(
             updateTournamentStatus({
               tournamentId: tournament.id,
-              status: "closed",
+              status: "about_to_start",
             }),
           );
         }
@@ -91,6 +91,7 @@ const page = () => {
     try {
       const newTournament = {
         ...formData,
+        creator: user,
         status: "open",
         users: [],
         teams: [],
@@ -98,7 +99,10 @@ const page = () => {
         start_date: "",
       };
 
-      const res = await axios.post("/api/tournaments", formData);
+      const res = await axios.post("/api/tournaments", {
+        ...formData,
+        creator: user,
+      });
 
       dispatch(
         setTournaments([...tournaments, { id: res.data.id, ...newTournament }]),
@@ -170,7 +174,9 @@ const page = () => {
         <ul className="space-y-3">
           {tournaments?.map((tournament, index) => {
             const isTeam = tournament.type.value === "team";
-            const usersAmount = tournament.users?.length || 0;
+            const usersAmount = isTeam
+              ? tournament.teams.length
+              : tournament.users?.length || 0;
             const teamsAmount = tournament.teams.length || 0;
             const fillPercent = isTeam
               ? Math.round((teamsAmount / tournament.max_teams) * 100)

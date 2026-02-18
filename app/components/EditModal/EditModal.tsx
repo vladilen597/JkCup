@@ -247,6 +247,7 @@ const EditModal = ({
             className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="open">Открыт</option>
+            <option value="about_to_start">Регистрация закрыта</option>
             <option value="ongoing">В процессе</option>
             <option value="finished">Завершён</option>
             <option value="canceled">Отменён</option>

@@ -2,6 +2,7 @@ import { ChevronRight, Gamepad2, Trophy, User, Users } from "lucide-react";
 import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { statuses } from "../(app)/tournaments/[id]/page";
 
 interface ITournamentProps {
   id: string;
@@ -48,7 +49,7 @@ const Tournament = ({
       transition={{ duration: 0.3, delay: index * 0.06 }}
     >
       <Link href={"/tournaments/" + id}>
-        <div className="group relative rounded-xl border border-border/50 bg-card p-5 hover:border-primary/30 hover:shadow-[var(--neon-shadow)] transition-all duration-300 cursor-pointer">
+        <div className="group relative rounded-xl border border-border/50 bg-card p-5 hover:border-primary/30 hover:shadow-(--neon-shadow) transition-all duration-300 cursor-pointer">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -62,7 +63,7 @@ const Tournament = ({
                   className="bg-primary/10 text-primary border border-primary/20"
                 />
                 <Badge
-                  text={status}
+                  text={statuses[status as keyof typeof statuses]}
                   className="bg-primary/10 text-primary border border-primary/20"
                 />
                 {isFull && (

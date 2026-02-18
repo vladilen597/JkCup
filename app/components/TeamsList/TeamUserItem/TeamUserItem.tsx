@@ -11,6 +11,7 @@ interface ITeamUserItemProps {
   isLoading: boolean;
   isMyTeam: boolean;
   isCurrentUserCreator: boolean;
+  canLeave: boolean;
   onLeaveClick: () => void;
 }
 
@@ -22,6 +23,7 @@ const TeamUserItem = ({
   isLoading,
   isMyTeam,
   isCurrentUserCreator,
+  canLeave,
   onLeaveClick,
 }: ITeamUserItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
@@ -58,7 +60,7 @@ const TeamUserItem = ({
           )}
         </div>
       </div>
-      {isMyTeam && (isCurrentUser || isCurrentUserCreator) && (
+      {isMyTeam && (isCurrentUser || isCurrentUserCreator) && canLeave && (
         <button
           onClick={onLeaveClick}
           disabled={isLoading}

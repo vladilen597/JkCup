@@ -21,6 +21,8 @@ interface ITeamItemProps extends ITeam {
   teams: ITeam[];
   players_per_team: number;
   is_my_team: boolean;
+  tournament_status: string;
+  canJoin: boolean;
 }
 
 const TeamItem = ({
@@ -32,6 +34,8 @@ const TeamItem = ({
   users,
   creator_uid,
   is_my_team,
+  canJoin,
+  tournament_status,
   teams,
 }: ITeamItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
@@ -132,7 +136,9 @@ const TeamItem = ({
               {name || `Команда ${uid.slice(0, 6)}`}
             </h3>
             {is_private && <Lock className="w-4 h-4 text-neutral-500" />}
-            {(creator_uid === currentUser.uid || isEnoughRole) && (
+            {((creator_uid === currentUser.uid &&
+              tournament_status === "open") ||
+              isEnoughRole) && (
               <button
                 type="button"
                 className="bg-red-500 p-1 rounded-sm text-white cursor-pointer"
@@ -155,17 +161,20 @@ const TeamItem = ({
               isLoading={isLoading}
               isCurrentUserCreator={currentUser.uid === creator_uid}
               onLeaveClick={() => handleLeaveTeam(user)}
+              canLeave={tournament_status === "open"}
             />
           ))}
-          <JoinTeamButton
-            isTeamPrivate={is_private}
-            isCurrentUserCreator={currentUser.uid === creator_uid}
-            isLoading={isLoading}
-            onJoinClick={handleJoinTeam}
-            handleClickInvite={handleOpenAddTeammateModal}
-            isMyTeam={is_my_team}
-            isTeamFull={players_per_team === users.length}
-          />
+          {tournament_status === "open" && canJoin && (
+            <JoinTeamButton
+              isTeamPrivate={is_private}
+              isCurrentUserCreator={currentUser.uid === creator_uid}
+              isLoading={isLoading}
+              onJoinClick={handleJoinTeam}
+              handleClickInvite={handleOpenAddTeammateModal}
+              isMyTeam={is_my_team}
+              isTeamFull={players_per_team === users.length}
+            />
+          )}
         </div>
       </li>
       <CustomModal
