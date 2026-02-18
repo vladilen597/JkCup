@@ -27,7 +27,7 @@ const page = () => {
     name: "",
     game: "",
     type: {
-      id: 1,
+      id: 2,
       value: "single",
       label: "Одиночный",
     },

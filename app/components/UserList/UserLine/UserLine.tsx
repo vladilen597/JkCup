@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import Discord from "../../Icons/Discord";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
-import CustomSelect from "../../Shared/CustomSelect/CustomSelect";
+import RoleSelect from "../../Shared/RoleSelect/CustomSelect";
 
 const roleSelectOptions = [
   {
@@ -171,7 +171,7 @@ const UserLine: React.FC<UserLineProps> = ({
             {isSuperAdmin &&
             currentUser.uid !== uid &&
             role !== "superadmin" ? (
-              <CustomSelect
+              <RoleSelect
                 value={userRole}
                 onChange={handleUpdateRole}
                 options={roleSelectOptions}

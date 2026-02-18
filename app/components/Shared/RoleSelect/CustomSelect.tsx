@@ -8,7 +8,7 @@ export interface ISelectOption {
   label: string;
 }
 
-interface ICustomSelectProps {
+interface IRoleSelectProps {
   value: ISelectOption;
   containerClassName?: string;
   triggerClassName?: string;
@@ -17,10 +17,7 @@ interface ICustomSelectProps {
 }
 
 const containerVariants = {
-  expanded: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
+  expanded: {},
   collapsed: {},
 };
 
@@ -33,34 +30,22 @@ const labelVariants = {
   },
 };
 
-const triggerVariants = {
-  expanded: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  collapsed: {
-    transform: "rotate(0deg)",
-  },
-};
-
 const contentVariants = {
   expanded: {
     opacity: 1,
-    height: "auto",
   },
   collapsed: {
     opacity: 0,
-    height: 0,
   },
 };
 
-const CustomSelect = ({
+const RoleSelect = ({
   value,
   containerClassName,
   triggerClassName,
   onChange,
   options,
-}: ICustomSelectProps) => {
+}: IRoleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggleIsOpen = (e: MouseEvent<HTMLLabelElement>) => {
@@ -75,10 +60,12 @@ const CustomSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative bg-muted rounded-lg ${containerClassName}`}
+      className={`block relative ${containerClassName}`}
       onClick={handleToggleIsOpen}
     >
-      <motion.div className="flex items-center p-3 justify-between text-sm">
+      <div
+        className={`text-xs font-mono flex items-center gap-2 justify-end py-2 ${triggerClassName}`}
+      >
         {value.label || "Не выбрано"}
         <motion.div
           variants={labelVariants}
@@ -88,11 +75,11 @@ const CustomSelect = ({
         >
           <ChevronDown className="h-4 w-4" />
         </motion.div>
-      </motion.div>
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none"
+            className="absolute top-full font-mono text-xs right-0 bg-muted rounded-lg overflow-hidden z-10"
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"
@@ -101,7 +88,7 @@ const CustomSelect = ({
             {options.map((option) => (
               <li
                 key={option.id}
-                className={`p-3 hover:bg-primary-foreground/50 ${value.id === option.id && "bg-primary-foreground/80"}`}
+                className="p-2 px-4 hover:bg-primary-foreground"
                 onClick={() => onChange(option)}
               >
                 {option.label}
@@ -114,4 +101,4 @@ const CustomSelect = ({
   );
 };
 
-export default CustomSelect;
+export default RoleSelect;

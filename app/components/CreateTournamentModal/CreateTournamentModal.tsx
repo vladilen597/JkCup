@@ -115,13 +115,13 @@ const CreateTournamentModal = ({
 
         <div className="col-span-2">
           <span className="text-sm font-medium">Тип турнира</span>
-          <CustomSelect
-            containerClassName="mt-1 border-2 border-border text-lg rounded-lg bg-muted"
-            triggerClassName="pl-2 text-sm! text-left py-2 text-left justify-start"
-            options={selectTypeOptions}
-            value={formData.type}
-            onChange={handleChangeTournamentType}
-          />
+          <div className="mt-2">
+            <CustomSelect
+              options={selectTypeOptions}
+              value={formData.type}
+              onChange={handleChangeTournamentType}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
