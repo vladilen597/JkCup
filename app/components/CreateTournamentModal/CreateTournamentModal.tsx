@@ -124,30 +124,52 @@ const CreateTournamentModal = ({
           />
         </div>
 
-        <div>
-          <label className="flex items-center gap-2 text-sm font-medium mb-1">
-            <Users className="w-4 h-4" /> Макс.{" "}
-            {formData.type.value === "team" ? "команд" : "игроков"}
-          </label>
-          <input
-            type="number"
-            value={
-              formData.type.value === "team"
-                ? formData.max_teams
-                : formData.max_players
-            }
-            onChange={(e) => {
-              handleChange({
-                ...formData,
-                ...(formData.type.value === "team"
-                  ? { max_teams: Number(e.target.value), rewards: [] }
-                  : { max_players: Number(e.target.value), rewards: [] }),
-              });
-            }}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-            min="2"
-            required
-          />
+        <div className="flex items-center gap-2">
+          <div className="w-full">
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Users className="w-4 h-4" /> Макс.{" "}
+              {formData.type.value === "team" ? "команд" : "игроков"}
+            </label>
+            <input
+              type="number"
+              value={
+                formData.type.value === "team"
+                  ? formData.max_teams
+                  : formData.max_players
+              }
+              onChange={(e) => {
+                handleChange({
+                  ...formData,
+                  ...(formData.type.value === "team"
+                    ? { max_teams: Number(e.target.value), rewards: [] }
+                    : { max_players: Number(e.target.value), rewards: [] }),
+                });
+              }}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              min="2"
+              required
+            />
+          </div>
+          {formData.type.value === "team" && (
+            <div className="w-full">
+              <label className="block text-sm font-medium mb-1">
+                Игроков в команде
+              </label>
+              <input
+                type="number"
+                value={formData.players_per_team}
+                onChange={(e) =>
+                  handleChange({
+                    ...formData,
+                    players_per_team: Number(e.target.value),
+                  })
+                }
+                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                min="2"
+                required
+              />
+            </div>
+          )}
         </div>
         <div>
           <label className="flex gap-2 items-center text-sm font-medium mb-1">
@@ -160,27 +182,6 @@ const CreateTournamentModal = ({
             required
           />
         </div>
-
-        {formData.type.value === "team" && (
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Игроков в команде
-            </label>
-            <input
-              type="number"
-              value={formData.players_per_team}
-              onChange={(e) =>
-                handleChange({
-                  ...formData,
-                  players_per_team: Number(e.target.value),
-                })
-              }
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              min="2"
-              required
-            />
-          </div>
-        )}
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">

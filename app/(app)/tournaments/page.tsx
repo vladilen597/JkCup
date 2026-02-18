@@ -99,7 +99,7 @@ const page = () => {
         status: "open",
         users: [],
         teams: [],
-        createdAt: new Date(),
+        createdAt: new Date().toString(),
         start_date: "",
       };
 

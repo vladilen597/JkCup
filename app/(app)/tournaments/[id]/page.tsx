@@ -201,7 +201,7 @@ const TournamentPage = () => {
         max_teams: editForm.max_teams,
         players_per_team: editForm.players_per_team,
         start_date: editForm.start_date
-          ? new Date(editForm.start_date).toISOString()
+          ? new Date(editForm.start_date).toString()
           : null,
         rewards: editForm.rewards,
         duration: editForm.duration,
@@ -401,39 +401,77 @@ const TournamentPage = () => {
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
-        {canEditTournament && (
-          <div className="flex items-center gap-4 mb-8">
-            {tournament.creator && (
-              <div className="">
-                <span className="text-sm">Создатель</span>
-                <div className="mt-1 flex gap-2 items-center">
-                  <Image
-                    width={32}
-                    height={32}
-                    className="w-6 h-6 rounded-full"
-                    src={tournament?.creator?.photoUrl || ""}
-                    alt="User photo"
-                  />
-                  <div>
-                    <span className="text-xs font-bold">
-                      {tournament?.creator?.displayName}
-                    </span>
+        <div className="flex items-center justify-between">
+          <div>
+            {canEditTournament && (
+              <div className="flex items-center gap-4">
+                {tournament.creator && (
+                  <div className="">
+                    <span className="text-sm">Создатель</span>
+                    <div className="mt-1 flex gap-2 items-center">
+                      <Image
+                        width={32}
+                        height={32}
+                        className="w-6 h-6 rounded-full"
+                        src={tournament?.creator?.photoUrl || ""}
+                        alt="User photo"
+                      />
+                      <div>
+                        <span className="text-xs font-bold">
+                          {tournament?.creator?.displayName}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-            {tournament?.createdAt && (
-              <div className="">
-                <span className="text-sm">Время создания</span>
-                <div className="mt-1 flex gap-2 items-center">
-                  {format(tournament.createdAt, "dd.MM.yyyy HH:mm")}
-                </div>
+                )}
+                {tournament?.createdAt && (
+                  <div className="">
+                    <span className="text-sm">Время создания</span>
+                    <div className="mt-1 flex gap-2 items-center">
+                      {format(tournament?.createdAt, "dd.MM.yyyy HH:mm")}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+          {canEditTournament && (
+            <div className="flex gap-3">
+              {tournament.status === "open" && (
+                <button
+                  onClick={handleCloseRegistration}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors cursor-pointer"
+                >
+                  <Album className="h-4 w-4" />
+                  Закрыть регистрацию
+                </button>
+              )}
+              {tournament.status === "about_to_start" && (
+                <button
+                  onClick={handleStartTournament}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trophy className="h-4 w-4" />
+                  Начать турнир
+                </button>
+              )}
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors cursor-pointer"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors cursor-pointer"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
 
-        <div className="relative">
+        <div className="relative mt-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
@@ -443,41 +481,6 @@ const TournamentPage = () => {
                 {isTeamMode ? "Командный" : "Одиночный"}
               </span>
             </div>
-
-            {canEditTournament && (
-              <div className="flex gap-3">
-                {tournament.status === "open" && (
-                  <button
-                    onClick={handleCloseRegistration}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Album className="h-4 w-4" />
-                    Закрыть регистрацию
-                  </button>
-                )}
-                {tournament.status === "about_to_start" && (
-                  <button
-                    onClick={handleStartTournament}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Trophy className="h-4 w-4" />
-                    Начать турнир
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowEditModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors cursor-pointer"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors cursor-pointer"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           <TournamentDurationDisplay
