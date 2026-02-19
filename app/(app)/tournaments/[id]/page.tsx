@@ -78,7 +78,7 @@ const TournamentPage = () => {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { tournaments } = useAppSelector((state) => state.tournaments);
-  const [isHasTeam, setHasTeam] = useState(false);
+  const [isTournamentLoading, setIsTournamentLoading] = useState(false);
   const tournamentid = params.id as string;
 
   const tournament = tournaments.find((t) => t.id === params.id);
@@ -108,7 +108,6 @@ const TournamentPage = () => {
   });
 
   const handleOpenEditModal = () => {
-    console.log("first");
     setShowEditModal(true);
   };
 
@@ -226,8 +225,6 @@ const TournamentPage = () => {
     }
   };
 
-  console.log(tournament);
-
   const handleCloseRegistration = async () => {
     try {
       if (tournament) {
@@ -305,18 +302,27 @@ const TournamentPage = () => {
   };
 
   const handleLoadTournament = async () => {
+    setIsTournamentLoading(true);
     const tournamentRef = doc(db, "tournaments", params.id as string);
     try {
-      const data = (await getDoc(tournamentRef)).data();
-      if (data) {
-        if (tournaments.length) {
-          dispatch(updateTournament(data as ITournament));
+      const tournamentDoc = await getDoc(tournamentRef);
+
+      const tournamentData = {
+        ...tournamentDoc.data(),
+        id: tournamentDoc.id,
+      };
+
+      if (tournamentData) {
+        if (tournaments.some((tournament) => tournament.id === tournamentid)) {
+          dispatch(updateTournament(tournamentData as ITournament));
         } else {
-          dispatch(setTournaments([data as ITournament]));
+          dispatch(setTournaments([tournamentData as ITournament]));
         }
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsTournamentLoading(false);
     }
   };
 
@@ -373,6 +379,15 @@ const TournamentPage = () => {
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
+  if (isTournamentLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] gap-2">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        Загрузка турнира...
+      </div>
+    );
+  }
+
   if (!tournament) {
     return <div className="p-8 text-center">Турнир не найден</div>;
   }
@@ -387,11 +402,10 @@ const TournamentPage = () => {
       ? tournament.teams.length === tournament.max_players
       : tournament.users.length === tournament.max_players;
 
-  const isUserHasTeam = tournament.teams.some((team) =>
+  console.log(tournament);
+  const isUserHasTeam = tournament.teams?.some((team) =>
     team.users?.some((user) => user.uid === currentUser.uid),
   );
-
-  console.log(showEditModal);
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">

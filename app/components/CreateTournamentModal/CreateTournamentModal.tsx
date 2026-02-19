@@ -177,7 +177,6 @@ const CreateTournamentModal = ({
           </label>
           <input
             {...inputProps}
-            onTimeUpdate={(value) => console.log(value)}
             className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
