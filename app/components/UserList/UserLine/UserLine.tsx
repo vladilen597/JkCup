@@ -154,18 +154,21 @@ const UserLine: React.FC<UserLineProps> = ({
             )}
           </>
         )}
-        {!hideDelete && onDeleteClick && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onDeleteClick();
-            }}
-          >
-            <X className="w-5 h-5 text-neutral-400" />
-          </button>
-        )}
+        {!hideDelete &&
+          currentUser.role === "superadmin" &&
+          currentUser.uid !== uid &&
+          onDeleteClick && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDeleteClick();
+              }}
+            >
+              <X className="w-5 h-5 text-neutral-400" />
+            </button>
+          )}
       </motion.li>
     </Link>
   );

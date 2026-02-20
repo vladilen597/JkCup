@@ -16,7 +16,7 @@ const page = () => {
     try {
       const tournamentsQuery = query(collection(db, "archivedTournaments"));
       const tournamentsSnap = await getDocs(tournamentsQuery);
-      console.log(tournamentsSnap);
+
       const enrichedTournaments = await Promise.all(
         tournamentsSnap.docs.map(async (tournamentDoc) => {
           const tournamentData = {

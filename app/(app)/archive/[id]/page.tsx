@@ -112,7 +112,7 @@ const TournamentPage = () => {
     const tournamentRef = doc(db, "archivedTournaments", params.id as string);
     try {
       const tournamentDoc = await getDoc(tournamentRef);
-      console.log(tournamentDoc);
+
       const tournamentData = {
         ...(tournamentDoc.data() as ITournament),
         id: tournamentDoc.id as string,
