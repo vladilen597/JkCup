@@ -7,12 +7,16 @@ interface UserListProps {
   showRoles?: boolean;
   users: any[];
   emptyMessage?: string;
+  hideDelete?: boolean;
+  handleClickDelete?: (userId: any) => void;
 }
 
 const UserList = ({
   showRoles,
   users,
   emptyMessage = "Пока нет участников",
+  hideDelete,
+  handleClickDelete,
 }: UserListProps) => {
   if (users.length === 0) {
     return (
@@ -26,7 +30,18 @@ const UserList = ({
   return (
     <ul className="flex flex-col gap-2">
       {users.map((user, i) => (
-        <UserLine key={user.id} {...user} index={i} showRoles={showRoles} />
+        <UserLine
+          key={user.uid}
+          {...user}
+          index={i}
+          showRoles={showRoles}
+          hideDelete={hideDelete}
+          onDeleteClick={() => {
+            if (handleClickDelete) {
+              handleClickDelete(user.uid);
+            } else undefined;
+          }}
+        />
       ))}
     </ul>
   );

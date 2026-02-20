@@ -1,19 +1,14 @@
+import JudgeAddItem from "./JudgeAddItem/JudgeAddItem";
 import { IUser } from "@/app/utils/store/userSlice";
-import UserAddItem from "./UserAddItem/UserAddItem";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-interface IUserAddListProps {
-  teamId: string;
+interface IJudgeAddListProps {
   occupiedUserIds: Set<string>;
   handleClose: () => void;
 }
 
-const UserAddList = ({
-  teamId,
-  occupiedUserIds,
-  handleClose,
-}: IUserAddListProps) => {
+const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
   const [users, setUsers] = useState<IUser[]>([]);
 
   const handleLoadUsers = async () => {
@@ -36,18 +31,13 @@ const UserAddList = ({
   return (
     <>
       <div className="mb-6">
-        <h3 className="text-xl font-bold">Добавить сокомандника</h3>
+        <h3 className="text-xl font-bold">Добавить судью</h3>
       </div>
 
       <ul className="flex flex-col gap-2 max-h-75 overflow-y-auto">
         {users.map((user, index) => {
           return (
-            <UserAddItem
-              user={user}
-              index={index}
-              teamId={teamId}
-              onClose={handleClose}
-            />
+            <JudgeAddItem user={user} index={index} onClose={handleClose} />
           );
         })}
       </ul>
@@ -55,4 +45,4 @@ const UserAddList = ({
   );
 };
 
-export default UserAddList;
+export default JudgeAddList;

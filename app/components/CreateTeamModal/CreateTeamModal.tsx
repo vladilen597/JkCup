@@ -5,6 +5,9 @@ import { ChangeEvent, useState } from "react";
 import { db } from "@/app/utils/firebase";
 import { addTournamentTeam } from "@/app/utils/store/tournamentsSlice";
 import { v4 as uuidv4 } from "uuid";
+import CustomButton, {
+  BUTTON_TYPES,
+} from "../Shared/CustomButton/CustomButton";
 
 interface ICreateTeamModalProps {
   tournamentId: string;
@@ -117,20 +120,16 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
         </div>
       )}
       <div className="flex justify-end gap-3 mt-4">
-        <button
+        <CustomButton
+          label="Отмена"
+          buttonType={BUTTON_TYPES.CANCEL}
           onClick={onClose}
-          className="px-5 py-2.5 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80"
-        >
-          Отмена
-        </button>
-        <button
+        />
+        <CustomButton
+          label="Создать"
+          isLoading={isLoading}
           onClick={handleCreateTeam}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg  disabled:opacity-60"
-        >
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Создать
-        </button>
+        />
       </div>
     </>
   );

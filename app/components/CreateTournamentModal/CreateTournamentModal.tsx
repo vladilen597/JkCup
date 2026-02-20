@@ -4,7 +4,10 @@ import { SubmitEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
-import { X, Plus, Clock, Users } from "lucide-react";
+import { X, Plus, Clock, Users, Trophy, Gamepad2 } from "lucide-react";
+import CustomButton, {
+  BUTTON_TYPES,
+} from "../Shared/CustomButton/CustomButton";
 
 export const selectTypeOptions = [
   {
@@ -68,7 +71,6 @@ const CreateTournamentModal = ({
     <motion.form
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-12 p-6 bg-card rounded-xl border border-border/50"
       onSubmit={onSubmit}
     >
       <h3 className="text-xl font-bold mb-4">Новый турнир</h3>
@@ -89,7 +91,10 @@ const CreateTournamentModal = ({
           </div>
 
           <div className="w-full">
-            <label className="block text-sm font-medium mb-1">Игра</label>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Gamepad2 className="w-4 h-4" />
+              Игра
+            </label>
             <input
               type="text"
               value={formData.game}
@@ -184,16 +189,16 @@ const CreateTournamentModal = ({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Награды</label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Trophy className="w-4 h-4" /> Награды
+            </label>
             {canAddMoreRewards && (
-              <button
-                type="button"
+              <CustomButton
+                label="Добавить награду"
+                className="bg-primary/10 text-primary hover:bg-primary/20"
+                icon={<Plus className="w-4 h-4" />}
                 onClick={handleAddReward}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Добавить награду
-              </button>
+              />
             )}
           </div>
 
@@ -260,6 +265,7 @@ const CreateTournamentModal = ({
           <label className="block text-sm font-medium mb-1">Дата начала</label>
           <input
             type="datetime-local"
+            required
             value={formData.start_date}
             onChange={(e) =>
               handleChange({ ...formData, start_date: e.target.value })
@@ -269,20 +275,13 @@ const CreateTournamentModal = ({
         </div>
       </div>
 
-      <div className="mt-6 flex gap-4">
-        <button
-          type="submit"
-          className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          Создать
-        </button>
-        <button
-          type="button"
+      <div className="mt-6 flex gap-2">
+        <CustomButton type="submit" label="Создать" />
+        <CustomButton
+          label="Отмена"
+          buttonType={BUTTON_TYPES.CANCEL}
           onClick={onClose}
-          className="px-6 py-2.5 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
-        >
-          Отмена
-        </button>
+        />
       </div>
     </motion.form>
   );

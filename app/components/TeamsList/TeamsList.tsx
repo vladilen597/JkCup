@@ -1,10 +1,11 @@
 import { ITeam } from "@/app/utils/store/tournamentsSlice";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import TeamItem from "./TeamItem/TeamItem";
-import { useState } from "react";
+import { IUser } from "@/app/utils/store/userSlice";
 
 interface TeamListProps {
   teams: ITeam[];
+  judges: IUser[];
   tournamentId: string;
   maxPlayersPerTeam: number;
   isLoading?: boolean;
@@ -14,6 +15,7 @@ interface TeamListProps {
 
 const TeamList = ({
   teams = [],
+  judges,
   tournament_status,
   maxPlayersPerTeam,
 }: TeamListProps) => {
@@ -22,7 +24,10 @@ const TeamList = ({
   const occupiedUserIds = new Set(
     teams.flatMap((team) => team.users?.map((user) => user.uid) || []),
   );
+  const isUserJudge = judges.some((judge) => judge.uid === currentUser.uid);
+
   const isUserHasTeam = occupiedUserIds.has(currentUser?.uid || "");
+  const isCurrentUserCanJoin = !isUserHasTeam && !isUserJudge;
 
   if (teams.length === 0) {
     return (
@@ -44,7 +49,7 @@ const TeamList = ({
             teams={teams}
             filled={filled}
             is_my_team={isMyTeam}
-            canJoin={!isUserHasTeam}
+            canJoin={isCurrentUserCanJoin}
             players_per_team={maxPlayersPerTeam}
             tournament_status={tournament_status}
             occupiedUserIds={occupiedUserIds}

@@ -1,7 +1,10 @@
 "use client";
 
 import CreateTournamentModal from "@/app/components/CreateTournamentModal/CreateTournamentModal";
+import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
+import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
+import Title from "@/app/components/Title/Title";
 import { db } from "@/app/utils/firebase";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import {
@@ -22,7 +25,8 @@ const page = () => {
   const { user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
-  const [showForm, setShowForm] = useState(false);
+  const [isCreateTournamentModalOpen, setIsCreateTournamentModalOpen] =
+    useState(false);
   const [formData, setFormData] = useState<any>({
     name: "",
     game: "",
@@ -36,7 +40,7 @@ const page = () => {
     max_teams: 6,
     players_per_team: 2,
     start_date: "",
-    rewards: [],
+    rewards: [{ id: uuidv4(), value: "" }],
     status: "open",
     duration: 0,
   });
@@ -99,6 +103,7 @@ const page = () => {
         status: "open",
         users: [],
         teams: [],
+        judges: [],
         createdAt: new Date().toString(),
         start_date: "",
       };
@@ -113,7 +118,7 @@ const page = () => {
       );
 
       setFormData(newTournament);
-      setShowForm(false);
+      setIsCreateTournamentModalOpen(false);
     } catch (err) {
       console.error(err);
       alert("Ошибка при создании");
@@ -121,7 +126,7 @@ const page = () => {
   };
 
   const handleCloseCreateTournamentModal = () => {
-    setShowForm(false);
+    setIsCreateTournamentModalOpen(false);
   };
 
   return (
@@ -132,24 +137,19 @@ const page = () => {
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
       >
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Trophy className="h-8 w-8 text-primary" />
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-                Турниры
-              </h1>
+              <Title title="Турниры" />
             </div>
 
             {canCreateTournament && (
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
-              >
-                <Plus className="h-5 w-5" />
-                Создать турнир
-              </button>
+              <CustomButton
+                icon={<Plus className="h-5 w-5" />}
+                label="Создать турнир"
+                onClick={() => setIsCreateTournamentModalOpen(true)}
+              />
             )}
           </div>
 
@@ -158,17 +158,6 @@ const page = () => {
           </p>
         </div>
       </motion.div>
-
-      {canCreateTournament && showForm && (
-        <CreateTournamentModal
-          formData={formData}
-          handleChange={setFormData}
-          handleChangeTournamentType={handleUpdateTournamentType}
-          onClose={handleCloseCreateTournamentModal}
-          onSubmit={handleCreateTournament}
-          handleAddReward={handleAddReward}
-        />
-      )}
 
       {tournaments?.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">
@@ -203,6 +192,21 @@ const page = () => {
             );
           })}
         </ul>
+      )}
+      {canCreateTournament && (
+        <CustomModal
+          isOpen={isCreateTournamentModalOpen}
+          onClose={handleCloseCreateTournamentModal}
+        >
+          <CreateTournamentModal
+            formData={formData}
+            handleChange={setFormData}
+            handleChangeTournamentType={handleUpdateTournamentType}
+            onClose={handleCloseCreateTournamentModal}
+            onSubmit={handleCreateTournament}
+            handleAddReward={handleAddReward}
+          />
+        </CustomModal>
       )}
     </main>
   );

@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 export interface ISelectOption {
@@ -62,6 +62,7 @@ const CustomSelect = ({
   options,
 }: ICustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLLabelElement>(null);
 
   const handleToggleIsOpen = (e: MouseEvent<HTMLLabelElement>) => {
     e.stopPropagation();
@@ -71,6 +72,7 @@ const CustomSelect = ({
 
   return (
     <motion.label
+      ref={containerRef}
       variants={containerVariants}
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}

@@ -16,6 +16,9 @@ export interface ITournament {
   status: string;
   teams: ITeam[];
   duration: number;
+  judges: IUser[];
+  winner_team: ITeam | null;
+  winner_user: IUser | null;
   rewards: { id: string; value: string }[];
   creator?: IUser;
   createdAt?: string;
@@ -91,6 +94,52 @@ const tournamentsSlice = createSlice({
         });
       }
     },
+    addJudge: (
+      state,
+      action: PayloadAction<{ tournamentId: string; user: IUser }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      tournament?.judges.push(action.payload.user);
+    },
+    removeJudge: (
+      state,
+      action: PayloadAction<{ tournamentId: string; userId: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      if (tournament) {
+        tournament.judges = tournament.judges.filter(
+          (judge) => judge.uid !== action.payload.userId,
+        );
+      }
+    },
+    selectWinnerTeam: (
+      state,
+      action: PayloadAction<{ team: ITeam; tournamentId: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      if (tournament) {
+        tournament.winner_team = action.payload.team;
+        tournament.status = "finished";
+      }
+    },
+    selectWinnerUser: (
+      state,
+      action: PayloadAction<{ user: IUser; tournamentId: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      if (tournament) {
+        tournament.winner_user = action.payload.user;
+        tournament.status = "finished";
+      }
+    },
     removeTeam: (
       state,
       action: PayloadAction<{ tournamentId: string; teamId: string }>,
@@ -102,6 +151,19 @@ const tournamentsSlice = createSlice({
       if (tournament) {
         tournament.teams = tournament.teams.filter(
           (team) => team.uid !== action.payload.teamId,
+        );
+      }
+    },
+    removeUserFromSingleTournament: (
+      state,
+      action: PayloadAction<{ tournamentId: string; userId: string }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+      if (tournament) {
+        tournament.users = tournament.users.filter(
+          (user) => user.uid !== action.payload.userId,
         );
       }
     },
@@ -177,6 +239,11 @@ export const {
   updateTournamentStatus,
   removeParticipant,
   removeTeamParticipant,
+  addJudge,
+  selectWinnerTeam,
+  selectWinnerUser,
+  removeUserFromSingleTournament,
+  removeJudge,
 } = tournamentsSlice.actions;
 
 export default tournamentsSlice.reducer;

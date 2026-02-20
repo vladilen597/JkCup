@@ -37,11 +37,11 @@ const ProfileDropdown = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8, scale: 0.95 }}
       transition={{ duration: 0.15 }}
-      className="absolute top-full right-0 mt-2 w-48 p-1.5 rounded-xl glass-panel neon-border z-50"
+      className="absolute top-full bg-primary-foreground right-0 mt-2 w-48 p-1.5 rounded-xl glass-panel neon-border z-50"
     >
       <Link
         href={"/users/" + userId}
-        onClick={onClose} // Закрываем при переходе
+        onClick={onClose}
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
       >
         <Settings className="h-4 w-4" />

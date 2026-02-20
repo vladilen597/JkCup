@@ -1,5 +1,6 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
+import CustomButton from "../Shared/CustomButton/CustomButton";
 
 interface IJoinTournamentButtonProps {
   isTeamMode: boolean;
@@ -35,29 +36,29 @@ const JoinTournamentButton = ({
 
   if (isTeamMode && !isFull && canCreateTeam) {
     return (
-      <button
-        onClick={handleOpenCreateTeamModal}
+      <CustomButton
+        label="Создать команду"
+        icon={<Users className="w-4 h-4" />}
+        isLoading={isLoading}
         disabled={isLoading}
-        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors bg-primary hover:bg-primary/90 text-primary-foreground`}
-      >
-        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-        Создать команду
-      </button>
+        onClick={handleOpenCreateTeamModal}
+      />
     );
   }
 
   if (!isTeamMode && !isFull) {
     return (
-      <button
-        onClick={handleJoinLeave}
+      <CustomButton
+        label={isJoinedSingleTournament ? "Покинуть" : "Вступить"}
+        className={
+          isJoinedSingleTournament
+            ? "bg-red-600 hover:bg-red-700 text-white"
+            : "bg-primary hover:bg-primary/90 text-primary-foreground"
+        }
+        isLoading={isLoading}
         disabled={isLoading}
-        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors
-                ${isJoinedSingleTournament ? "bg-red-600 hover:bg-red-700 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"}
-                disabled:opacity-60 disabled:cursor-not-allowed`}
-      >
-        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {isJoinedSingleTournament ? "Покинуть" : "Вступить"}
-      </button>
+        onClick={handleJoinLeave}
+      />
     );
   }
 };

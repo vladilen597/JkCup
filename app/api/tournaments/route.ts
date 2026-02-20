@@ -44,6 +44,9 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toString(),
       users: [],
       teams: [],
+      winner_team: null,
+      winner_user: null,
+      judges: [],
     };
 
     const docRef = await addDoc(collection(db, "tournaments"), newTournament);

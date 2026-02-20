@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 
 interface TournamentDurationDisplayProps {
   duration?: number;
+  status: string;
   startedAt?: string | Date | any;
 }
 
 const TournamentDurationDisplay = ({
   duration,
+  status,
   startedAt,
 }: TournamentDurationDisplayProps) => {
   const formatDuration = (ms: number) => {
@@ -44,15 +46,19 @@ const TournamentDurationDisplay = ({
       setRemainingMs(calculateRemaining());
     }, 1000);
 
+    if (timer && status === "in_progress") {
+      clearInterval(timer);
+    }
+
     return () => clearInterval(timer);
-  }, [startedAt, duration]);
+  }, [startedAt, duration, status]);
 
   if (!duration && !remainingMs) {
     return null;
   }
 
   return (
-    <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+    <div className="px-3 py-1.5 mt-2 flex items-center gap-2 text-sm bg-[#171a21] w-fit rounded-lg border border-neon! text-neon">
       <Clock className="h-4 w-4" />
       {startedAt ? (
         remainingMs > 0 ? (
@@ -65,13 +71,12 @@ const TournamentDurationDisplay = ({
         ) : (
           <span className="text-red-400">Турнир окончен</span>
         )
-      ) : (
+      ) : status !== "in_progress" ? (
         <>
-          Длительность:{" "}
-          <span className="font-mono text-foreground">
-            {formatDuration(duration || 0)}
-          </span>
+          <span className="font-mono">{formatDuration(duration || 0)}</span>
         </>
+      ) : (
+        ""
       )}
     </div>
   );

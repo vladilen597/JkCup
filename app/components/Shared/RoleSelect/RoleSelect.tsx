@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 export interface ISelectOption {
@@ -47,6 +47,7 @@ const RoleSelect = ({
   options,
 }: IRoleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLLabelElement>(null);
 
   const handleToggleIsOpen = (e: MouseEvent<HTMLLabelElement>) => {
     e.stopPropagation();
@@ -54,8 +55,32 @@ const RoleSelect = ({
     setIsOpen((prevState) => !prevState);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | Event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleOptionClick = (option: ISelectOption) => {
+    onChange(option);
+  };
+
   return (
     <motion.label
+      ref={containerRef}
       variants={containerVariants}
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
@@ -64,7 +89,7 @@ const RoleSelect = ({
       onClick={handleToggleIsOpen}
     >
       <div
-        className={`text-xs font-mono flex items-center gap-2 justify-end py-2 ${triggerClassName}`}
+        className={`text-xs font-mono flex items-center gap-2 justify-end py-2 cursor-pointer ${triggerClassName}`}
       >
         {value.label || "Не выбрано"}
         <motion.div
@@ -88,8 +113,8 @@ const RoleSelect = ({
             {options.map((option) => (
               <li
                 key={option.id}
-                className="p-2 px-4 hover:bg-primary-foreground"
-                onClick={() => onChange(option)}
+                className="p-2 px-4 hover:bg-primary-foreground cursor-pointer"
+                onClick={() => handleOptionClick(option)}
               >
                 {option.label}
               </li>

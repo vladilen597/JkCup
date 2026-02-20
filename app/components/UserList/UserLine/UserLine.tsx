@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import Link from "next/link";
@@ -8,7 +8,9 @@ import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import Discord from "../../Icons/Discord";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
-import RoleSelect from "../../Shared/RoleSelect/CustomSelect";
+import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
+import { X } from "lucide-react";
+import Image from "next/image";
 
 const roleSelectOptions = [
   {
@@ -27,24 +29,26 @@ interface UserLineProps {
   uid: string;
   displayName: string;
   photoUrl: string | null;
-  joinedAt?: any;
   status?: string;
   index?: number;
   discord: string;
   showRoles?: boolean;
   role: string;
+  hideDelete?: boolean;
+  onDeleteClick: () => void;
 }
 
 const UserLine: React.FC<UserLineProps> = ({
   uid,
   displayName,
   photoUrl,
-  joinedAt,
   status = "registered",
   index = 0,
   discord,
   role,
   showRoles,
+  hideDelete,
+  onDeleteClick,
 }) => {
   const [userRole, setUserRole] = useState<{
     id: number;
@@ -56,9 +60,6 @@ const UserLine: React.FC<UserLineProps> = ({
     label: "Пользователь",
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const joinedDate = joinedAt?.toDate?.()
-    ? joinedAt.toDate().toLocaleDateString()
-    : "—";
 
   const isCurrentUser = uid === currentUser.uid;
   const isSuperAdmin = currentUser.role === "superadmin";
@@ -99,7 +100,9 @@ const UserLine: React.FC<UserLineProps> = ({
         }`}
       >
         {photoUrl ? (
-          <img
+          <Image
+            width={40}
+            height={40}
             src={photoUrl}
             alt={displayName}
             className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
@@ -132,40 +135,6 @@ const UserLine: React.FC<UserLineProps> = ({
           )}
         </div>
 
-        {/* {showRoles && (
-          <>
-            {isSuperAdmin &&
-            currentUser.uid !== uid &&
-            role !== "superadmin" ? (
-              <select
-                className="text-xs font-mono outline-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                value={userRole}
-                onChange={handleUpdateRole}
-              >
-                <option className="bg-muted outline-0 text-right" value="user">
-                  Пользователь
-                </option>
-                <option
-                  className="bg-muted outline-0  text-right"
-                  value="admin"
-                >
-                  Админ
-                </option>
-              </select>
-            ) : (
-              <div
-                className={`text-right text-xs text-muted-foreground font-mono ${roleColors[role as keyof typeof roleColors]}`}
-              >
-                {roles[role as keyof typeof roles]}
-              </div>
-            )}
-          </>
-        )} */}
-
         {showRoles && (
           <>
             {isSuperAdmin &&
@@ -184,6 +153,18 @@ const UserLine: React.FC<UserLineProps> = ({
               </div>
             )}
           </>
+        )}
+        {!hideDelete && onDeleteClick && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDeleteClick();
+            }}
+          >
+            <X className="w-5 h-5 text-neutral-400" />
+          </button>
         )}
       </motion.li>
     </Link>

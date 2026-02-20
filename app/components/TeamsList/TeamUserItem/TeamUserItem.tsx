@@ -60,21 +60,23 @@ const TeamUserItem = ({
           )}
         </div>
       </div>
-      {isMyTeam && (isCurrentUser || isCurrentUserCreator) && canLeave && (
-        <button
-          onClick={onLeaveClick}
-          disabled={isLoading}
-          className="cursor-pointer"
-        >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-          ) : (
-            <div className="p-2 bg-red-600/80 rounded-sm">
-              <DoorOpen className="w-4 h-4" />
-            </div>
-          )}
-        </button>
-      )}
+      {isMyTeam &&
+        ((isCurrentUser && !isCurrentUserCreator && canLeave) || // Non-creator users can leave
+          (!isCurrentUser && isCurrentUserCreator && canLeave)) && ( // Creator can kick others
+          <button
+            onClick={onLeaveClick}
+            disabled={isLoading}
+            className="cursor-pointer"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+            ) : (
+              <div className="p-2 bg-red-600/80 rounded-sm">
+                <DoorOpen className="w-4 h-4" />
+              </div>
+            )}
+          </button>
+        )}
     </div>
   );
 };

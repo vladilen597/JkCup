@@ -11,12 +11,7 @@ import {
   Loader2,
   AlertCircle,
   User,
-  Edit,
-  Trash2,
   Trophy,
-  Clock,
-  Album,
-  Archive,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -27,18 +22,13 @@ import {
   deleteDoc,
   arrayUnion,
   getDoc,
-  arrayRemove,
-  addDoc,
-  collection,
 } from "firebase/firestore";
 import {
   addParticipant,
   ITournament,
   removeParticipant,
-  removeUserFromSingleTournament,
   setTournaments,
   updateTournament,
-  updateTournamentStatus,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
 import EditModal from "@/app/components/EditModal/EditModal";
@@ -52,9 +42,7 @@ import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import TournamentDurationDisplay from "@/app/components/Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
-import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import Title from "@/app/components/Title/Title";
-import SelectWinnerModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import Discord from "@/app/components/Icons/Discord";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
@@ -90,250 +78,47 @@ const TournamentPage = () => {
   const params = useParams();
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const { tournaments } = useAppSelector((state) => state.tournaments);
   const [isTournamentLoading, setIsTournamentLoading] = useState(false);
   const tournamentId = params.id as string;
-
-  const tournament = tournaments.find((t) => t.id === params.id);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
-  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState<IEditTournament>({
-    name: tournament?.name || "",
-    description: tournament?.description || "",
-    game: tournament?.game || "",
-    max_players: tournament?.max_players || 6,
-    max_teams: tournament?.max_teams || 6,
-    players_per_team: tournament?.players_per_team || 2,
-    start_date: tournament?.start_date
-      ? new Date(tournament.start_date).toISOString().slice(0, 16)
-      : "",
-    type: tournament?.type || {
-      id: 1,
-      value: "team",
-      label: "Командный",
+  const [tournament, setTournament] = useState<ITournament>({
+    id: "",
+    game: "",
+    description: "",
+    name: "",
+    users: [],
+    teams: [],
+    max_players: 0,
+    type: {
+      id: 2,
+      label: "Одиночный",
+      value: "single",
     },
-    rewards: tournament?.rewards || [],
-    duration: tournament?.duration || 0,
+    max_teams: 1,
+    players_per_team: 1,
+    status: "finished",
+    start_date: "",
+    duration: 0,
+    judges: [],
+    winner_team: null,
+    winner_user: null,
+    rewards: [],
   });
+
+  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const router = useRouter();
-
-  const handleOpenEditModal = () => {
-    setShowEditModal(true);
-  };
-
-  const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
-    setEditForm({ ...editForm, [event.target.name]: event.target.value });
-  };
-
-  const handleUpdateTextField = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setEditForm({ ...editForm, description: event?.target.value });
-  };
-
-  const handleUpdateTeamAmount = (value: number) => {
-    setEditForm({ ...editForm, players_per_team: value });
-  };
-
-  const handleUpdateStartDate = (value: string) => {
-    setEditForm({ ...editForm, start_date: value });
-  };
-
-  const handleOpenCreateTeamModal = () => {
-    setIsCreateTeamModalOpen(true);
-  };
-
-  const handleCloseCreateTeamModal = () => {
-    setIsCreateTeamModalOpen(false);
-  };
-
-  const canEdit =
-    currentUser?.role === "superadmin" || currentUser?.role === "admin";
-  const isJoined =
-    tournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
-
-  const handleJoinLeave = async () => {
-    if (!currentUser?.uid) {
-      setErrorMsg("Войдите в аккаунт");
-      return;
-    }
-
-    if (!tournament?.id) return;
-
-    setIsLoading(true);
-    setErrorMsg("");
-
-    const tournamentRef = doc(db, "tournaments", tournament.id);
-
-    try {
-      if (isJoined) {
-        await updateDoc(tournamentRef, {
-          ...tournament,
-          users: tournament.users.filter(
-            (user) => user.uid !== currentUser.uid,
-          ),
-        });
-
-        dispatch(
-          removeParticipant({
-            tournamentId: tournament.id,
-            userId: currentUser.uid,
-          }),
-        );
-      } else {
-        await updateDoc(tournamentRef, {
-          users: arrayUnion(currentUser),
-        });
-        dispatch(
-          addParticipant({
-            tournamentId: tournament.id,
-            participant: currentUser,
-          }),
-        );
-      }
-    } catch (err: any) {
-      console.error("Error:", err);
-      setErrorMsg("Не получилось обновить участие");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canEdit || !tournament?.id) return;
-
-    setIsLoading(true);
-    setErrorMsg("");
-
-    const tournamentRef = doc(db, "tournaments", tournament.id);
-
-    try {
-      await updateDoc(tournamentRef, {
-        name: editForm.name,
-        description: editForm.description,
-        game: editForm.game,
-        max_players: editForm.max_players,
-        max_teams: editForm.max_teams,
-        players_per_team: editForm.players_per_team,
-        start_date: editForm.start_date
-          ? new Date(editForm.start_date).toString()
-          : null,
-        rewards: editForm.rewards,
-        duration: editForm.duration,
-      });
-
-      const updatedTournaments = tournaments.map((t) =>
-        t.id === tournament.id ? { ...t, ...editForm } : t,
-      );
-      dispatch(setTournaments(updatedTournaments));
-
-      setShowEditModal(false);
-    } catch (error: any) {
-      console.log(error);
-      setErrorMsg("Не удалось обновить турнир");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCloseRegistration = async () => {
-    try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "about_to_start",
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "about_to_start",
-          }),
-        );
-      }
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    }
-  };
-
-  const handleStartTournament = async () => {
-    try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "in_progress",
-          startedAt: new Date().toString(),
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "in_progress",
-            startedAt: new Date().toString(),
-          }),
-        );
-      }
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    }
-  };
-
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setShowDeleteConfirm(false);
-  };
-
-  const handleChangeMaxTeamsOrPlayers = (value: number) => {
-    if (editForm.type.value === "team") {
-      setEditForm((prevState) => ({
-        ...prevState,
-        max_teams: value,
-      }));
-    } else {
-      setEditForm((prevState) => ({
-        ...prevState,
-        max_players: value,
-      }));
-    }
-  };
-
-  const handleChangeDuration = (value: number) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      duration: value,
-    }));
-  };
-
-  const handleUpdateTournamentType = (value: ISelectOption) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      type: value,
-    }));
-  };
 
   const handleLoadTournament = async () => {
     setIsTournamentLoading(true);
-    const tournamentRef = doc(db, "tournaments", params.id as string);
+    const tournamentRef = doc(db, "archivedTournaments", params.id as string);
     try {
       const tournamentDoc = await getDoc(tournamentRef);
-
+      console.log(tournamentDoc);
       const tournamentData = {
-        ...tournamentDoc.data(),
-        id: tournamentDoc.id,
+        ...(tournamentDoc.data() as ITournament),
+        id: tournamentDoc.id as string,
       };
 
-      if (tournamentData) {
-        if (tournaments.some((tournament) => tournament.id === tournamentId)) {
-          dispatch(updateTournament(tournamentData as ITournament));
-        } else {
-          dispatch(setTournaments([tournamentData as ITournament]));
-        }
-      }
+      setTournament(tournamentData);
     } catch (error) {
       console.log(error);
     } finally {
@@ -341,80 +126,9 @@ const TournamentPage = () => {
     }
   };
 
-  const handleRemoveUserFromTournament = async (userId: string) => {
-    try {
-      const userRef = doc(db, "users", userId);
-      const user = (await getDoc(userRef)).data();
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      updateDoc(tournamentRef, {
-        users: arrayRemove(user),
-      });
-      dispatch(removeUserFromSingleTournament({ tournamentId, userId }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleArhiveTournament = async () => {
-    try {
-      const tournamentDoc = doc(db, "tournaments", tournamentId);
-      await addDoc(collection(db, "archivedTournaments"), tournament);
-      await deleteDoc(tournamentDoc);
-
-      router.replace("/tournaments");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     handleLoadTournament();
   }, []);
-
-  const handleRewardChange = (index: number, value: string) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: prevState.rewards.map((reward, i) =>
-        i === index ? { ...reward, value } : reward,
-      ),
-    }));
-  };
-
-  const handleAddReward = () => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: [...prevState.rewards, { id: uuidv4(), value: "" }],
-    }));
-  };
-
-  const handleDeleteReward = (id: string) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: prevState.rewards.filter((reward) => reward.id !== id),
-    }));
-  };
-
-  const handleDelete = async () => {
-    if (!canEdit || !tournament?.id) return;
-
-    setIsLoading(true);
-    setErrorMsg("");
-
-    try {
-      await deleteDoc(doc(db, "tournaments", tournament.id));
-
-      dispatch(
-        setTournaments(tournaments.filter((t) => t.id !== tournament.id)),
-      );
-      router.replace("/tournaments");
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      setErrorMsg("Не удалось удалить турнир");
-    } finally {
-      setIsLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
 
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
@@ -505,50 +219,6 @@ const TournamentPage = () => {
               </div>
             )}
           </div>
-          {canEditTournament && (
-            <div className="flex gap-3">
-              {tournament.status === "open" && (
-                <CustomButton
-                  icon={<Album className="h-4 w-4" />}
-                  label="Закрыть регистрацию"
-                  onClick={handleCloseRegistration}
-                />
-              )}
-              {tournament.status === "about_to_start" && (
-                <CustomButton
-                  icon={<Trophy className="h-4 w-4" />}
-                  label="Начать турнир"
-                  onClick={handleStartTournament}
-                />
-              )}
-              {tournament.status === "in_progress" && (
-                <CustomButton
-                  icon={<Trophy className="h-4 w-4" />}
-                  label="Закончить и выбрать победителя"
-                  onClick={handleOpenSelectWinnerModal}
-                />
-              )}
-              {tournament.status === "finished" && (
-                <CustomButton
-                  icon={<Archive className="h-4 w-4" />}
-                  label="Архивировать"
-                  onClick={handleArhiveTournament}
-                />
-              )}
-              {tournament.status !== "finished" && (
-                <CustomButton
-                  icon={<Edit className="h-4 w-4 text-amber-600" />}
-                  className="py-1.5 px-2.5 bg-amber-600/20 hover:bg-amber-600/40 text-white border border-amber-600!"
-                  onClick={handleOpenEditModal}
-                />
-              )}
-              <CustomButton
-                icon={<Trash2 className="h-4 w-4 text-red-600" />}
-                className="py-1.5 px-2.5 bg-red-600/20 hover:bg-red-600/40 text-white border border-red-600!"
-                onClick={() => setShowDeleteConfirm(true)}
-              />
-            </div>
-          )}
         </div>
 
         <div className="relative mt-6">
@@ -762,32 +432,7 @@ const TournamentPage = () => {
             {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
             {isTeamMode ? tournament.max_teams : tournament.max_players})
           </h2>
-
-          {tournament.status === "open" && (
-            <JoinTournamentButton
-              isFull={isFull}
-              handleOpenCreateTeamModal={handleOpenCreateTeamModal}
-              handleJoinLeave={handleJoinLeave}
-              isTeamMode={isTeamMode}
-              isLoading={isLoading}
-              canCreateTeam={isUserCanCreateTeam}
-              isJoinedSingleTournament={
-                !isTeamMode
-                  ? tournament.users.some(
-                      (user) => user.uid === currentUser.uid,
-                    )
-                  : undefined
-              }
-            />
-          )}
         </div>
-
-        {errorMsg && (
-          <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-sm text-red-400">
-            <AlertCircle className="h-4 w-4" />
-            {errorMsg}
-          </div>
-        )}
 
         {isTeamMode ? (
           <TeamList
@@ -795,53 +440,13 @@ const TournamentPage = () => {
             judges={tournament.judges || []}
             tournamentId={tournament.id}
             maxPlayersPerTeam={tournament.players_per_team}
-            isLoading={isLoading}
+            isLoading={false}
             tournament_status={tournament.status}
           />
         ) : (
-          <UserList
-            users={tournament.users || []}
-            handleClickDelete={handleRemoveUserFromTournament}
-          />
+          <UserList hideDelete users={tournament.users || []} />
         )}
       </motion.section>
-
-      <CustomModal isOpen={showEditModal} onClose={handleCloseEditModal}>
-        <EditModal
-          {...editForm}
-          isLoading={isLoading}
-          onInputChange={handleUpdateEditField}
-          onTextareaChange={handleUpdateTextField}
-          onTeamAmountChange={handleUpdateTeamAmount}
-          onStartDateChange={handleUpdateStartDate}
-          onClose={handleCloseEditModal}
-          handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
-          handleChangeTournamentType={handleUpdateTournamentType}
-          handleRewardChange={handleRewardChange}
-          handleAddReward={handleAddReward}
-          handleDeleteReward={handleDeleteReward}
-          handleChangeDuration={handleChangeDuration}
-          onSubmit={handleEdit}
-        />
-      </CustomModal>
-
-      <CustomModal isOpen={showDeleteConfirm} onClose={handleCloseDeleteModal}>
-        <DeleteTournamentModal
-          isLoading={isLoading}
-          onClose={handleCloseDeleteModal}
-          onSubmit={handleDelete}
-        />
-      </CustomModal>
-
-      <CustomModal
-        isOpen={isCreateTeamModalOpen}
-        onClose={handleCloseCreateTeamModal}
-      >
-        <CreateTeamModal
-          tournamentId={tournament.id}
-          onClose={handleCloseCreateTeamModal}
-        />
-      </CustomModal>
 
       <CustomModal
         isOpen={isWinnerModalOpen}

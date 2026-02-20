@@ -3,10 +3,11 @@
 @import "tailwindcss";
 
 @import "tw-animate-css";
-
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
+@tailwind utilities;
 
 @theme {
   --radius-lg: 0.75rem;
@@ -209,6 +210,20 @@ h6 {
   box-shadow: var(--neon-shadow);
 }
 
+@layer utilities {
+  .icon-btn {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-lg border
+           transition-colors cursor-pointer;
+  }
+  .icon-btn.amber {
+    @apply bg-amber-600/20 border-amber-600/30 text-amber-400 hover:bg-amber-600/40;
+  }
+
+  .icon-btn.red {
+    @apply bg-red-600/20 border-red-600/30 text-red-400 hover:bg-red-600/40;
+  }
+}
+
 @utility neon-glow {
   box-shadow: var(--neon-shadow-strong);
 }
@@ -232,8 +247,17 @@ h6 {
   );
 }
 
-@utility glass-panel {
-  background: hsl(var(--card) / 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.5);
+::-webkit-scrollbar {
+  width: 3px !important;
+  height: 8px !important;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #139288 !important;
+  border-radius: 8px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0e6e66 !important;
 }

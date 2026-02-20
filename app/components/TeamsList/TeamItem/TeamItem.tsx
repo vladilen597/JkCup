@@ -15,6 +15,9 @@ import CustomModal from "../../Shared/CustomModal/CustomModal";
 import UserAddList from "./UserAddList/UserAddList";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useState } from "react";
+import CustomButton, {
+  BUTTON_TYPES,
+} from "../../Shared/CustomButton/CustomButton";
 
 interface ITeamItemProps extends ITeam {
   filled: number;
@@ -141,13 +144,12 @@ const TeamItem = ({
             {((creator_uid === currentUser.uid &&
               tournament_status === "open") ||
               isEnoughRole) && (
-              <button
-                type="button"
-                className="bg-red-500 p-1 rounded-sm text-white cursor-pointer"
+              <CustomButton
+                className="p-1 rounded-sm"
+                buttonType={BUTTON_TYPES.DANGER}
+                icon={<Trash2 className="w-4 h-4" />}
                 onClick={() => handleDeleteTeam(uid)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              />
             )}
           </div>
           <span className="text-sm text-gray-400">

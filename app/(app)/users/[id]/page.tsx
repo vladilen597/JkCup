@@ -102,7 +102,6 @@ const page = () => {
         transition={{ duration: 0.6 }}
         className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
       >
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">

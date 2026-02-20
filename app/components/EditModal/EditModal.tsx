@@ -8,6 +8,9 @@ import CustomSelect, {
 } from "../Shared/CustomSelect/CustomSelect";
 import { selectTypeOptions } from "../CreateTournamentModal/CreateTournamentModal";
 import { useDurationInput } from "react-duration-input";
+import CustomButton, {
+  BUTTON_TYPES,
+} from "../Shared/CustomButton/CustomButton";
 
 interface IEditModalProps {
   name: string;
@@ -237,21 +240,17 @@ const EditModal = ({
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
+          <CustomButton
+            label="Отмена"
+            buttonType={BUTTON_TYPES.CANCEL}
             onClick={onClose}
-            className="px-5 py-2.5 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
-          >
-            Отмена
-          </button>
-          <button
-            type="submit"
+          />
+          <CustomButton
+            label="Сохранить"
             disabled={isLoading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-60 transition-colors"
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Сохранить
-          </button>
+            isLoading={isLoading}
+            type="submit"
+          />
         </div>
       </form>
     </>

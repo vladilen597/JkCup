@@ -1,16 +1,24 @@
 "use client";
 
+import DeleteUserModalContent from "@/app/components/DeleteUserModalContent/DeleteUserModalContent";
+import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import UserList from "@/app/components/UserList/UserList";
+import { IUser } from "@/app/utils/store/userSlice";
 import { Users, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { IUser } from "@/app/utils/store/userSlice";
+import Title from "@/app/components/Title/Title";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState("");
+
+  const handleCloseModal = () => {
+    setUserId("");
+  };
 
   const handleLoadUsers = async () => {
     try {
@@ -56,13 +64,10 @@ const UsersPage = () => {
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
       >
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <Users className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-              Пользователи
-            </h1>
+            <Title title="Пользователи" />
           </div>
           <p className="text-muted-foreground max-w-2xl text-lg">
             Все зарегистрированные участники платформы. Найдите друзей,
@@ -99,8 +104,17 @@ const UsersPage = () => {
           users={users}
           showRoles
           emptyMessage="Пока нет зарегистрированных пользователей"
+          handleClickDelete={setUserId}
         />
       </motion.section>
+
+      <CustomModal isOpen={!!userId} onClose={handleCloseModal}>
+        <DeleteUserModalContent
+          userId={userId}
+          onClose={handleCloseModal}
+          onSubmit={handleLoadUsers}
+        />
+      </CustomModal>
     </main>
   );
 };
