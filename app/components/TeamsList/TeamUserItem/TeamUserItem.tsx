@@ -61,8 +61,8 @@ const TeamUserItem = ({
         </div>
       </div>
       {isMyTeam &&
-        ((isCurrentUser && !isCurrentUserCreator && canLeave) || // Non-creator users can leave
-          (!isCurrentUser && isCurrentUserCreator && canLeave)) && ( // Creator can kick others
+        ((isCurrentUser && !isCurrentUserCreator && canLeave) ||
+          (!isCurrentUser && isCurrentUserCreator && canLeave)) && (
           <button
             onClick={onLeaveClick}
             disabled={isLoading}

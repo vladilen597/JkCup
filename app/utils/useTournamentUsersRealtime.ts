@@ -10,25 +10,8 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "./firebase";
-
-// Type definitions
-export interface User {
-  uid: string;
-  displayName?: string;
-  email?: string;
-  [key: string]: any;
-}
-
-export interface Tournament {
-  id: string;
-  name: string;
-  title?: string;
-  users: User[];
-  joinedUsers?: User[];
-  createdAt?: Date;
-  status?: "active" | "completed" | "upcoming";
-  [key: string]: any;
-}
+import { ITeam } from "./store/tournamentsSlice";
+import { IUser } from "./store/userSlice";
 
 export interface UseTournamentUsersOptions {
   onlyActive?: boolean;
@@ -36,6 +19,7 @@ export interface UseTournamentUsersOptions {
 
 export interface UseTournamentUsersReturn {
   totalJoinedUsers: number;
+  totalTeams: number;
   loading: boolean;
   error: string | null;
   refresh: () => void;
@@ -47,6 +31,7 @@ const useTournamentUsersRealtime = (
   const { onlyActive = false } = options;
 
   const [totalJoinedUsers, setTotalJoinedUsers] = useState<number>(0);
+  const [totalTeams, setTotalTeams] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,16 +39,21 @@ const useTournamentUsersRealtime = (
     (snapshot: QuerySnapshot<DocumentData>) => {
       try {
         let totalUsers = 0;
+        let totalTeams = 0;
 
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
 
-          // Get users array (handling different field names)
-          const users = (data.users || data.joinedUsers || []) as User[];
+          const users = (data.users || data.joinedUsers || []) as IUser[];
+          data.teams.forEach((team: ITeam) => {
+            totalUsers += team.users.length;
+          });
           totalUsers += users.length;
+          totalTeams += data.teams.length;
         });
 
         setTotalJoinedUsers(totalUsers);
+        setTotalTeams(totalTeams);
         setError(null);
       } catch (err) {
         if (err instanceof Error) {
@@ -83,14 +73,12 @@ const useTournamentUsersRealtime = (
 
     const tournamentsRef = collection(db, "tournaments");
 
-    // Build query constraints
     const constraints: QueryConstraint[] = [];
 
     if (onlyActive) {
       constraints.push(where("status", "==", "active"));
     }
 
-    // Create the query
     const q =
       constraints.length > 0
         ? query(tournamentsRef, ...constraints)
@@ -116,7 +104,7 @@ const useTournamentUsersRealtime = (
     setError(null);
   }, []);
 
-  return { totalJoinedUsers, loading, error, refresh };
+  return { totalJoinedUsers, totalTeams, loading, error, refresh };
 };
 
 export default useTournamentUsersRealtime;
