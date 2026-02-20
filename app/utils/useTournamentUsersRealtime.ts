@@ -1,3 +1,4 @@
+// hooks/useTournamentUsersRealtime.ts
 import { useState, useEffect, useCallback } from "react";
 import {
   collection,
@@ -10,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+// Type definitions
 export interface User {
   uid: string;
   displayName?: string;
@@ -28,25 +30,12 @@ export interface Tournament {
   [key: string]: any;
 }
 
-export interface TournamentStats {
-  totalJoinedUsers: number;
-}
-
-export interface TournamentDetail {
-  id: string;
-  name: string;
-  userCount: number;
-  users: User[];
-}
-
 export interface UseTournamentUsersOptions {
   onlyActive?: boolean;
-  minUsers?: number;
-  includeEmpty?: boolean;
 }
 
 export interface UseTournamentUsersReturn {
-  stats: TournamentStats | null;
+  totalJoinedUsers: number;
   loading: boolean;
   error: string | null;
   refresh: () => void;
@@ -55,9 +44,9 @@ export interface UseTournamentUsersReturn {
 const useTournamentUsersRealtime = (
   options: UseTournamentUsersOptions = {},
 ): UseTournamentUsersReturn => {
-  const { onlyActive = false, minUsers = 0, includeEmpty = true } = options;
+  const { onlyActive = false } = options;
 
-  const [stats, setStats] = useState<TournamentStats | null>(null);
+  const [totalJoinedUsers, setTotalJoinedUsers] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,18 +58,12 @@ const useTournamentUsersRealtime = (
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
 
+          // Get users array (handling different field names)
           const users = (data.users || data.joinedUsers || []) as User[];
-          const userCount = users.length;
-
-          if (userCount < minUsers) return;
-          if (!includeEmpty && userCount === 0) return;
+          totalUsers += users.length;
         });
 
-        const tournamentStats: TournamentStats = {
-          totalJoinedUsers: totalUsers,
-        };
-
-        setStats(tournamentStats);
+        setTotalJoinedUsers(totalUsers);
         setError(null);
       } catch (err) {
         if (err instanceof Error) {
@@ -92,7 +75,7 @@ const useTournamentUsersRealtime = (
         setLoading(false);
       }
     },
-    [minUsers, includeEmpty],
+    [],
   );
 
   useEffect(() => {
@@ -100,12 +83,14 @@ const useTournamentUsersRealtime = (
 
     const tournamentsRef = collection(db, "tournaments");
 
+    // Build query constraints
     const constraints: QueryConstraint[] = [];
 
     if (onlyActive) {
       constraints.push(where("status", "==", "active"));
     }
 
+    // Create the query
     const q =
       constraints.length > 0
         ? query(tournamentsRef, ...constraints)
@@ -131,7 +116,7 @@ const useTournamentUsersRealtime = (
     setError(null);
   }, []);
 
-  return { stats, loading, error, refresh };
+  return { totalJoinedUsers, loading, error, refresh };
 };
 
 export default useTournamentUsersRealtime;
