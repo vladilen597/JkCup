@@ -5,6 +5,7 @@ import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 import Title from "@/app/components/Title/Title";
+import TournamentStats from "@/app/components/TournamentStats/TournamentStats";
 import { db } from "@/app/utils/firebase";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import {
@@ -156,6 +157,9 @@ const page = () => {
           <p className="text-muted-foreground max-w-2xl text-lg">
             Следите и участвуйте в турнирах
           </p>
+        </div>
+        <div className="mt-8">
+          <TournamentStats />
         </div>
       </motion.div>
 
