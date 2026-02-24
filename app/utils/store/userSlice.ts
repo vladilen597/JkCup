@@ -8,6 +8,8 @@ export interface IUser {
   discord: string;
   createdAt?: string;
   lastSignIn?: string;
+  steamLink?: string;
+  steamDisplayName?: string;
   role: "user" | "admin" | "superadmin";
 }
 
@@ -19,6 +21,8 @@ const initialState: { user: IUser } = {
     email: "",
     discord: "",
     role: "user",
+    steamLink: "",
+    steamDisplayName: "",
   },
 };
 

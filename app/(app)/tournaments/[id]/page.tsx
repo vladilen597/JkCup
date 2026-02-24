@@ -30,7 +30,6 @@ import {
   arrayRemove,
   addDoc,
   collection,
-  onSnapshot,
 } from "firebase/firestore";
 import {
   addParticipant,
@@ -55,9 +54,10 @@ import TournamentDurationDisplay from "@/app/components/Shared/TournamentDuratio
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import Title from "@/app/components/Title/Title";
+import SelectWinnerModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
+import Discord from "@/app/components/Icons/Discord";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
-import Discord from "@/app/components/Icons/Discord";
 
 export const statuses = {
   open: "Открыт",
@@ -91,100 +91,36 @@ const TournamentPage = () => {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { tournaments } = useAppSelector((state) => state.tournaments);
-
-  const [realtimeTournament, setRealtimeTournament] =
-    useState<ITournament | null>(null);
   const [isTournamentLoading, setIsTournamentLoading] = useState(false);
+  const tournamentId = params.id as string;
+
+  const tournament = tournaments.find((t) => t.id === params.id);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
-
-  const tournamentId = params.id as string;
-  const router = useRouter();
-
-  // Get the tournament to display (realtime if available, otherwise from Redux)
-  const displayTournament =
-    realtimeTournament || tournaments.find((t) => t.id === tournamentId);
-
   const [editForm, setEditForm] = useState<IEditTournament>({
-    name: displayTournament?.name || "",
-    description: displayTournament?.description || "",
-    game: displayTournament?.game || "",
-    max_players: displayTournament?.max_players || 6,
-    max_teams: displayTournament?.max_teams || 6,
-    players_per_team: displayTournament?.players_per_team || 2,
-    start_date: displayTournament?.start_date
-      ? new Date(displayTournament.start_date).toISOString().slice(0, 16)
+    name: tournament?.name || "",
+    description: tournament?.description || "",
+    game: tournament?.game || "",
+    max_players: tournament?.max_players || 6,
+    max_teams: tournament?.max_teams || 6,
+    players_per_team: tournament?.players_per_team || 2,
+    start_date: tournament?.start_date
+      ? new Date(tournament.start_date).toISOString().slice(0, 16)
       : "",
-    type: displayTournament?.type || {
+    type: tournament?.type || {
       id: 1,
       value: "team",
       label: "Командный",
     },
-    rewards: displayTournament?.rewards || [],
-    duration: displayTournament?.duration || 0,
+    rewards: tournament?.rewards || [],
+    duration: tournament?.duration || 0,
   });
-
-  // Update edit form when displayTournament changes
-  useEffect(() => {
-    if (displayTournament) {
-      setEditForm({
-        name: displayTournament.name || "",
-        description: displayTournament.description || "",
-        game: displayTournament.game || "",
-        max_players: displayTournament.max_players || 6,
-        max_teams: displayTournament.max_teams || 6,
-        players_per_team: displayTournament.players_per_team || 2,
-        start_date: displayTournament.start_date
-          ? new Date(displayTournament.start_date).toISOString().slice(0, 16)
-          : "",
-        type: displayTournament.type || {
-          id: 1,
-          value: "team",
-          label: "Командный",
-        },
-        rewards: displayTournament.rewards || [],
-        duration: displayTournament.duration || 0,
-      });
-    }
-  }, [displayTournament]);
-
-  // REAL-TIME LISTENER for this specific tournament
-  useEffect(() => {
-    if (!tournamentId) return;
-
-    const tournamentRef = doc(db, "tournaments", tournamentId);
-
-    const unsubscribe = onSnapshot(
-      tournamentRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const updatedTournament = {
-            ...docSnapshot.data(),
-            id: docSnapshot.id,
-          } as ITournament;
-
-          setRealtimeTournament(updatedTournament);
-
-          // Also update Redux store for consistency
-          if (tournaments.some((t) => t.id === tournamentId)) {
-            dispatch(updateTournament(updatedTournament));
-          } else {
-            dispatch(setTournaments([updatedTournament]));
-          }
-        }
-      },
-      (error) => {
-        console.error("Error in tournament real-time listener:", error);
-        setErrorMsg("Ошибка при загрузке обновлений турнира");
-      },
-    );
-
-    return () => unsubscribe();
-  }, [tournamentId, dispatch, tournaments]);
+  const router = useRouter();
 
   const handleOpenEditModal = () => {
     setShowEditModal(true);
@@ -216,9 +152,8 @@ const TournamentPage = () => {
 
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
-
   const isJoined =
-    displayTournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
+    tournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
 
   const handleJoinLeave = async () => {
     if (!currentUser?.uid) {
@@ -226,28 +161,38 @@ const TournamentPage = () => {
       return;
     }
 
-    if (!displayTournament?.id) return;
+    if (!tournament?.id) return;
 
     setIsLoading(true);
     setErrorMsg("");
 
-    const tournamentRef = doc(db, "tournaments", displayTournament.id);
+    const tournamentRef = doc(db, "tournaments", tournament.id);
 
     try {
       if (isJoined) {
-        // Remove user
         await updateDoc(tournamentRef, {
-          users: displayTournament.users.filter(
+          ...tournament,
+          users: tournament.users.filter(
             (user) => user.uid !== currentUser.uid,
           ),
         });
-        // No need to dispatch - real-time update will handle it
+
+        dispatch(
+          removeParticipant({
+            tournamentId: tournament.id,
+            userId: currentUser.uid,
+          }),
+        );
       } else {
-        // Add user
         await updateDoc(tournamentRef, {
           users: arrayUnion(currentUser),
         });
-        // No need to dispatch - real-time update will handle it
+        dispatch(
+          addParticipant({
+            tournamentId: tournament.id,
+            participant: currentUser,
+          }),
+        );
       }
     } catch (err: any) {
       console.error("Error:", err);
@@ -259,12 +204,12 @@ const TournamentPage = () => {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canEdit || !displayTournament?.id) return;
+    if (!canEdit || !tournament?.id) return;
 
     setIsLoading(true);
     setErrorMsg("");
 
-    const tournamentRef = doc(db, "tournaments", displayTournament.id);
+    const tournamentRef = doc(db, "tournaments", tournament.id);
 
     try {
       await updateDoc(tournamentRef, {
@@ -281,7 +226,11 @@ const TournamentPage = () => {
         duration: editForm.duration,
       });
 
-      // No need to manually update Redux - real-time listener will handle it
+      const updatedTournaments = tournaments.map((t) =>
+        t.id === tournament.id ? { ...t, ...editForm } : t,
+      );
+      dispatch(setTournaments(updatedTournaments));
+
       setShowEditModal(false);
     } catch (error: any) {
       console.log(error);
@@ -293,30 +242,41 @@ const TournamentPage = () => {
 
   const handleCloseRegistration = async () => {
     try {
-      if (displayTournament) {
-        const tournamentRef = doc(db, "tournaments", displayTournament.id);
-        await updateDoc(tournamentRef, {
+      if (tournament) {
+        const tournamentRef = doc(db, "tournaments", tournament.id);
+        updateDoc(tournamentRef, {
           status: "about_to_start",
         });
-        // Real-time listener will update UI
+        dispatch(
+          updateTournamentStatus({
+            tournamentId: tournament.id,
+            status: "about_to_start",
+          }),
+        );
       }
     } catch (err) {
-      console.error("Failed to update tournament:", err);
+      console.error("Failed to load tournaments:", err);
     }
   };
 
   const handleStartTournament = async () => {
     try {
-      if (displayTournament) {
-        const tournamentRef = doc(db, "tournaments", displayTournament.id);
-        await updateDoc(tournamentRef, {
+      if (tournament) {
+        const tournamentRef = doc(db, "tournaments", tournament.id);
+        updateDoc(tournamentRef, {
           status: "in_progress",
           startedAt: new Date().toString(),
         });
-        // Real-time listener will update UI
+        dispatch(
+          updateTournamentStatus({
+            tournamentId: tournament.id,
+            status: "in_progress",
+            startedAt: new Date().toString(),
+          }),
+        );
       }
     } catch (err) {
-      console.error("Failed to start tournament:", err);
+      console.error("Failed to load tournaments:", err);
     }
   };
 
@@ -361,6 +321,7 @@ const TournamentPage = () => {
     const tournamentRef = doc(db, "tournaments", params.id as string);
     try {
       const tournamentDoc = await getDoc(tournamentRef);
+
       const tournamentData = {
         ...tournamentDoc.data(),
         id: tournamentDoc.id,
@@ -385,20 +346,21 @@ const TournamentPage = () => {
       const userRef = doc(db, "users", userId);
       const user = (await getDoc(userRef)).data();
       const tournamentRef = doc(db, "tournaments", tournamentId);
-      await updateDoc(tournamentRef, {
+      updateDoc(tournamentRef, {
         users: arrayRemove(user),
       });
-      // Real-time listener will update UI
+      dispatch(removeUserFromSingleTournament({ tournamentId, userId }));
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleArchiveTournament = async () => {
+  const handleArhiveTournament = async () => {
     try {
       const tournamentDoc = doc(db, "tournaments", tournamentId);
-      await addDoc(collection(db, "archivedTournaments"), displayTournament);
+      await addDoc(collection(db, "archivedTournaments"), tournament);
       await deleteDoc(tournamentDoc);
+
       router.replace("/tournaments");
     } catch (error) {
       console.log(error);
@@ -433,13 +395,17 @@ const TournamentPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!canEdit || !displayTournament?.id) return;
+    if (!canEdit || !tournament?.id) return;
 
     setIsLoading(true);
     setErrorMsg("");
 
     try {
-      await deleteDoc(doc(db, "tournaments", displayTournament.id));
+      await deleteDoc(doc(db, "tournaments", tournament.id));
+
+      dispatch(
+        setTournaments(tournaments.filter((t) => t.id !== tournament.id)),
+      );
       router.replace("/tournaments");
     } catch (err: any) {
       console.error("Delete error:", err);
@@ -453,15 +419,7 @@ const TournamentPage = () => {
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
-  const handleOpenSelectWinnerModal = () => {
-    setIsWinnerModalOpen(true);
-  };
-
-  const handleCloseSelectWinnerModal = () => {
-    setIsWinnerModalOpen(false);
-  };
-
-  if (isTournamentLoading && !displayTournament) {
+  if (isTournamentLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -470,29 +428,36 @@ const TournamentPage = () => {
     );
   }
 
-  if (!displayTournament) {
+  if (!tournament) {
     return <div className="p-8 text-center">Турнир не найден</div>;
   }
 
-  const isTeamMode = displayTournament.type.value === "team";
+  const isTeamMode = tournament.type.value === "team";
   const filledSlots = isTeamMode
-    ? displayTournament.teams?.length || 0
-    : displayTournament.users?.length || 0;
+    ? tournament.teams?.length || 0
+    : tournament.users?.length || 0;
 
-  const isFull = isTeamMode
-    ? displayTournament.teams?.length === displayTournament.max_teams
-    : displayTournament.users?.length === displayTournament.max_players;
+  const isFull =
+    tournament.players_per_team > 1
+      ? tournament.teams.length === tournament.max_players
+      : tournament.users.length === tournament.max_players;
 
-  const isCurrentUserJudge =
-    displayTournament.judges?.some((judge) => judge.uid === currentUser?.uid) ||
-    false;
-
-  const isUserHasTeam =
-    displayTournament.teams?.some((team) =>
-      team.users?.some((user) => user.uid === currentUser?.uid),
-    ) || false;
+  const isCurrentUserJudge = tournament.judges.some(
+    (judge) => judge.uid === currentUser.uid,
+  );
+  const isUserHasTeam = tournament.teams?.some((team) =>
+    team.users?.some((user) => user.uid === currentUser.uid),
+  );
 
   const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
+
+  const handleOpenSelectWinnerModal = () => {
+    setIsWinnerModalOpen(true);
+  };
+
+  const handleCloseSelectWinnerModal = () => {
+    setIsWinnerModalOpen(false);
+  };
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
@@ -510,7 +475,7 @@ const TournamentPage = () => {
           <div>
             {canEditTournament && (
               <div className="flex items-center gap-4">
-                {displayTournament.creator && (
+                {tournament.creator && (
                   <div className="">
                     <span className="text-sm">Создатель</span>
                     <div className="mt-1 flex gap-2 items-center">
@@ -518,22 +483,22 @@ const TournamentPage = () => {
                         width={32}
                         height={32}
                         className="w-6 h-6 rounded-full"
-                        src={displayTournament?.creator?.photoUrl || ""}
+                        src={tournament?.creator?.photoUrl || ""}
                         alt="User photo"
                       />
                       <div>
                         <span className="text-xs font-bold">
-                          {displayTournament?.creator?.displayName}
+                          {tournament?.creator?.displayName}
                         </span>
                       </div>
                     </div>
                   </div>
                 )}
-                {displayTournament?.createdAt && (
+                {tournament?.createdAt && (
                   <div className="">
                     <span className="text-sm">Время создания</span>
                     <div className="mt-1 flex gap-2 items-center">
-                      {format(displayTournament?.createdAt, "dd.MM.yyyy HH:mm")}
+                      {format(tournament?.createdAt, "dd.MM.yyyy HH:mm")}
                     </div>
                   </div>
                 )}
@@ -542,35 +507,35 @@ const TournamentPage = () => {
           </div>
           {canEditTournament && (
             <div className="flex gap-3">
-              {displayTournament.status === "open" && (
+              {tournament.status === "open" && (
                 <CustomButton
                   icon={<Album className="h-4 w-4" />}
                   label="Закрыть регистрацию"
                   onClick={handleCloseRegistration}
                 />
               )}
-              {displayTournament.status === "about_to_start" && (
+              {tournament.status === "about_to_start" && (
                 <CustomButton
                   icon={<Trophy className="h-4 w-4" />}
                   label="Начать турнир"
                   onClick={handleStartTournament}
                 />
               )}
-              {displayTournament.status === "in_progress" && (
+              {tournament.status === "in_progress" && (
                 <CustomButton
                   icon={<Trophy className="h-4 w-4" />}
                   label="Закончить и выбрать победителя"
                   onClick={handleOpenSelectWinnerModal}
                 />
               )}
-              {displayTournament.status === "finished" && (
+              {tournament.status === "finished" && (
                 <CustomButton
                   icon={<Archive className="h-4 w-4" />}
                   label="Архивировать"
-                  onClick={handleArchiveTournament}
+                  onClick={handleArhiveTournament}
                 />
               )}
-              {displayTournament.status !== "finished" && (
+              {tournament.status !== "finished" && (
                 <CustomButton
                   icon={<Edit className="h-4 w-4 text-amber-600" />}
                   className="py-1.5 px-2.5 bg-amber-600/20 hover:bg-amber-600/40 text-white border border-amber-600!"
@@ -590,7 +555,7 @@ const TournamentPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-                {statuses[displayTournament.status as keyof typeof statuses]}
+                {statuses[tournament.status as keyof typeof statuses]}
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 {isTeamMode ? "Командный" : "Одиночный"}
@@ -598,21 +563,21 @@ const TournamentPage = () => {
             </div>
           </div>
 
-          <Title title={displayTournament.name} className="mt-2" />
+          <Title title={tournament.name} className="mt-2" />
           <TournamentDurationDisplay
-            duration={displayTournament.duration}
-            startedAt={displayTournament.startedAt}
-            status={displayTournament.status}
+            duration={tournament.duration}
+            startedAt={tournament.startedAt}
+            status={tournament.status}
           />
           <p className="mt-2 text-muted-foreground max-w-2xl leading-relaxed">
-            {displayTournament.description}
+            {tournament.description}
           </p>
 
           <div className="mt-2">
             <span className="block font-bold">Награды</span>
-            {!!displayTournament.rewards?.length && (
+            {!!tournament.rewards?.length && (
               <ul className="mt-2">
-                {displayTournament.rewards?.map((reward, index) => (
+                {tournament.rewards?.map((reward, index) => (
                   <div className="flex items-center gap-1" key={reward.id}>
                     <span className="text-xs gap-2 w-4 text-center">
                       {trophyIndexes[
@@ -630,7 +595,7 @@ const TournamentPage = () => {
         </div>
       </motion.div>
 
-      {displayTournament.status === "finished" && (
+      {tournament.status === "finished" && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -645,10 +610,10 @@ const TournamentPage = () => {
           {isTeamMode ? (
             <div className="mt-8">
               <span className="text-xl font-bold flex items-center gap-2">
-                {displayTournament.winner_team?.name}
+                {tournament.winner_team?.name}
               </span>
               <ul className="mt-2">
-                {displayTournament.winner_team?.users.map((user) => (
+                {tournament.winner_team?.users.map((user) => (
                   <li key={user.uid} className="flex items-center gap-2">
                     <Image
                       className="w-10 h-10 rounded-full"
@@ -673,24 +638,24 @@ const TournamentPage = () => {
           ) : (
             <div className="mt-8">
               <div
-                key={displayTournament.winner_user?.uid}
+                key={tournament.winner_user?.uid}
                 className="flex items-center gap-2"
               >
                 <Image
                   className="w-10 h-10 rounded-full"
-                  src={displayTournament.winner_user?.photoUrl || ""}
+                  src={tournament.winner_user?.photoUrl || ""}
                   width={40}
                   height={40}
                   alt="User image"
                 />
                 <div>
                   <span className="font-semibold text-foreground truncate leading-5 text-sm">
-                    {displayTournament.winner_user?.displayName}
+                    {tournament.winner_user?.displayName}
                   </span>
-                  {displayTournament.winner_user?.discord && (
+                  {tournament.winner_user?.discord && (
                     <span className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
                       <Discord className="h-4 w-4" />
-                      {displayTournament.winner_user?.discord}
+                      {tournament.winner_user?.discord}
                     </span>
                   )}
                 </div>
@@ -711,39 +676,34 @@ const TournamentPage = () => {
           label="Формат"
           value={
             isTeamMode
-              ? `${displayTournament.players_per_team}v${displayTournament.players_per_team}`
+              ? `${tournament.players_per_team}v${tournament.players_per_team}`
               : "1v1"
           }
         />
         <StatCard
           icon={<Hash className="h-4 w-4" />}
           label={isTeamMode ? "Команд" : "Игроков"}
-          value={`${filledSlots} / ${isTeamMode ? displayTournament.max_teams : displayTournament.max_players}`}
+          value={`${filledSlots} / ${isTeamMode ? tournament.max_teams : tournament.max_players}`}
         />
         <StatCard
           icon={<Calendar className="h-4 w-4" />}
           label="Начало"
           value={
-            displayTournament.start_date
-              ? format(
-                  new Date(displayTournament.start_date),
-                  "dd/MM/yyyy HH:mm",
-                )
+            tournament.start_date
+              ? format(new Date(tournament.start_date), "dd/MM/yyyy HH:mm")
               : "Скоро"
           }
         />
         <StatCard
           icon={<User className="h-4 w-4" />}
           label="Статус"
-          value={
-            statuses[displayTournament.status as keyof typeof statuses] || "—"
-          }
+          value={statuses[tournament.status as keyof typeof statuses] || "—"}
           highlight
         />
       </motion.div>
 
-      {(displayTournament.status === "open" ||
-        displayTournament.status === "about_to_start") && (
+      {(tournament.status === "open" ||
+        tournament.status === "about_to_start") && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -757,12 +717,8 @@ const TournamentPage = () => {
             <span className="text-xs font-mono text-primary">
               {Math.round(
                 isTeamMode
-                  ? (displayTournament.teams?.length /
-                      displayTournament.max_teams) *
-                      100
-                  : (displayTournament.users?.length /
-                      displayTournament.max_players) *
-                      100,
+                  ? (tournament.teams.length / tournament.max_teams) * 100
+                  : (tournament.users.length / tournament.max_players) * 100,
               )}
               %
             </span>
@@ -772,7 +728,7 @@ const TournamentPage = () => {
               className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
               initial={{ width: 0 }}
               animate={{
-                width: `${((filledSlots || 0) / (displayTournament.max_players || 1)) * 100}%`,
+                width: `${((filledSlots || 0) / (tournament.max_players || 1)) * 100}%`,
               }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             />
@@ -786,11 +742,11 @@ const TournamentPage = () => {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <AddJudgeBlock
-          tournamentStatus={displayTournament.status}
-          judges={displayTournament.judges || []}
-          isTeamTournament={displayTournament.type.value === "team"}
-          teams={displayTournament.teams || []}
-          users={displayTournament.users || []}
+          tournamentStatus={tournament.status}
+          judges={tournament.judges}
+          isTeamTournament={tournament.type.value === "team"}
+          teams={tournament.teams}
+          users={tournament.users}
         />
       </motion.section>
 
@@ -804,13 +760,10 @@ const TournamentPage = () => {
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
-            {isTeamMode
-              ? displayTournament.max_teams
-              : displayTournament.max_players}
-            )
+            {isTeamMode ? tournament.max_teams : tournament.max_players})
           </h2>
 
-          {displayTournament.status === "open" && (
+          {tournament.status === "open" && (
             <JoinTournamentButton
               isFull={isFull}
               handleOpenCreateTeamModal={handleOpenCreateTeamModal}
@@ -820,8 +773,8 @@ const TournamentPage = () => {
               canCreateTeam={isUserCanCreateTeam}
               isJoinedSingleTournament={
                 !isTeamMode
-                  ? displayTournament.users?.some(
-                      (user) => user.uid === currentUser?.uid,
+                  ? tournament.users.some(
+                      (user) => user.uid === currentUser.uid,
                     )
                   : undefined
               }
@@ -838,16 +791,16 @@ const TournamentPage = () => {
 
         {isTeamMode ? (
           <TeamList
-            teams={displayTournament.teams || []}
-            judges={displayTournament.judges || []}
-            tournamentId={displayTournament.id}
-            maxPlayersPerTeam={displayTournament.players_per_team}
+            teams={tournament.teams || []}
+            judges={tournament.judges || []}
+            tournamentId={tournament.id}
+            maxPlayersPerTeam={tournament.players_per_team}
             isLoading={isLoading}
-            tournament_status={displayTournament.status}
+            tournament_status={tournament.status}
           />
         ) : (
           <UserList
-            users={displayTournament.users || []}
+            users={tournament.users || []}
             handleClickDelete={handleRemoveUserFromTournament}
           />
         )}
@@ -885,7 +838,7 @@ const TournamentPage = () => {
         onClose={handleCloseCreateTeamModal}
       >
         <CreateTeamModal
-          tournamentId={displayTournament.id}
+          tournamentId={tournament.id}
           onClose={handleCloseCreateTeamModal}
         />
       </CustomModal>
@@ -896,12 +849,12 @@ const TournamentPage = () => {
       >
         {isTeamMode ? (
           <SelectWinnerTeamModal
-            teams={displayTournament.teams || []}
+            teams={tournament.teams}
             onClose={handleCloseSelectWinnerModal}
           />
         ) : (
           <SelectWinnerUserModal
-            users={displayTournament.users || []}
+            users={tournament.users}
             onClose={handleCloseSelectWinnerModal}
           />
         )}

@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { NextResponse } from "next/server";
+import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 
-export async function GET(request: NextRequest) {
+const rolePriority: Record<string, number> = {
+  superadmin: 1,
+  admin: 2,
+};
+
+export async function GET() {
   try {
     const usersQuery = query(collection(db, "users"));
-
     const snapshot = await getDocs(usersQuery);
 
     const users = snapshot.docs.map((doc) => ({
@@ -15,7 +19,15 @@ export async function GET(request: NextRequest) {
       discord: doc.data().discord || "",
       role: doc.data().role,
       createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || null,
+      steamLink: doc.data().steamLink,
+      steamDisplayName: doc.data().steamDisplayName,
     }));
+
+    users.sort((a, b) => {
+      const priorityA = rolePriority[a.role] || 99;
+      const priorityB = rolePriority[b.role] || 99;
+      return priorityA - priorityB;
+    });
 
     return NextResponse.json({
       users,

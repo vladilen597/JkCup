@@ -36,6 +36,8 @@ export function useGoogleSignIn() {
           discord: userSnap.data().discord || "",
           createdAt: userSnap.data().createdAt,
           role: userSnap.data().role,
+          steamLink: userSnap.data().steamLink,
+          steamDisplayName: userSnap.data().steamDisplayName,
         };
 
         await setDoc(
@@ -52,6 +54,8 @@ export function useGoogleSignIn() {
           discord: "",
           createdAt: new Date().toString(),
           role: "user" as "user" | "admin" | "superadmin",
+          steamLink: "",
+          steamDisplayName: "",
         };
 
         await setDoc(userRef, userData);

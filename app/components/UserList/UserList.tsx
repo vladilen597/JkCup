@@ -27,6 +27,8 @@ const UserList = ({
     );
   }
 
+  console.log(users);
+
   return (
     <ul className="flex flex-col gap-2">
       {users.map((user, i) => (

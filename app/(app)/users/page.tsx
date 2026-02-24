@@ -24,6 +24,8 @@ const UsersPage = () => {
     try {
       const { data } = await axios.get("/api/users");
 
+      console.log("data", data);
+
       setUsers(data.users || []);
     } catch (err: any) {
       console.error(err);

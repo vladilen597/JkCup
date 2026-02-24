@@ -11,6 +11,8 @@ import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Clock, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import Steam from "@/app/components/Icons/Steam";
+import Link from "next/link";
 
 export const roles = {
   user: "Пользователь",
@@ -24,6 +26,8 @@ export const roleColors = {
   superadmin: "text-yellow-400",
 };
 
+const steamLinkRegex = /steamcommunity\.com\/(?:id|profiles)\/([a-zA-Z0-9_-]+)/;
+
 const page = () => {
   const [userInfo, setUserInfo] = useState<IUser>({
     uid: "",
@@ -32,7 +36,10 @@ const page = () => {
     photoUrl: "",
     email: "",
     role: "user",
+    steamLink: "",
+    steamDisplayName: "",
   });
+  const [steamLinkError, setSteamLinkError] = useState("");
   const { user: currentUser } = useAppSelector((state) => state.user);
   const params = useParams();
   const isCurrentUser = params.id === currentUser.uid;
@@ -48,6 +55,23 @@ const page = () => {
     }));
   };
 
+  const handleUpdateSteamAccount = (event: ChangeEvent<HTMLInputElement>) => {
+    if (
+      !event.target.value.match(steamLinkRegex) &&
+      event.target.value.length !== 0
+    ) {
+      setSteamLinkError(
+        "Введите валидную ссылку формата https://steamcommunity.com/my/profile",
+      );
+    } else {
+      setSteamLinkError("");
+    }
+    setUserInfo((prevState) => ({
+      ...prevState,
+      steamLink: event.target.value,
+    }));
+  };
+
   const handleLoadUser = async () => {
     const data = (await getDoc(userDocRef)).data();
     if (data) {
@@ -58,12 +82,19 @@ const page = () => {
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+    const steamDisplayNameString = userInfo.steamLink
+      ? userInfo.steamLink.replace(/\/$/, "").split("/").pop()
+      : "";
     try {
       await updateDoc(userDocRef, {
         discord: userInfo.discord,
         displayName: userInfo.displayName,
+        steamLink: userInfo.steamLink,
+        steamDisplayName: steamDisplayNameString,
       });
-      dispatch(setUser(userInfo));
+      dispatch(
+        setUser({ ...userInfo, steamDisplayName: steamDisplayNameString }),
+      );
     } catch (error) {
       console.error(error);
     } finally {
@@ -210,6 +241,38 @@ const page = () => {
             )}
           </div>
 
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Steam className="h-4 w-4 text-white" />
+              Ссылка на профиль Steam
+            </label>
+            <input
+              name="steamLink"
+              type="text"
+              value={userInfo.steamLink}
+              onChange={handleUpdateSteamAccount}
+              placeholder="https://steamcommunity.com/id/username123"
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+              disabled={!isCurrentUser}
+            />
+            {isCurrentUser && (
+              <>
+                <span className="block text-xs leading-5 text-neutral-400 mt-1">
+                  Найти ссылку на свой Steam-аккаунт можно{" "}
+                  <Link
+                    href="https://steamcommunity.com/my/profile"
+                    className="underline"
+                  >
+                    здесь
+                  </Link>
+                </span>
+                <span className="block text-xs leading-5 text-red-400 mt-1">
+                  {steamLinkError}
+                </span>
+              </>
+            )}
+          </div>
+
           {/* <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-1">
               <Clock className="h-4 w-4" />
@@ -230,7 +293,7 @@ const page = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="flex items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60"
+            className="flex items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60 cursor-pointer"
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
