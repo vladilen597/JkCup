@@ -98,7 +98,9 @@ const page = () => {
     if (!canCreateTournament) return;
 
     try {
-      const newTournament = {
+      const isBracket = formData.type.value === "bracket";
+
+      const newTournamentBase = {
         ...formData,
         creator: user,
         status: "open",
@@ -106,19 +108,42 @@ const page = () => {
         teams: [],
         judges: [],
         createdAt: new Date().toString(),
-        start_date: "",
+
+        bracket: isBracket
+          ? {
+              currentRound: 0,
+              participants: [],
+              rounds: [
+                {
+                  id: "round-0",
+                  matches: [
+                    {
+                      id: `match-${uuidv4()}`,
+                      player1: null,
+                      player2: null,
+                      winner: null,
+                      score: "",
+                    },
+                  ],
+                },
+              ],
+            }
+          : null,
       };
 
       const res = await axios.post("/api/tournaments", {
         ...formData,
         creator: user,
+        bracket: newTournamentBase.bracket,
       });
 
       dispatch(
-        setTournaments([...tournaments, { id: res.data.id, ...newTournament }]),
+        setTournaments([
+          ...tournaments,
+          { ...newTournamentBase, id: res.data.id },
+        ]),
       );
 
-      setFormData(newTournament);
       setIsCreateTournamentModalOpen(false);
     } catch (err) {
       console.error(err);
@@ -181,6 +206,11 @@ const page = () => {
             const isFull = isTeam
               ? teamsAmount >= tournament.max_teams
               : usersAmount >= tournament.max_players;
+            const maxPlayers = isTeam
+              ? tournament.max_teams
+              : tournament.max_players;
+
+            isTeam && console.log(tournament.teams, usersAmount);
 
             return (
               <Tournament
@@ -189,6 +219,7 @@ const page = () => {
                 {...tournament}
                 description={tournament.description}
                 currentPlayers={usersAmount}
+                maxPlayers={maxPlayers}
                 isTeam={isTeam}
                 isFull={isFull}
                 fillPercent={fillPercent}

@@ -10,16 +10,9 @@ import CustomButton, {
 } from "../Shared/CustomButton/CustomButton";
 
 export const selectTypeOptions = [
-  {
-    id: 1,
-    value: "team",
-    label: "Командный",
-  },
-  {
-    id: 2,
-    value: "single",
-    label: "Одиночный",
-  },
+  { id: 1, value: "team", label: "Командный" },
+  { id: 2, value: "single", label: "Одиночный" },
+  { id: 3, value: "bracket", label: "Сетка" },
 ];
 
 interface ICreateTournamentModalProps {

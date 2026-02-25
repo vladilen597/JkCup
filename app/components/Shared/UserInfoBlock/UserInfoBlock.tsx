@@ -30,7 +30,6 @@ const UserInfoBlock = ({
           src={photoUrl}
           alt={displayName || ""}
           className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
-          referrerPolicy="no-referrer"
         />
       ) : (
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20">

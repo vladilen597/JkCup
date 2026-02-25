@@ -18,6 +18,7 @@ interface ITournamentProps {
   description: string;
   start_date: string;
   status: string;
+  maxPlayers: number;
   rewards: { id: string; value: string }[];
 }
 
@@ -33,6 +34,7 @@ const Tournament = ({
   isTeam,
   fillPercent,
   max_players,
+  maxPlayers,
   players_per_team,
   status,
   currentPlayers,
@@ -108,7 +110,7 @@ const Tournament = ({
                 <User className="h-3.5 w-3.5" />
               )}
               <span className="font-mono text-sm">
-                {currentPlayers}/{max_players}
+                {currentPlayers}/{maxPlayers}
               </span>
             </div>
 

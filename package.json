@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",
@@ -24,6 +26,7 @@
     "react-dom": "19.2.3",
     "react-duration-input": "^1.0.8",
     "react-redux": "^9.2.0",
+    "react-zoom-pan-pinch": "^3.7.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
     "tailwind-merge": "^3.4.1",

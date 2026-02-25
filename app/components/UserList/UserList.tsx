@@ -26,7 +26,6 @@ const UserList = ({
       </div>
     );
   }
-
   console.log(users);
 
   return (

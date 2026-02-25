@@ -54,10 +54,10 @@ import TournamentDurationDisplay from "@/app/components/Shared/TournamentDuratio
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import Title from "@/app/components/Title/Title";
-import SelectWinnerModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
-import Discord from "@/app/components/Icons/Discord";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
+import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
+import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
 
 export const statuses = {
   open: "Открыт",
@@ -95,7 +95,7 @@ const TournamentPage = () => {
   const tournamentId = params.id as string;
 
   const tournament = tournaments.find((t) => t.id === params.id);
-
+  console.log(tournament?.start_date);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -110,7 +110,7 @@ const TournamentPage = () => {
     max_teams: tournament?.max_teams || 6,
     players_per_team: tournament?.players_per_team || 2,
     start_date: tournament?.start_date
-      ? new Date(tournament.start_date).toISOString().slice(0, 16)
+      ? new Date(tournament.start_date).toString()
       : "",
     type: tournament?.type || {
       id: 1,
@@ -450,6 +450,7 @@ const TournamentPage = () => {
   );
 
   const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
+  const isBracketMode = tournament?.type?.value === "bracket";
 
   const handleOpenSelectWinnerModal = () => {
     setIsWinnerModalOpen(true);
@@ -615,22 +616,7 @@ const TournamentPage = () => {
               <ul className="mt-2">
                 {tournament.winner_team?.users.map((user) => (
                   <li key={user.uid} className="flex items-center gap-2">
-                    <Image
-                      className="w-10 h-10 rounded-full"
-                      src={user.photoUrl}
-                      width={40}
-                      height={40}
-                      alt="User image"
-                    />
-                    <div>
-                      <span className="font-semibold text-foreground truncate leading-5 text-sm">
-                        {user.displayName}
-                      </span>
-                      <span className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                        <Discord className="h-4 w-4" />
-                        {user.discord}
-                      </span>
-                    </div>
+                    <UserInfoBlock {...user} />
                   </li>
                 ))}
               </ul>
@@ -641,24 +627,7 @@ const TournamentPage = () => {
                 key={tournament.winner_user?.uid}
                 className="flex items-center gap-2"
               >
-                <Image
-                  className="w-10 h-10 rounded-full"
-                  src={tournament.winner_user?.photoUrl || ""}
-                  width={40}
-                  height={40}
-                  alt="User image"
-                />
-                <div>
-                  <span className="font-semibold text-foreground truncate leading-5 text-sm">
-                    {tournament.winner_user?.displayName}
-                  </span>
-                  {tournament.winner_user?.discord && (
-                    <span className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                      <Discord className="h-4 w-4" />
-                      {tournament.winner_user?.discord}
-                    </span>
-                  )}
-                </div>
+                <UserInfoBlock {...tournament.winner_user} />
               </div>
             </div>
           )}
@@ -789,20 +758,25 @@ const TournamentPage = () => {
           </div>
         )}
 
-        {isTeamMode ? (
+        {isBracketMode ? (
+          <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md">
+            <BracketTournamentView
+              tournament={tournament}
+              currentUser={currentUser}
+              isJudge={isCurrentUserJudge}
+            />
+          </div>
+        ) : isTeamMode ? (
           <TeamList
             teams={tournament.teams || []}
-            judges={tournament.judges || []}
             tournamentId={tournament.id}
+            judges={tournament.judges}
             maxPlayersPerTeam={tournament.players_per_team}
             isLoading={isLoading}
             tournament_status={tournament.status}
           />
         ) : (
-          <UserList
-            users={tournament.users || []}
-            handleClickDelete={handleRemoveUserFromTournament}
-          />
+          <UserList users={tournament.users || []} />
         )}
       </motion.section>
 
