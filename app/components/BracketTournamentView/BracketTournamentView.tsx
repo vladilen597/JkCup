@@ -43,7 +43,7 @@ const DroppableSlot = ({
   return (
     <div
       ref={setNodeRef}
-      className={`relative p-2 min-h-13 border-b border-zinc-800/50 flex items-center justify-between transition-colors duration-200 ${
+      className={`w-fit relative p-2 min-h-13 border-b border-zinc-800/50 flex items-center justify-between transition-colors duration-200 ${
         isOver && isAdmin ? "bg-primary/20" : "bg-transparent"
       } ${isPlaceholder ? "border-b-0" : ""}`}
     >
