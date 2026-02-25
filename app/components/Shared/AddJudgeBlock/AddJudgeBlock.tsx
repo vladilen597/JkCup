@@ -59,11 +59,13 @@ const AddJudgeBlock = ({
             )}
         </div>
       </section>
-      <ul className="mt-2 space-y-2 rounded-lg border border-border/50 overflow-hidden">
-        {judges.map((judge, index) => (
-          <JudgeItem key={judge.uid} user={judge} index={index} />
-        ))}
-      </ul>
+      {!!judges.length && (
+        <ul className="mt-2 space-y-2 rounded-lg border border-border/50 overflow-hidden">
+          {judges.map((judge, index) => (
+            <JudgeItem key={judge.uid} user={judge} index={index} />
+          ))}
+        </ul>
+      )}
       {currentUser.role !== "user" && (
         <CustomModal
           isOpen={isAddJudgeModalOpen}
