@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { db } from "@/app/utils/firebase";
 import { IUser } from "@/app/utils/store/userSlice";
 import { removeJudge } from "@/app/utils/store/tournamentsSlice";
+import UserInfoBlock from "../../UserInfoBlock/UserInfoBlock";
 
 const UserLine: React.FC<{ user: IUser; index: number }> = ({
   user,
@@ -41,46 +42,20 @@ const UserLine: React.FC<{ user: IUser; index: number }> = ({
   };
 
   return (
-    <Link href={"/users/" + uid}>
+    <Link
+      href={"/users/" + uid}
+      className="not-first:border-t border-t-border/50"
+    >
       <motion.li
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className={`flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/70 border border-border/50 transition-all duration-200 group ${
+        className={`flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/70  transition-all duration-200 group ${
           role === "superadmin" ? "border-neon" : ""
         }`}
       >
         <div className="flex items-center gap-3">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={displayName}
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
-          )}
-
-          <div className="flex-1 min-w-0">
-            <div>
-              <p className="font-semibold text-foreground truncate leading-5 text-sm">
-                {displayName}
-                {isCurrentUser && (
-                  <span className="ml-2 text-xs leading-0 text-orange-400">
-                    Вы
-                  </span>
-                )}
-              </p>
-              {discord && (
-                <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                  <Discord className="w-4 h-4" /> {discord}
-                </p>
-              )}
-            </div>
-          </div>
+          <UserInfoBlock {...user} />
         </div>
         {currentUser.role !== "user" && (
           <>
