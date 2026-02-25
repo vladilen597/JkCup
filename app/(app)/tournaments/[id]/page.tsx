@@ -726,28 +726,32 @@ const TournamentPage = () => {
         transition={{ duration: 0.4, delay: 0.3 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
-            {isTeamMode ? tournament.max_teams : tournament.max_players})
-          </h2>
+          {tournament.type.value !== "bracket" && (
+            <>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
+                {isTeamMode ? tournament.max_teams : tournament.max_players})
+              </h2>
 
-          {tournament.status === "open" && (
-            <JoinTournamentButton
-              isFull={isFull}
-              handleOpenCreateTeamModal={handleOpenCreateTeamModal}
-              handleJoinLeave={handleJoinLeave}
-              isTeamMode={isTeamMode}
-              isLoading={isLoading}
-              canCreateTeam={isUserCanCreateTeam}
-              isJoinedSingleTournament={
-                !isTeamMode
-                  ? tournament.users.some(
-                      (user) => user.uid === currentUser.uid,
-                    )
-                  : undefined
-              }
-            />
+              {tournament.status === "open" && (
+                <JoinTournamentButton
+                  isFull={isFull}
+                  handleOpenCreateTeamModal={handleOpenCreateTeamModal}
+                  handleJoinLeave={handleJoinLeave}
+                  isTeamMode={isTeamMode}
+                  isLoading={isLoading}
+                  canCreateTeam={isUserCanCreateTeam}
+                  isJoinedSingleTournament={
+                    !isTeamMode
+                      ? tournament.users.some(
+                          (user) => user.uid === currentUser.uid,
+                        )
+                      : undefined
+                  }
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -760,11 +764,7 @@ const TournamentPage = () => {
 
         {isBracketMode ? (
           <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md">
-            <BracketTournamentView
-              tournament={tournament}
-              currentUser={currentUser}
-              isJudge={isCurrentUserJudge}
-            />
+            <BracketTournamentView tournament={tournament} />
           </div>
         ) : isTeamMode ? (
           <TeamList

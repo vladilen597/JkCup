@@ -2,6 +2,19 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { IUser } from "./userSlice";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 
+export interface IBracket {
+  rounds: {
+    id: string;
+    matches: {
+      id: string;
+      users: IUser[]; // Ensure this is an array
+      score: string;
+    }[];
+  }[];
+  currentRound: number; // If this is mandatory, ensure it's initialized in your initial state
+  participants: IUser[];
+}
+
 export interface ITournament {
   id: string;
   game: string;
@@ -23,20 +36,12 @@ export interface ITournament {
   creator?: IUser;
   createdAt?: string;
   startedAt?: string;
-  bracket?: {
-    rounds: Array<{
-      id: string;
-      matches: Array<{
-        id: string;
-        player1?: IUser | null;
-        player2?: IUser | null;
-        winner?: IUser | null;
-        score?: string;
-      }>;
-    }>;
-    currentRound: number;
-    participants: IUser[];
-  };
+  bracket?: IBracket;
+}
+
+export interface IRound {
+  id: string;
+  matches: any[];
 }
 
 export interface ITeam {
@@ -240,37 +245,70 @@ const tournamentsSlice = createSlice({
         tournament.users = tournament.users.filter((u) => u.uid !== userId);
       }
     },
-    updateBracketUser: (
-      state,
-      action: PayloadAction<{
-        tournamentId: string;
-        roundId: string;
-        matchId: string;
-        slot: "player1" | "player2";
-        user: IUser | null;
-      }>,
-    ) => {
-      const { tournamentId, roundId, matchId, slot, user } = action.payload;
+    updateBracketUser: (state, action) => {
+      const { tournamentId, roundId, matchId, index, user } = action.payload;
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
-
-      if (tournament && tournament.bracket) {
+      if (tournament?.bracket) {
         const round = tournament.bracket.rounds.find((r) => r.id === roundId);
-        if (round) {
-          const match = round.matches.find((m) => m.id === matchId);
-          if (match) {
-            // Dynamically update player1 or player2
-            match[slot] = user;
+        const match = round?.matches.find((m) => m.id === matchId);
+
+        if (match) {
+          if (!match.users) match.users = [];
+
+          if (user === null) {
+            // Deletes the user and shifts the array (removes the "hole")
+            match.users.splice(index, 1);
+          } else {
+            // If index is match.users.length, this appends automatically
+            match.users[index] = user;
           }
         }
       }
     },
-    addRound: (state, action: PayloadAction<{ tournamentId: string }>) => {
+    advanceWinner: (
+      state,
+      action: PayloadAction<{
+        tournamentId: string;
+        roundIndex: number;
+        matchIndex: number;
+        teamUsers: IUser[]; // Changed from winner: IUser
+      }>,
+    ) => {
+      const { tournamentId, roundIndex, matchIndex, teamUsers } =
+        action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+
+      if (tournament?.bracket?.rounds) {
+        const nextRoundIndex = roundIndex + 1;
+        const nextMatchIndex = Math.floor(matchIndex / 2);
+        const nextSlotIndex = matchIndex % 2;
+
+        if (tournament.bracket.rounds[nextRoundIndex]) {
+          const nextMatch =
+            tournament.bracket.rounds[nextRoundIndex].matches[nextMatchIndex];
+          if (nextMatch) {
+            // In a team-based bracket, we likely need to handle the users
+            // as a nested structure or a specific slice of the array.
+            // For simplicity, we'll store the advancing team at the calculated index.
+            if (!nextMatch.users) nextMatch.users = [];
+
+            // This logic assumes nextMatch.users[0] is Team A and [1] is Team B
+            // You might need to adjust this depending on if 'users' is a flat
+            // list or a list of team objects.
+            nextMatch.users[nextSlotIndex] = teamUsers as any;
+          }
+        }
+      }
+    },
+    addRound: (
+      state,
+      action: PayloadAction<{ tournamentId: string; round: IRound }>,
+    ) => {
       const tournament = state.tournaments.find(
         (t) => t.id === action.payload.tournamentId,
       );
 
       if (tournament) {
-        // 1. Ensure bracket exists
         if (!tournament.bracket) {
           tournament.bracket = {
             rounds: [],
@@ -279,38 +317,60 @@ const tournamentsSlice = createSlice({
           };
         }
 
-        // 2. CRITICAL FIX: Ensure rounds is actually an array
-        // If it's an object or null, reset it to an empty array
         if (!Array.isArray(tournament.bracket.rounds)) {
           tournament.bracket.rounds = [];
         }
 
-        const newRoundIndex = tournament.bracket.rounds.length;
-
-        // 3. Now .push() will definitely work
-        tournament.bracket.rounds.push({
-          id: `Раунд ${newRoundIndex + 1}`,
-          matches: [],
-        });
+        tournament.bracket.rounds.push(action.payload.round);
       }
     },
-
-    // Adds a match to a specific round
-    addMatchToRound: (
+    removeRound: (
       state,
-      action: PayloadAction<{ tournamentId: string; roundIndex: number }>,
+      action: PayloadAction<{ tournamentId: string; roundId: string }>,
     ) => {
       const tournament = state.tournaments.find(
         (t) => t.id === action.payload.tournamentId,
       );
+
+      if (tournament?.bracket?.rounds) {
+        tournament.bracket.rounds = tournament.bracket.rounds.filter(
+          (round) => round.id !== action.payload.roundId,
+        );
+      }
+    },
+    addMatchToRound: (
+      state,
+      action: PayloadAction<{
+        tournamentId: string;
+        roundIndex: number;
+        newMatch: any;
+      }>,
+    ) => {
+      const tournament = state.tournaments.find(
+        (t) => t.id === action.payload.tournamentId,
+      );
+
       if (tournament && tournament.bracket?.rounds[action.payload.roundIndex]) {
         const round = tournament.bracket.rounds[action.payload.roundIndex];
-        round.matches.push({
-          id: `match-${round.matches.length}-${Date.now()}`,
-          player1: null,
-          player2: null,
-          winner: null,
-        });
+        round.matches.push(action.payload.newMatch);
+      }
+    },
+    removeMatchFromRound: (
+      state,
+      action: PayloadAction<{
+        tournamentId: string;
+        roundId: string;
+        matchId: string;
+      }>,
+    ) => {
+      const { tournamentId, roundId, matchId } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+
+      if (tournament?.bracket?.rounds) {
+        const round = tournament.bracket.rounds.find((r) => r.id === roundId);
+        if (round) {
+          round.matches = round.matches.filter((m) => m.id !== matchId);
+        }
       }
     },
   },
@@ -333,7 +393,10 @@ export const {
   removeJudge,
   updateBracketUser,
   addRound,
+  removeRound,
   addMatchToRound,
+  advanceWinner,
+  removeMatchFromRound,
 } = tournamentsSlice.actions;
 
 export default tournamentsSlice.reducer;

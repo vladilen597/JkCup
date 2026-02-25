@@ -31,19 +31,13 @@ import {
   updateTournament,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
-import EditModal from "@/app/components/EditModal/EditModal";
 import StatCard from "@/app/components/Shared/StatCard/StatCard";
-import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
-import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
-import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
-import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import TournamentDurationDisplay from "@/app/components/Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import Title from "@/app/components/Title/Title";
-import Discord from "@/app/components/Icons/Discord";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
 import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";

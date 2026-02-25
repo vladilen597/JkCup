@@ -123,31 +123,33 @@ const CreateTournamentModal = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-full">
-            <label className="flex items-center gap-2 text-sm font-medium mb-1">
-              <Users className="w-4 h-4" /> Макс.{" "}
-              {formData.type.value === "team" ? "команд" : "игроков"}
-            </label>
-            <input
-              type="number"
-              value={
-                formData.type.value === "team"
-                  ? formData.max_teams
-                  : formData.max_players
-              }
-              onChange={(e) => {
-                handleChange({
-                  ...formData,
-                  ...(formData.type.value === "team"
-                    ? { max_teams: Number(e.target.value), rewards: [] }
-                    : { max_players: Number(e.target.value), rewards: [] }),
-                });
-              }}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              min="2"
-              required
-            />
-          </div>
+          {formData.type.value !== "bracket" && (
+            <div className="w-full">
+              <label className="flex items-center gap-2 text-sm font-medium mb-1">
+                <Users className="w-4 h-4" /> Макс.{" "}
+                {formData.type.value === "team" ? "команд" : "игроков"}
+              </label>
+              <input
+                type="number"
+                value={
+                  formData.type.value === "team"
+                    ? formData.max_teams
+                    : formData.max_players
+                }
+                onChange={(e) => {
+                  handleChange({
+                    ...formData,
+                    ...(formData.type.value === "team"
+                      ? { max_teams: Number(e.target.value), rewards: [] }
+                      : { max_players: Number(e.target.value), rewards: [] }),
+                  });
+                }}
+                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                min="2"
+                required
+              />
+            </div>
+          )}
           {formData.type.value === "team" && (
             <div className="w-full">
               <label className="block text-sm font-medium mb-1">
