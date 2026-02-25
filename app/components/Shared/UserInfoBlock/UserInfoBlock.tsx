@@ -24,7 +24,7 @@ const UserInfoBlock = ({
   return (
     <>
       {photoUrl ? (
-        <Image
+        <img
           width={40}
           height={40}
           src={photoUrl}

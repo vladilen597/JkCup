@@ -728,7 +728,7 @@ const TournamentPage = () => {
               className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
               initial={{ width: 0 }}
               animate={{
-                width: `${((filledSlots || 0) / (tournament.max_players || 1)) * 100}%`,
+                width: `${((filledSlots || 0) / (tournament.type.value === "team" ? tournament.max_teams : tournament.max_players || 1)) * 100}%`,
               }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             />

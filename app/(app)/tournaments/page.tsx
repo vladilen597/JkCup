@@ -181,6 +181,9 @@ const page = () => {
             const isFull = isTeam
               ? teamsAmount >= tournament.max_teams
               : usersAmount >= tournament.max_players;
+            const maxPlayers = isTeam
+              ? tournament.max_teams
+              : tournament.max_players;
 
             return (
               <Tournament
@@ -191,6 +194,7 @@ const page = () => {
                 currentPlayers={usersAmount}
                 isTeam={isTeam}
                 isFull={isFull}
+                maxPlayers={maxPlayers}
                 fillPercent={fillPercent}
               />
             );
