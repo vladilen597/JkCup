@@ -85,6 +85,39 @@ const page = () => {
     }
   };
 
+  const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const file = event.target.files[0];
+      if (file.size > 1048487) {
+        alert("Файл слишком большой");
+        return;
+      }
+      const reader = new FileReader();
+
+      reader.readAsDataURL(file);
+
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target?.result as string;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 200;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+          setImageFile(compressedBase64);
+        };
+      };
+    }
+  };
+
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -135,24 +168,6 @@ const page = () => {
       </div>
     );
   }
-
-  const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Файл слишком большой");
-        return;
-      }
-      const reader = new FileReader();
-
-      reader.readAsDataURL(file);
-
-      reader.onload = () => {
-        console.log("called: ", reader);
-        setImageFile(reader.result);
-      };
-    }
-  };
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
