@@ -36,7 +36,7 @@ export interface ITournament {
   creator?: IUser;
   createdAt?: string;
   startedAt?: string;
-  bracket?: IBracket;
+  bracket: IBracket;
 }
 
 export interface IRound {

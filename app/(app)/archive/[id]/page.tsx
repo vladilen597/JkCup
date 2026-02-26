@@ -97,6 +97,11 @@ const TournamentPage = () => {
     winner_team: null,
     winner_user: null,
     rewards: [],
+    bracket: {
+      rounds: [],
+      currentRound: 0,
+      participants: [],
+    },
   });
 
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
