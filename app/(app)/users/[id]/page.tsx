@@ -7,10 +7,15 @@ import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  MouseEvent,
+  SubmitEvent,
+  useEffect,
+  useState,
+} from "react";
 import { motion } from "framer-motion";
-import { Clock, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { Camera, Loader2 } from "lucide-react";
 import Steam from "@/app/components/Icons/Steam";
 import Link from "next/link";
 
@@ -39,6 +44,7 @@ const page = () => {
     steamLink: "",
     steamDisplayName: "",
   });
+  const [imageFile, setImageFile] = useState<string | ArrayBuffer | null>("");
   const [steamLinkError, setSteamLinkError] = useState("");
   const { user: currentUser } = useAppSelector((state) => state.user);
   const params = useParams();
@@ -91,9 +97,14 @@ const page = () => {
         displayName: userInfo.displayName,
         steamLink: userInfo.steamLink,
         steamDisplayName: steamDisplayNameString,
+        photoUrl: imageFile,
       });
       dispatch(
-        setUser({ ...userInfo, steamDisplayName: steamDisplayNameString }),
+        setUser({
+          ...userInfo,
+          photoUrl: imageFile as string,
+          steamDisplayName: steamDisplayNameString,
+        }),
       );
     } catch (error) {
       console.error(error);
@@ -125,6 +136,24 @@ const page = () => {
     );
   }
 
+  const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const file = event.target.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Файл слишком большой");
+        return;
+      }
+      const reader = new FileReader();
+
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        console.log("called: ", reader);
+        setImageFile(reader.result);
+      };
+    }
+  };
+
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
       <motion.div
@@ -135,22 +164,45 @@ const page = () => {
       >
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
-          {userInfo.photoUrl && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Image
-                width={128}
-                height={128}
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full ring-2 ring-primary/30 shadow-xl"
-                src={userInfo.photoUrl}
-                alt="Profile picture"
-              />
-            </motion.div>
-          )}
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 ">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative ring-2 ring-primary/30 shadow-xl rounded-full overflow-hidden"
+          >
+            {isCurrentUser && (
+              <div className="absolute flex items-center justify-center w-full h-full z-10 hover:opacity-100 opacity-0 bg-black/50 transition-all">
+                <input
+                  type="file"
+                  className="absolute opacity-0 z-10 w-full h-full cursor-pointer"
+                  onChange={handleChangeImage}
+                />
+                <Camera />
+              </div>
+            )}
+            {userInfo.photoUrl && (
+              <>
+                {imageFile ? (
+                  <Image
+                    width={128}
+                    height={128}
+                    className="w-24 h-24 md:w-32 md:h-32"
+                    src={imageFile as string}
+                    alt="Profile picture"
+                  />
+                ) : (
+                  <Image
+                    width={128}
+                    height={128}
+                    className="w-24 h-24 md:w-32 md:h-32"
+                    src={userInfo.photoUrl}
+                    alt="Profile picture"
+                  />
+                )}
+              </>
+            )}
+          </motion.div>
 
           <div className="space-y-2">
             <motion.h1
