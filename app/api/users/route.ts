@@ -1,15 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import admin from "firebase-admin";
+import { db as firebaseDB } from "@/app/utils/firebase";
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
 
 const rolePriority: Record<string, number> = {
   superadmin: 1,
   admin: 2,
 };
 
-export async function GET() {
+export const GET = async () => {
   try {
-    const usersQuery = query(collection(db, "users"));
+    const usersQuery = query(collection(firebaseDB, "users"));
     const snapshot = await getDocs(usersQuery);
 
     const users = snapshot.docs.map((doc) => ({
@@ -49,4 +60,35 @@ export async function GET() {
       { status: 500 },
     );
   }
-}
+};
+
+const db = admin.firestore();
+const auth = admin.auth();
+
+export const DELETE = async (req: NextRequest) => {
+  try {
+    const userId = req.nextUrl.searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "No user id provided" },
+        { status: 400 },
+      );
+    }
+
+    await auth.deleteUser(userId);
+
+    await db.collection("users").doc(userId).delete();
+
+    return NextResponse.json(
+      { message: "Пользователь успешно удалён" },
+      { status: 200 },
+    );
+  } catch (error: any) {
+    console.error("Ошибка при удалении:", error);
+    return NextResponse.json(
+      { message: "Ошибка сервера", error: error.message },
+      { status: 500 },
+    );
+  }
+};

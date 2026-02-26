@@ -5,6 +5,8 @@ import CustomButton, {
 import { Trash2 } from "lucide-react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
+// import admin from "firebase-admin";
+import axios from "axios";
 
 interface IDeleteUserModalContentProps {
   userId: string;
@@ -22,10 +24,15 @@ const DeleteUserModalContent = ({
   const handleDeleteUser = async () => {
     setIsLoading(true);
     try {
-      const userRef = doc(db, "users", userId);
-      await deleteDoc(userRef);
-      await onSubmit();
-      onClose();
+      const data = await axios.delete("/api/users", {
+        params: {
+          userId,
+        },
+      });
+      if (data.status === 200) {
+        onClose();
+        onSubmit();
+      }
     } catch (error) {
       console.log(error);
     } finally {
