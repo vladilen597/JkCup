@@ -210,8 +210,6 @@ const page = () => {
               ? tournament.max_teams
               : tournament.max_players;
 
-            isTeam && console.log(tournament.teams, usersAmount);
-
             return (
               <Tournament
                 key={tournament.id}

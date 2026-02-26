@@ -231,6 +231,7 @@ const page = () => {
               type="text"
               value={userInfo.discord}
               onChange={handleUpdateInput}
+              placeholder={isCurrentUser ? "discordUser" : "Не указан"}
               className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
               disabled={!isCurrentUser}
             />
@@ -251,7 +252,11 @@ const page = () => {
               type="text"
               value={userInfo.steamLink}
               onChange={handleUpdateSteamAccount}
-              placeholder="https://steamcommunity.com/id/username123"
+              placeholder={
+                isCurrentUser
+                  ? "https://steamcommunity.com/id/username123"
+                  : "Не указана"
+              }
               className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
               disabled={!isCurrentUser}
             />
