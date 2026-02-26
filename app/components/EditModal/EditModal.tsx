@@ -125,19 +125,21 @@ const EditModal = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-full">
-            <label className="block text-sm font-medium mb-1">
-              Макс. {type.value === "team" ? "команд" : "игроков"}
-            </label>
-            <input
-              type="number"
-              value={type.value === "team" ? max_teams : max_players}
-              onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              min="2"
-              required
-            />
-          </div>
+          {type.value !== "bracket" && (
+            <div className="w-full">
+              <label className="block text-sm font-medium mb-1">
+                Макс. {type.value === "team" ? "команд" : "игроков"}
+              </label>
+              <input
+                type="number"
+                value={type.value === "team" ? max_teams : max_players}
+                onChange={(e) => handleChangeMaxTeamsOrPlayers(+e.target.value)}
+                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                min="2"
+                required
+              />
+            </div>
+          )}
 
           {type.value === "team" && (
             <div className="w-full">

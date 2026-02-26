@@ -33,7 +33,6 @@ const Tournament = ({
   name,
   isTeam,
   fillPercent,
-  max_players,
   players_per_team,
   status,
   currentPlayers,

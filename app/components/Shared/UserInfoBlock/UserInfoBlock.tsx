@@ -31,7 +31,6 @@ const UserInfoBlock = ({
           src={photoUrl}
           alt={displayName || ""}
           className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
-          referrerPolicy="no-referrer"
         />
       ) : (
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20">
@@ -49,12 +48,12 @@ const UserInfoBlock = ({
           </p>
           <div className="flex items-center gap-2">
             {discord && (
-              <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
+              <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
                 <Discord className="w-4 h-4" /> {discord}
               </p>
             )}
             {!!steamLink && !!steamDisplayName && (
-              <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
+              <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
                 <Steam className="w-4 h-4" />{" "}
                 <Link
                   onClick={handleClickSteamLink}

@@ -31,21 +31,16 @@ import {
   updateTournament,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
-import EditModal from "@/app/components/EditModal/EditModal";
 import StatCard from "@/app/components/Shared/StatCard/StatCard";
-import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
-import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
-import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
-import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import TournamentDurationDisplay from "@/app/components/Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import Title from "@/app/components/Title/Title";
-import Discord from "@/app/components/Icons/Discord";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
+import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 
 export const statuses = {
   open: "Открыт",
@@ -102,6 +97,11 @@ const TournamentPage = () => {
     winner_team: null,
     winner_user: null,
     rewards: [],
+    bracket: {
+      rounds: [],
+      currentRound: 0,
+      participants: [],
+    },
   });
 
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
@@ -285,22 +285,7 @@ const TournamentPage = () => {
               <ul className="mt-2">
                 {tournament.winner_team?.users.map((user) => (
                   <li key={user.uid} className="flex items-center gap-2">
-                    <Image
-                      className="w-10 h-10 rounded-full"
-                      src={user.photoUrl}
-                      width={40}
-                      height={40}
-                      alt="User image"
-                    />
-                    <div>
-                      <span className="font-semibold text-foreground truncate leading-5 text-sm">
-                        {user.displayName}
-                      </span>
-                      <span className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                        <Discord className="h-4 w-4" />
-                        {user.discord}
-                      </span>
-                    </div>
+                    <UserInfoBlock {...user} />
                   </li>
                 ))}
               </ul>
@@ -311,24 +296,7 @@ const TournamentPage = () => {
                 key={tournament.winner_user?.uid}
                 className="flex items-center gap-2"
               >
-                <Image
-                  className="w-10 h-10 rounded-full"
-                  src={tournament.winner_user?.photoUrl || ""}
-                  width={40}
-                  height={40}
-                  alt="User image"
-                />
-                <div>
-                  <span className="font-semibold text-foreground truncate leading-5 text-sm">
-                    {tournament.winner_user?.displayName}
-                  </span>
-                  {tournament.winner_user?.discord && (
-                    <span className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                      <Discord className="h-4 w-4" />
-                      {tournament.winner_user?.discord}
-                    </span>
-                  )}
-                </div>
+                <UserInfoBlock {...tournament.winner_user} />
               </div>
             </div>
           )}

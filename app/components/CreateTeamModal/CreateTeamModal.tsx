@@ -17,7 +17,7 @@ interface ICreateTeamModalProps {
 const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
   const [teamData, setTeamData] = useState({
     name: "",
-    is_private: false,
+    is_private: true,
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);

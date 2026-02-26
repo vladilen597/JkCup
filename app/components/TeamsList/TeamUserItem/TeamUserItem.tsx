@@ -1,13 +1,9 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { DoorOpen, Loader2 } from "lucide-react";
-import Discord from "../../Icons/Discord";
-import Image from "next/image";
+import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
+import { IUser } from "@/app/utils/store/userSlice";
 
-interface ITeamUserItemProps {
-  uid: string;
-  photoUrl: string;
-  displayName: string;
-  discord: string;
+interface ITeamUserItemProps extends IUser {
   isLoading: boolean;
   isMyTeam: boolean;
   isCurrentUserCreator: boolean;
@@ -23,6 +19,8 @@ const TeamUserItem = ({
   isLoading,
   isMyTeam,
   isCurrentUserCreator,
+  steamDisplayName,
+  steamLink,
   canLeave,
   onLeaveClick,
 }: ITeamUserItemProps) => {
@@ -33,32 +31,14 @@ const TeamUserItem = ({
   return (
     <div className="flex items-center justify-between">
       <div key={uid} className="flex items-center gap-3 text-sm">
-        {photoUrl ? (
-          <Image
-            width={40}
-            height={40}
-            src={photoUrl}
-            alt=""
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white">
-            {displayName?.[0] || "?"}
-          </div>
-        )}
-        <div>
-          <div className="">
-            <span className="truncate">{displayName}</span>
-            {isCurrentUser && (
-              <span className="ml-2 ext-xs leading-0 text-orange-400">Вы</span>
-            )}
-          </div>
-          {discord && (
-            <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-              <Discord className="w-4 h-4" /> {discord}
-            </p>
-          )}
-        </div>
+        <UserInfoBlock
+          uid={uid}
+          photoUrl={photoUrl}
+          discord={discord}
+          displayName={displayName}
+          steamDisplayName={steamDisplayName}
+          steamLink={steamLink}
+        />
       </div>
       {isMyTeam &&
         ((isCurrentUser && !isCurrentUserCreator && canLeave) ||
