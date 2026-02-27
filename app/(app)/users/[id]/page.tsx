@@ -196,26 +196,26 @@ const page = () => {
                 <Camera />
               </div>
             )}
-            {userInfo.photoUrl && (
-              <>
-                {imageFile ? (
-                  <Image
-                    width={128}
-                    height={128}
-                    className="w-24 h-24 md:w-32 md:h-32"
-                    src={imageFile as string}
-                    alt="Profile picture"
-                  />
-                ) : (
-                  <Image
-                    width={128}
-                    height={128}
-                    className="w-24 h-24 md:w-32 md:h-32"
-                    src={userInfo.photoUrl}
-                    alt="Profile picture"
-                  />
-                )}
-              </>
+            {imageFile ? (
+              <Image
+                width={128}
+                height={128}
+                className="w-24 h-24 md:w-32 md:h-32"
+                src={imageFile as string}
+                alt="Profile picture"
+              />
+            ) : userInfo.photoUrl ? (
+              <Image
+                width={128}
+                height={128}
+                className="w-24 h-24 md:w-32 md:h-32"
+                src={userInfo.photoUrl}
+                alt="Profile picture"
+              />
+            ) : (
+              <div className="w-32 h-32 bg-primary/10 flex items-center justify-center text-primary text-2xl">
+                {userInfo.displayName[0] || "U"}
+              </div>
             )}
           </motion.div>
 
