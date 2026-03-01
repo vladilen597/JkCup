@@ -130,12 +130,12 @@ const page = () => {
         displayName: userInfo.displayName,
         steamLink: userInfo.steamLink,
         steamDisplayName: steamDisplayNameString,
-        photoUrl: imageFile,
+        ...(imageFile ? { photoUrl: imageFile } : {}),
       });
       dispatch(
         setUser({
           ...userInfo,
-          photoUrl: imageFile as string,
+          ...(imageFile ? { photoUrl: imageFile as string } : {}),
           steamDisplayName: steamDisplayNameString,
         }),
       );
