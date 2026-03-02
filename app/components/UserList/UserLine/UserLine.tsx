@@ -1,17 +1,16 @@
 "use client";
 
-import React, { SetStateAction, useEffect, useState } from "react";
-import { motion } from "motion/react";
-import { useAppSelector } from "@/app/utils/store/hooks";
-import Link from "next/link";
+import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 import { roleColors, roles } from "@/app/(app)/users/[id]/page";
-import Discord from "../../Icons/Discord";
+import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import React, { useEffect, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
-import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
+import { motion } from "motion/react";
 import { X } from "lucide-react";
-import Image from "next/image";
-import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
+import Link from "next/link";
+import { IUser } from "@/app/utils/store/userSlice";
 
 const roleSelectOptions = [
   {
@@ -26,18 +25,10 @@ const roleSelectOptions = [
   },
 ];
 
-interface UserLineProps {
-  uid: string;
-  displayName: string;
-  photoUrl: string | null;
-  status?: string;
-  index?: number;
-  discord: string;
+interface UserLineProps extends IUser {
   showRoles?: boolean;
-  role: string;
   hideDelete?: boolean;
-  steamDisplayName: string;
-  steamLink: string;
+  index?: number;
   onDeleteClick: () => void;
 }
 
@@ -132,6 +123,7 @@ const UserLine: React.FC<UserLineProps> = ({
         )}
         {!hideDelete &&
           currentUser.role === "superadmin" &&
+          role !== "superadmin" &&
           currentUser.uid !== uid &&
           onDeleteClick && (
             <button

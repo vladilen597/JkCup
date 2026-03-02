@@ -1,4 +1,3 @@
-import { useDurationInput } from "react-duration-input";
 import { motion } from "motion/react";
 import { SubmitEvent } from "react";
 import CustomSelect, {
@@ -8,6 +7,8 @@ import { X, Plus, Clock, Users, Trophy, Gamepad2 } from "lucide-react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
+import DateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
+import DurationPicker from "../Shared/DurationPicker/DurationPicker";
 
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
@@ -43,18 +44,6 @@ const CreateTournamentModal = ({
   handleAddReward,
   onSubmit,
 }: ICreateTournamentModalProps) => {
-  const inputProps = useDurationInput({
-    timeInMilliseconds: formData.duration,
-    isMilliseconds: false,
-    onTimeUpdate: (value) =>
-      handleChange((prevState: any) => {
-        return {
-          ...prevState,
-          duration: value,
-        };
-      }),
-  });
-
   const canAddMoreRewards =
     formData.type.value === "team"
       ? formData.max_teams > formData.rewards.length
@@ -173,12 +162,18 @@ const CreateTournamentModal = ({
         </div>
         <div>
           <label className="flex gap-2 items-center text-sm font-medium mb-1">
-            <Clock className="w-4 h-4" /> Продолжительность
+            <Clock className="w-4 h-4" /> Длительность
           </label>
-          <input
-            {...inputProps}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-            required
+          <DurationPicker
+            valueMs={formData.duration}
+            onChange={(value) => {
+              handleChange((prevState: any) => {
+                return {
+                  ...prevState,
+                  duration: value,
+                };
+              });
+            }}
           />
         </div>
 
@@ -258,14 +253,11 @@ const CreateTournamentModal = ({
 
         <div>
           <label className="block text-sm font-medium mb-1">Дата начала</label>
-          <input
-            type="datetime-local"
-            required
+          <DateTimePicker
             value={formData.start_date}
-            onChange={(e) =>
-              handleChange({ ...formData, start_date: e.target.value })
+            onChange={(value) =>
+              handleChange({ ...formData, start_date: value })
             }
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>

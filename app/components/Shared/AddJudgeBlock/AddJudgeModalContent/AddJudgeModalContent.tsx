@@ -1,6 +1,4 @@
-import UserAddList from "@/app/components/TeamsList/TeamItem/UserAddList/UserAddList";
 import JudgeAddList from "./JudgeAddList/JudgeAddList";
-import { ITeam } from "@/app/utils/store/tournamentsSlice";
 
 const AddJudgeModalContent = ({
   occupiedUserIds,

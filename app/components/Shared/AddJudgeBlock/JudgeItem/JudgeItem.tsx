@@ -4,8 +4,7 @@ import React, { MouseEvent, useState } from "react";
 import { motion } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import Link from "next/link";
-import Discord from "@/app/components/Icons/Discord";
-import { Cross, Loader2, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { db } from "@/app/utils/firebase";
@@ -13,14 +12,13 @@ import { IUser } from "@/app/utils/store/userSlice";
 import { removeJudge } from "@/app/utils/store/tournamentsSlice";
 import UserInfoBlock from "../../UserInfoBlock/UserInfoBlock";
 
-const UserLine: React.FC<{ user: IUser; index: number }> = ({
+const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
   user,
   index,
 }) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
-  const isCurrentUser = user.uid === currentUser.uid;
-  const { uid, displayName, photoUrl, discord, role } = user;
+  const { uid, role } = user;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -31,7 +29,7 @@ const UserLine: React.FC<{ user: IUser; index: number }> = ({
     try {
       const tournamentRef = doc(db, "tournaments", tournamentId);
       await updateDoc(tournamentRef, {
-        judges: arrayRemove(user),
+        judgesIds: arrayRemove(user.uid),
       });
       dispatch(removeJudge({ tournamentId, userId: uid }));
     } catch (error) {
@@ -47,9 +45,9 @@ const UserLine: React.FC<{ user: IUser; index: number }> = ({
       className="not-first:border-t border-t-border/50"
     >
       <motion.li
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className={`flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/70  transition-all duration-200 group ${
           role === "superadmin" ? "border-neon" : ""
         }`}
@@ -73,4 +71,4 @@ const UserLine: React.FC<{ user: IUser; index: number }> = ({
   );
 };
 
-export default UserLine;
+export default JudgeLine;

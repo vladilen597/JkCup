@@ -1,7 +1,7 @@
 import { selectWinnerUser } from "@/app/utils/store/tournamentsSlice";
 import SelectUserList from "./SelectUserList/SelectUserList";
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { IUser } from "@/app/utils/store/userSlice";
+import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { doc, updateDoc } from "firebase/firestore";
 import CustomButton, {
   BUTTON_TYPES,
@@ -9,17 +9,19 @@ import CustomButton, {
 import { useParams } from "next/navigation";
 import { db } from "@/app/utils/firebase";
 import { Trophy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
 
 interface ISelectWinnerUserModalProps {
-  users: IUser[];
+  usersIds: string[];
   onClose: () => void;
 }
 
 const SelectWinnerUserModal = ({
-  users,
+  usersIds,
   onClose,
 }: ISelectWinnerUserModalProps) => {
+  const [users, setUsers] = useState<IUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const { id: tournamentId }: { id: string } = useParams();
   const dispatch = useAppDispatch();
@@ -28,7 +30,7 @@ const SelectWinnerUserModal = ({
     try {
       const tournamentRef = doc(db, "tournaments", tournamentId);
       await updateDoc(tournamentRef, {
-        winner_user: selectedUser,
+        winner_user: selectedUser?.uid,
         status: "finished",
       });
       if (selectedUser) {
@@ -41,6 +43,19 @@ const SelectWinnerUserModal = ({
       console.log(error);
     }
   };
+
+  const handleLoadUsers = async () => {
+    try {
+      const users = await handleGetUsersByIds(usersIds);
+      setUsers(users);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    handleLoadUsers();
+  }, []);
 
   return (
     <>

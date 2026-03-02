@@ -34,26 +34,3 @@ export async function GET() {
     );
   }
 }
-
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-
-    const newTournament = {
-      ...body,
-      createdAt: new Date().toString(),
-      users: [],
-      teams: [],
-      winner_team: null,
-      winner_user: null,
-      judges: [],
-    };
-
-    const docRef = await addDoc(collection(db, "tournaments"), newTournament);
-
-    return NextResponse.json({ id: docRef.id, ...newTournament });
-  } catch (error: any) {
-    console.error("Create tournament error:", error);
-    return NextResponse.json({ error: "Failed to create" }, { status: 500 });
-  }
-}

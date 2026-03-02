@@ -1,9 +1,15 @@
 import useTournamentUsersRealtime from "@/app/utils/useTournamentUsersRealtime";
-import { Loader2, User, Users } from "lucide-react";
+import { Loader2, Sword, Swords, User, Users } from "lucide-react";
 import React from "react";
 
 const TournamentStats: React.FC = () => {
-  const { totalJoinedUsers, totalTeams, loading } = useTournamentUsersRealtime({
+  const {
+    totalJoinedUsers,
+    totalSingleTournaments,
+    totalTeamTournaments,
+    totalTeams,
+    loading,
+  } = useTournamentUsersRealtime({
     onlyActive: false,
   });
 
@@ -32,6 +38,28 @@ const TournamentStats: React.FC = () => {
           <span className="text-xs text-muted-foreground">Команды</span>
           <p className="text-sm font-bold text-foreground font-display">
             {totalTeams.toLocaleString()}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-card px-4 py-2">
+        <Swords className="text-primary w-4 h-4" />
+        <div>
+          <span className="text-xs text-muted-foreground">
+            Командных турниров
+          </span>
+          <p className="text-sm font-bold text-foreground font-display">
+            {totalTeamTournaments.toLocaleString()}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-card px-4 py-2">
+        <Sword className="text-primary w-4 h-4" />
+        <div>
+          <span className="text-xs text-muted-foreground">
+            Одиночных турниров
+          </span>
+          <p className="text-sm font-bold text-foreground font-display">
+            {totalSingleTournaments.toLocaleString()}
           </p>
         </div>
       </div>

@@ -33,7 +33,7 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
           if (team.uid === teamId) {
             return {
               ...team,
-              users: [...team.users, user],
+              usersIds: [...team.usersIds, user.uid],
             };
           }
           return team;
@@ -41,7 +41,7 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
       });
 
       dispatch(
-        addTeamParticipant({ tournamentId, teamId: teamId, user: user }),
+        addTeamParticipant({ tournamentId, teamId: teamId, userUid: user.uid }),
       );
       onClose();
     } catch (error) {

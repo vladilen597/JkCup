@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, or, query, where } from "firebase/firestore";
 import admin from "firebase-admin";
 import { db as firebaseDB } from "@/app/utils/firebase";
 
