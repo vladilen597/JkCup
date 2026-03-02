@@ -8,6 +8,7 @@ import { X, Plus, Clock, Users, Trophy, Gamepad2 } from "lucide-react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
+import DescriptionEditor from "./DescriptionEditor/DescriptionEditor";
 
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
@@ -110,6 +111,8 @@ const CreateTournamentModal = ({
             className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-25 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
+
+        <DescriptionEditor />
 
         <div className="col-span-2">
           <span className="text-sm font-medium">Тип турнира</span>
