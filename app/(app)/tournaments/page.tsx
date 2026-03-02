@@ -15,7 +15,13 @@ import {
 } from "@/app/utils/store/tournamentsSlice";
 import Tournament from "@/app/utils/Tournament";
 import axios from "axios";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { motion } from "framer-motion";
 import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -90,8 +96,35 @@ const page = () => {
   };
 
   useEffect(() => {
-    handleLoadTournaments();
-  }, []);
+    const colRef = collection(db, "tournaments");
+
+    const unsubscribe = onSnapshot(
+      colRef,
+      (snapshot) => {
+        const updatedTournaments = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as ITournament;
+          const id = docSnap.id;
+
+          if (
+            data.start_date &&
+            new Date(data.start_date) < new Date() &&
+            data.status === "open"
+          ) {
+            updateDoc(doc(db, "tournaments", id), { status: "about_to_start" });
+          }
+
+          return { ...data, id };
+        });
+
+        dispatch(setTournaments(updatedTournaments));
+      },
+      (error) => {
+        console.error("Ошибка подписки на турниры:", error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [dispatch]);
 
   const handleCreateTournament = async (e: React.FormEvent) => {
     e.preventDefault();
