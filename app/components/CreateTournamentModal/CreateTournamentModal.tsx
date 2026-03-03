@@ -61,7 +61,7 @@ const CreateTournamentModal = ({
   const handleTagChange = (id: string, newValue: string) => {
     handleChange((prev: any) => ({
       ...prev,
-      tags: prev.tags.map((tag: ITag) =>
+      tags: prev.tags?.map((tag: ITag) =>
         tag.id === id ? { ...tag, value: newValue } : tag,
       ),
     }));
@@ -70,7 +70,7 @@ const CreateTournamentModal = ({
   const removeTag = (id: string) => {
     handleChange((prevState: any) => ({
       ...prevState,
-      tags: prevState.tags.filter((tag: any) => tag.id !== id),
+      tags: prevState.tags?.filter((tag: any) => tag.id !== id),
     }));
   };
 
@@ -95,7 +95,7 @@ const CreateTournamentModal = ({
   const updateTagColor = (id: string, bgColor: string, textColor: string) => {
     handleChange((prev: any) => ({
       ...prev,
-      tags: prev.tags.map((tag: ITag) =>
+      tags: prev.tags?.map((tag: ITag) =>
         tag.id === id ? { ...tag, bgColor, textColor } : tag,
       ),
     }));
@@ -152,7 +152,7 @@ const CreateTournamentModal = ({
             Теги
           </label>
           <ul className="mt-2 flex items-center gap-1 flex-wrap">
-            {formData.tags.map((tag) => (
+            {formData.tags?.map((tag) => (
               <li key={tag.id}>
                 <TagSelect
                   {...tag}

@@ -81,17 +81,19 @@ const EditModal = ({
 }: IEditModalProps) => {
   const handleTagChange = (id: string, newValue: string) => {
     onTagsChange(
-      tags.map((tag) => (tag.id === id ? { ...tag, value: newValue } : tag)),
+      tags?.map((tag) => (tag.id === id ? { ...tag, value: newValue } : tag)),
     );
   };
 
   const removeTag = (id: string) => {
-    onTagsChange(tags.filter((tag) => tag.id !== id));
+    onTagsChange(tags?.filter((tag) => tag.id !== id));
   };
 
   const updateTagColor = (id: string, bgColor: string, textColor: string) => {
     onTagsChange(
-      tags.map((tag) => (tag.id === id ? { ...tag, bgColor, textColor } : tag)),
+      tags?.map((tag) =>
+        tag.id === id ? { ...tag, bgColor, textColor } : tag,
+      ),
     );
   };
 
@@ -147,7 +149,7 @@ const EditModal = ({
             Теги
           </label>
           <ul className="mt-2 flex items-center gap-1 flex-wrap">
-            {tags.map((tag) => (
+            {tags?.map((tag) => (
               <li key={tag.id}>
                 <TagSelect
                   {...tag}

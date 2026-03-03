@@ -564,7 +564,7 @@ const TournamentPage = () => {
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 {isTeamMode ? "Командный" : "Одиночный"}
               </span>
-              {tournament.tags.map((tag) => (
+              {tournament.tags?.map((tag) => (
                 <Tag key={tag.id} {...tag} />
               ))}
             </div>
