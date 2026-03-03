@@ -47,6 +47,7 @@ const page = () => {
     max_teams: 6,
     players_per_team: 2,
     start_date: "",
+    tags: [],
     rewards: [{ id: uuidv4(), value: "" }],
     status: "open",
     duration: 0,
@@ -54,32 +55,6 @@ const page = () => {
 
   const canCreateTournament =
     user?.role === "admin" || user?.role === "superadmin";
-
-  const handleLoadTournaments = async () => {
-    try {
-      const { data } = await axios.get("/api/tournaments");
-      data.forEach((tournament: ITournament) => {
-        if (
-          tournament.start_date &&
-          new Date(tournament.start_date) < new Date()
-        ) {
-          const tournamentRef = doc(db, "tournaments", tournament.id);
-          updateDoc(tournamentRef, {
-            status: "about_to_start",
-          });
-          dispatch(
-            updateTournamentStatus({
-              tournamentId: tournament.id,
-              status: "about_to_start",
-            }),
-          );
-        }
-      });
-      dispatch(setTournaments(data));
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    }
-  };
 
   const handleAddReward = () => {
     setFormData((prevState: any) => ({
