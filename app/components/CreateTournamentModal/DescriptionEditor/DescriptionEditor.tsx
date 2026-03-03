@@ -1,18 +1,15 @@
-import React, { useRef, useState } from "react";
 import RichEditor from "../../Shared/RichEditor/RichEditor";
 
-type Props = {};
-
-const DescriptionEditor = (props: Props) => {
-  const [text, setText] = useState("");
-
-  const handleChangeHtml = (value: string) => {
-    setText(value);
-  };
-
+const DescriptionEditor = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) => {
   return (
     <label>
-      <RichEditor />
+      <RichEditor value={value} onChange={onChange} />
     </label>
   );
 };

@@ -3,6 +3,10 @@ import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { statuses } from "../(app)/tournaments/[id]/page";
+import CleanHtml from "../components/Shared/CleanHtml/CleanHtml";
+import { ITag } from "../lib/types";
+import { cn } from "@/lib/utils";
+import Tag from "../components/Shared/Tag/Tag";
 
 interface ITournamentProps {
   id: string;
@@ -18,6 +22,7 @@ interface ITournamentProps {
   description: string;
   start_date: string;
   status: string;
+  tags: ITag[];
   maxPlayers: number;
   rewards: { id: string; value: string }[];
 }
@@ -41,6 +46,7 @@ const Tournament = ({
   maxPlayers,
   isFull,
   rewards,
+  tags,
   description,
 }: ITournamentProps) => {
   return (
@@ -73,13 +79,16 @@ const Tournament = ({
                     className="bg-destructive/10 text-destructive border border-destructive/20"
                   />
                 )}
+                {tags?.map((tag) => (
+                  <Tag key={tag.id} {...tag} />
+                ))}
               </div>
               <div className="flex gap-1 items-center text-sm text-neutral-300 line-clamp-1">
                 <Gamepad2 /> {game}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground line-clamp-1">
-                {description}
-              </p>
+              <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
+                <CleanHtml html={description} />
+              </div>
               {!!rewards?.length && (
                 <ul className="mt-2">
                   {rewards?.map((reward, index) => (

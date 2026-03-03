@@ -61,6 +61,9 @@ import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/Select
 import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
 import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
+import CleanHtml from "@/app/components/Shared/CleanHtml/CleanHtml";
+import { ITag } from "@/app/lib/types";
+import Tag from "@/app/components/Shared/Tag/Tag";
 
 export const statuses = {
   open: "Открыт",
@@ -78,6 +81,7 @@ export interface IEditTournament {
   max_players: number;
   players_per_team: number;
   start_date: string;
+  tags: ITag[];
   type: ISelectOption;
   duration: number;
   rewards: { id: string; value: string }[];
@@ -120,6 +124,7 @@ const TournamentPage = () => {
       value: "team",
       label: "Командный",
     },
+    tags: tournament?.tags || [],
     rewards: tournament?.rewards || [],
     duration: tournament?.duration || 0,
   });
@@ -133,8 +138,8 @@ const TournamentPage = () => {
     setEditForm({ ...editForm, [event.target.name]: event.target.value });
   };
 
-  const handleUpdateTextField = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setEditForm({ ...editForm, description: event?.target.value });
+  const handleUpdateTextField = (value: string) => {
+    setEditForm({ ...editForm, description: value });
   };
 
   const handleUpdateTeamAmount = (value: number) => {
@@ -223,6 +228,7 @@ const TournamentPage = () => {
           : null,
         rewards: editForm.rewards,
         duration: editForm.duration,
+        tags: editForm.tags,
       });
 
       const updatedTournaments = tournaments.map((t) =>
@@ -558,6 +564,9 @@ const TournamentPage = () => {
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                 {isTeamMode ? "Командный" : "Одиночный"}
               </span>
+              {tournament.tags.map((tag) => (
+                <Tag key={tag.id} {...tag} />
+              ))}
             </div>
           </div>
 
@@ -567,9 +576,8 @@ const TournamentPage = () => {
             startedAt={tournament.startedAt}
             status={tournament.status}
           />
-          <p className="mt-2 text-muted-foreground max-w-2xl leading-relaxed">
-            {tournament.description}
-          </p>
+
+          <CleanHtml html={tournament.description} />
 
           <div className="mt-2">
             <span className="block font-bold">Награды</span>
@@ -776,6 +784,9 @@ const TournamentPage = () => {
         <EditModal
           {...editForm}
           isLoading={isLoading}
+          onTagsChange={(newTags) =>
+            setEditForm({ ...editForm, tags: newTags })
+          }
           onInputChange={handleUpdateEditField}
           onTextareaChange={handleUpdateTextField}
           onTeamAmountChange={handleUpdateTeamAmount}

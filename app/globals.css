@@ -261,3 +261,27 @@ h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #0e6e66 !important;
 }
+
+.prose-container ul,
+.ProseMirror ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.prose-container ol,
+.ProseMirror ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.prose-container li,
+.ProseMirror li {
+  display: list-item !important;
+  margin-bottom: 0.25rem !important;
+}

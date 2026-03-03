@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { X, Plus, Clock } from "lucide-react";
+import { X, Plus, Clock, Tag } from "lucide-react";
 import { ChangeEvent, FormEvent } from "react";
 import CustomSelect, {
   ISelectOption,
@@ -12,7 +12,18 @@ import CustomButton, {
 } from "../Shared/CustomButton/CustomButton";
 import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import DurationPicker from "../Shared/DurationPicker/DurationPicker";
+import dynamic from "next/dynamic";
+import { ITag } from "@/app/lib/types";
+import { v4 as uuidv4 } from "uuid";
+import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
 
+const Tiptap = dynamic(
+  () => import("@/app/components/Shared/RichEditor/RichEditor"),
+  {
+    ssr: false,
+    loading: () => <div className="h-50 bg-muted animate-pulse rounded-lg" />,
+  },
+);
 interface IEditModalProps {
   name: string;
   description: string;
@@ -24,9 +35,11 @@ interface IEditModalProps {
   duration: number;
   isLoading: boolean;
   type: ISelectOption;
+  tags: ITag[];
   rewards: { id: string; value: string }[];
+  onTagsChange: (tags: ITag[]) => void;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onTextareaChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onTextareaChange: (value: string) => void;
   onTeamAmountChange: (value: number) => void;
   onStartDateChange: (value: string) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
@@ -51,6 +64,7 @@ const EditModal = ({
   isLoading,
   type,
   rewards,
+  tags,
   onInputChange,
   onTextareaChange,
   onTeamAmountChange,
@@ -61,10 +75,40 @@ const EditModal = ({
   handleAddReward,
   handleDeleteReward,
   handleChangeDuration,
+  onTagsChange,
   onSubmit,
   onClose,
 }: IEditModalProps) => {
-  console.log("duration", duration);
+  const handleTagChange = (id: string, newValue: string) => {
+    onTagsChange(
+      tags.map((tag) => (tag.id === id ? { ...tag, value: newValue } : tag)),
+    );
+  };
+
+  const removeTag = (id: string) => {
+    onTagsChange(tags.filter((tag) => tag.id !== id));
+  };
+
+  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
+    onTagsChange(
+      tags.map((tag) => (tag.id === id ? { ...tag, bgColor, textColor } : tag)),
+    );
+  };
+
+  const addNewTag = () => {
+    const randomColor =
+      TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
+    onTagsChange([
+      ...tags,
+      {
+        id: uuidv4(),
+        value: "",
+        bgColor: randomColor.bg,
+        textColor: randomColor.text,
+      },
+    ]);
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -98,13 +142,38 @@ const EditModal = ({
         </div>
 
         <div>
+          <label className="flex items-center gap-2 text-sm font-medium mb-1">
+            <Tag className="w-4 h-4" />
+            Теги
+          </label>
+          <ul className="mt-2 flex items-center gap-1 flex-wrap">
+            {tags.map((tag) => (
+              <li key={tag.id}>
+                <TagSelect
+                  {...tag}
+                  onChange={(val: string) => handleTagChange(tag.id, val)}
+                  onDeleteClick={() => removeTag(tag.id)}
+                  onColorChange={(bg: string, txt: string) =>
+                    updateTagColor(tag.id, bg, txt)
+                  }
+                />
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                className="bg-primary/10 flex items-center gap-2 px-2 py-0.5 rounded-full text-[13px] cursor-pointer"
+                onClick={addNewTag}
+              >
+                <Plus className="w-4 h-4" /> Тег
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div>
           <label className="block text-sm font-medium mb-1">Описание</label>
-          <textarea
-            name="description"
-            value={description}
-            onChange={onTextareaChange}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-25 focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Tiptap value={description} onChange={onTextareaChange} />
         </div>
 
         <div className="col-span-2">

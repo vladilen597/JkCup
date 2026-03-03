@@ -3,13 +3,13 @@ import { SubmitEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
-import { X, Plus, Clock, Users, Trophy, Gamepad2 } from "lucide-react";
+import { X, Plus, Clock, Users, Trophy, Gamepad2, Tag } from "lucide-react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
-import DescriptionEditor from "./DescriptionEditor/DescriptionEditor";
 import DateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import DurationPicker from "../Shared/DurationPicker/DurationPicker";
+import { v4 as uuidv4 } from "uuid";
 
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
@@ -27,6 +27,7 @@ interface ICreateTournamentModalProps {
     max_teams: number;
     players_per_team: number;
     start_date: string;
+    tags: ITag[];
     duration: number;
     rewards: { id: string; value: string }[];
   };
@@ -37,6 +38,18 @@ interface ICreateTournamentModalProps {
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 }
 
+import dynamic from "next/dynamic";
+import { ITag } from "@/app/lib/types";
+import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
+
+const Tiptap = dynamic(
+  () => import("@/app/components/Shared/RichEditor/RichEditor"),
+  {
+    ssr: false,
+    loading: () => <div className="h-50 bg-muted animate-pulse rounded-lg" />,
+  },
+);
+
 const CreateTournamentModal = ({
   formData,
   handleChange,
@@ -45,6 +58,49 @@ const CreateTournamentModal = ({
   handleAddReward,
   onSubmit,
 }: ICreateTournamentModalProps) => {
+  const handleTagChange = (id: string, newValue: string) => {
+    handleChange((prev: any) => ({
+      ...prev,
+      tags: prev.tags.map((tag: ITag) =>
+        tag.id === id ? { ...tag, value: newValue } : tag,
+      ),
+    }));
+  };
+
+  const removeTag = (id: string) => {
+    handleChange((prevState: any) => ({
+      ...prevState,
+      tags: prevState.tags.filter((tag: any) => tag.id !== id),
+    }));
+  };
+
+  const addNewTag = () => {
+    const randomColor =
+      TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
+
+    handleChange((prev: any) => ({
+      ...prev,
+      tags: [
+        ...prev.tags,
+        {
+          id: uuidv4(),
+          value: "", // Пустой для ввода
+          bgColor: randomColor.bg,
+          textColor: randomColor.text,
+        },
+      ],
+    }));
+  };
+
+  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
+    handleChange((prev: any) => ({
+      ...prev,
+      tags: prev.tags.map((tag: ITag) =>
+        tag.id === id ? { ...tag, bgColor, textColor } : tag,
+      ),
+    }));
+  };
+
   const canAddMoreRewards =
     formData.type.value === "team"
       ? formData.max_teams > formData.rewards.length
@@ -91,17 +147,48 @@ const CreateTournamentModal = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Описание</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              handleChange({ ...formData, description: e.target.value })
-            }
-            className="w-full p-2.5 rounded-lg bg-muted border border-border min-h-25 focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <label className="flex items-center gap-2 text-sm font-medium mb-1">
+            <Tag className="w-4 h-4" />
+            Теги
+          </label>
+          <ul className="mt-2 flex items-center gap-1 flex-wrap">
+            {formData.tags.map((tag) => (
+              <li key={tag.id}>
+                <TagSelect
+                  {...tag}
+                  onChange={(val: string) => handleTagChange(tag.id, val)}
+                  onDeleteClick={() => removeTag(tag.id)}
+                  onColorChange={(bg: string, txt: string) =>
+                    updateTagColor(tag.id, bg, txt)
+                  }
+                />
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                className="bg-primary/10 flex items-center gap-2 px-2 py-0.5 rounded-full text-[13px] cursor-pointer"
+                onClick={addNewTag}
+              >
+                <Plus className="w-4 h-4" /> Тег
+              </button>
+            </li>
+          </ul>
         </div>
 
-        <DescriptionEditor />
+        <div>
+          <label className="block text-sm font-medium mb-1">Описание</label>
+
+          <Tiptap
+            value={formData.description}
+            onChange={(value) =>
+              handleChange((prevState: any) => ({
+                ...prevState,
+                description: value,
+              }))
+            }
+          />
+        </div>
 
         <div className="col-span-2">
           <span className="text-sm font-medium">Тип турнира</span>

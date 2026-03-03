@@ -3,3 +3,10 @@ export interface FirestoreTimestamp {
   nanoseconds: number;
   toDate: () => Date;
 }
+
+export interface ITag {
+  id: string;
+  value: string;
+  bgColor: string;
+  textColor: string;
+}

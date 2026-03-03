@@ -78,6 +78,7 @@ const TournamentPage = () => {
     winner_team: null,
     winner_user: null,
     rewards: [],
+    tags: [],
     bracket: {
       rounds: [],
       currentRound: 0,
