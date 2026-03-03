@@ -7,11 +7,11 @@ export interface IBracket {
     id: string;
     matches: {
       id: string;
-      users: IUser[]; // Ensure this is an array
+      users: IUser[];
       score: string;
     }[];
   }[];
-  currentRound: number; // If this is mandatory, ensure it's initialized in your initial state
+  currentRound: number;
   participants: IUser[];
 }
 
@@ -20,7 +20,7 @@ export interface ITournament {
   game: string;
   max_players: number;
   name: string;
-  users: IUser[];
+  usersIds: string[];
   type: ISelectOption;
   max_teams: number;
   players_per_team: number;
@@ -29,7 +29,7 @@ export interface ITournament {
   status: string;
   teams: ITeam[];
   duration: number;
-  judges: IUser[];
+  judgesIds: string[];
   winner_team: ITeam | null;
   winner_user: IUser | null;
   rewards: { id: string; value: string }[];
@@ -48,7 +48,7 @@ export interface ITeam {
   uid: string;
   creator_uid: string;
   name?: string;
-  users: IUser[];
+  usersIds: string[];
   is_private: boolean;
 }
 
@@ -109,18 +109,18 @@ const tournamentsSlice = createSlice({
           name: teamName,
           is_private,
           creator_uid: currentUser.uid,
-          users: [currentUser],
+          usersIds: [currentUser.uid],
         });
       }
     },
     addJudge: (
       state,
-      action: PayloadAction<{ tournamentId: string; user: IUser }>,
+      action: PayloadAction<{ tournamentId: string; userId: string }>,
     ) => {
       const tournament = state.tournaments.find(
         (t) => t.id === action.payload.tournamentId,
       );
-      tournament?.judges.push(action.payload.user);
+      tournament?.judgesIds.push(action.payload.userId);
     },
     removeJudge: (
       state,
@@ -130,8 +130,8 @@ const tournamentsSlice = createSlice({
         (t) => t.id === action.payload.tournamentId,
       );
       if (tournament) {
-        tournament.judges = tournament.judges.filter(
-          (judge) => judge.uid !== action.payload.userId,
+        tournament.judgesIds = tournament.judgesIds.filter(
+          (judgeId) => judgeId !== action.payload.userId,
         );
       }
     },
@@ -181,8 +181,8 @@ const tournamentsSlice = createSlice({
         (t) => t.id === action.payload.tournamentId,
       );
       if (tournament) {
-        tournament.users = tournament.users.filter(
-          (user) => user.uid !== action.payload.userId,
+        tournament.usersIds = tournament.usersIds.filter(
+          (userArrayId) => userArrayId !== action.payload.userId,
         );
       }
     },
@@ -203,7 +203,7 @@ const tournamentsSlice = createSlice({
       action: PayloadAction<{
         tournamentId: string;
         teamId: string;
-        user: IUser;
+        userUid: string;
       }>,
     ) => {
       const tournament = state.tournaments.find(
@@ -214,7 +214,7 @@ const tournamentsSlice = createSlice({
         const team = tournament.teams.find(
           (team) => team.uid === action.payload.teamId,
         );
-        team?.users.push(action.payload.user);
+        team?.usersIds.push(action.payload.userUid);
       }
     },
     addParticipant: (
@@ -227,8 +227,8 @@ const tournamentsSlice = createSlice({
       const { tournamentId, participant } = action.payload;
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
-        if (!tournament.users.some((u) => u.uid === participant.uid)) {
-          tournament.users.push(participant);
+        if (!tournament.usersIds.includes(participant.uid)) {
+          tournament.usersIds.push(participant.uid);
         }
       }
     },
@@ -242,7 +242,9 @@ const tournamentsSlice = createSlice({
       const { tournamentId, userId } = action.payload;
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
-        tournament.users = tournament.users.filter((u) => u.uid !== userId);
+        tournament.usersIds = tournament.usersIds.filter(
+          (userArrayId) => userArrayId !== userId,
+        );
       }
     },
     updateBracketUser: (state, action) => {

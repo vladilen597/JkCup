@@ -1,16 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Loader2, X, Plus, Clock } from "lucide-react";
+import { X, Plus, Clock } from "lucide-react";
 import { ChangeEvent, FormEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
 import { selectTypeOptions } from "../CreateTournamentModal/CreateTournamentModal";
-import { useDurationInput } from "react-duration-input";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
+import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
+import DurationPicker from "../Shared/DurationPicker/DurationPicker";
 
 interface IEditModalProps {
   name: string;
@@ -33,7 +34,7 @@ interface IEditModalProps {
   handleRewardChange: (index: number, value: string) => void;
   handleAddReward: () => void;
   handleDeleteReward: (id: string) => void;
-  handleChangeDuration: (ms: number) => void;
+  handleChangeDuration: (ms: any) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }
@@ -63,14 +64,7 @@ const EditModal = ({
   onSubmit,
   onClose,
 }: IEditModalProps) => {
-  const durationInputProps = useDurationInput({
-    timeInMilliseconds: duration,
-    isMilliseconds: false,
-    onTimeUpdate: (ms: number) => {
-      handleChangeDuration(ms);
-    },
-  });
-
+  console.log("duration", duration);
   return (
     <>
       <div className="mb-6">
@@ -162,14 +156,10 @@ const EditModal = ({
         <div>
           <label className="text-sm font-medium mb-1 flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            Длительность турнира
+            Длительность
           </label>
 
-          <input
-            {...durationInputProps}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="Например: 2:30 (2 часа 30 минут)"
-          />
+          <DurationPicker valueMs={duration} onChange={handleChangeDuration} />
         </div>
 
         <div className="space-y-3">
@@ -232,12 +222,9 @@ const EditModal = ({
 
         <div className="mt-3">
           <label className="block text-sm font-medium mb-1">Дата начала</label>
-          <input
-            name="start_date"
-            type="datetime-local"
+          <DarkDateTimePicker
             value={start_date}
-            onChange={(event) => onStartDateChange(event.target.value)}
-            className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+            onChange={(value) => onStartDateChange(value)}
           />
         </div>
 

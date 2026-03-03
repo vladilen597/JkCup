@@ -43,6 +43,7 @@ const UserAddList = ({
         {users.map((user, index) => {
           return (
             <UserAddItem
+              key={user.uid}
               user={user}
               index={index}
               teamId={teamId}

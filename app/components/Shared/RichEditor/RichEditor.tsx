@@ -15,7 +15,14 @@ import { HardBreak } from "@tiptap/extension-hard-break";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { ListItem } from "@tiptap/extension-list";
 
-const extensions = [Text, Dropcursor, HardBreak, Paragraph, ListItem];
+const extensions = [
+  StarterKit,
+  Text,
+  Dropcursor,
+  HardBreak,
+  Paragraph,
+  ListItem,
+];
 
 const Tiptap = () => {
   const editor = useEditor({
@@ -28,11 +35,7 @@ const Tiptap = () => {
     return null;
   }
 
-  return (
-    <RichTextProvider editor={editor}>
-      <EditorContent editor={editor} />
-    </RichTextProvider>
-  );
+  return <EditorContent editor={editor} />;
 };
 
 export default Tiptap;

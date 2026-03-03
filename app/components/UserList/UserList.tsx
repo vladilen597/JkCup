@@ -1,11 +1,14 @@
 "use client";
 
-import { Users } from "lucide-react";
+import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
+import { IUser } from "@/app/utils/store/userSlice";
+import { useEffect, useState } from "react";
 import UserLine from "./UserLine/UserLine";
+import { Users } from "lucide-react";
 
 interface UserListProps {
   showRoles?: boolean;
-  users: any[];
+  usersIds: string[];
   emptyMessage?: string;
   hideDelete?: boolean;
   handleClickDelete?: (userId: any) => void;
@@ -13,12 +16,29 @@ interface UserListProps {
 
 const UserList = ({
   showRoles,
-  users,
+  usersIds,
   emptyMessage = "Пока нет участников",
   hideDelete,
   handleClickDelete,
 }: UserListProps) => {
-  if (users.length === 0) {
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  const handleLoadUsersArray = async () => {
+    try {
+      const users: IUser[] = await handleGetUsersByIds(usersIds);
+      setUsers(users);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (usersIds.length) {
+      handleLoadUsersArray();
+    }
+  }, [usersIds]);
+
+  if (usersIds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Users className="h-10 w-10 mb-3 opacity-30" />

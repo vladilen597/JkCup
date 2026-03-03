@@ -27,10 +27,10 @@ const JudgeAddItem = ({ user, index, onClose }: IJudgeAddItemProps) => {
       const tournamentRef = doc(db, "tournaments", tournamentId);
 
       await updateDoc(tournamentRef, {
-        judges: arrayUnion(user),
+        judgesIds: arrayUnion(user.uid),
       });
 
-      dispatch(addJudge({ tournamentId, user }));
+      dispatch(addJudge({ tournamentId, userId: user.uid }));
       onClose();
     } catch (error) {
       console.log(error);

@@ -63,7 +63,7 @@ const page = () => {
           const isTeam = tournament.type.value === "team";
           const usersAmount = isTeam
             ? tournament.teams.length
-            : tournament.users?.length || 0;
+            : tournament.usersIds?.length || 0;
           const teamsAmount = tournament.teams.length || 0;
           const fillPercent = isTeam
             ? Math.round((teamsAmount / tournament.max_teams) * 100)

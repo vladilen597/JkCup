@@ -15,7 +15,13 @@ import {
 } from "@/app/utils/store/tournamentsSlice";
 import Tournament from "@/app/utils/Tournament";
 import axios from "axios";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { motion } from "framer-motion";
 import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -90,8 +96,35 @@ const page = () => {
   };
 
   useEffect(() => {
-    handleLoadTournaments();
-  }, []);
+    const colRef = collection(db, "tournaments");
+
+    const unsubscribe = onSnapshot(
+      colRef,
+      (snapshot) => {
+        const updatedTournaments = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as ITournament;
+          const id = docSnap.id;
+
+          if (
+            data.start_date &&
+            new Date(data.start_date) < new Date() &&
+            data.status === "open"
+          ) {
+            updateDoc(doc(db, "tournaments", id), { status: "about_to_start" });
+          }
+
+          return { ...data, id };
+        });
+
+        dispatch(setTournaments(updatedTournaments));
+      },
+      (error) => {
+        console.error("Ошибка подписки на турниры:", error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [dispatch]);
 
   const handleCreateTournament = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,10 +137,10 @@ const page = () => {
         ...formData,
         creator: user,
         status: "open",
-        users: [],
+        usersIds: [],
         teams: [],
-        judges: [],
-        createdAt: new Date().toString(),
+        judgesIds: [],
+        createdAt: new Date(),
 
         bracket: isBracket
           ? {
@@ -131,16 +164,22 @@ const page = () => {
           : null,
       };
 
-      const res = await axios.post("/api/tournaments", {
+      const docRef = await addDoc(collection(db, "tournaments"), {
         ...formData,
         creator: user,
         bracket: newTournamentBase.bracket,
+        createdAt: new Date().toString(),
+        usersIds: [],
+        teams: [],
+        winner_team: null,
+        winner_user: null,
+        judgesIds: [],
       });
 
       dispatch(
         setTournaments([
           ...tournaments,
-          { ...newTournamentBase, id: res.data.id },
+          { ...newTournamentBase, id: docRef.id },
         ]),
       );
 
@@ -198,7 +237,7 @@ const page = () => {
             const isTeam = tournament.type.value === "team";
             const usersAmount = isTeam
               ? tournament.teams.length
-              : tournament.users?.length || 0;
+              : tournament.usersIds?.length || 0;
             const teamsAmount = tournament.teams.length || 0;
             const fillPercent = isTeam
               ? Math.round((teamsAmount / tournament.max_teams) * 100)

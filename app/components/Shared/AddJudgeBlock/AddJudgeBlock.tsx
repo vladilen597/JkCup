@@ -7,19 +7,20 @@ import { IUser } from "@/app/utils/store/userSlice";
 import JudgeItem from "./JudgeItem/JudgeItem";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import CustomButton from "../CustomButton/CustomButton";
+import JudgeList from "./JudgeList/JudgeList";
 
 const AddJudgeBlock = ({
   isTeamTournament,
   tournamentStatus,
-  judges,
+  judgesIds,
   teams,
-  users,
+  usersIds,
 }: {
   isTeamTournament: boolean;
   tournamentStatus: string;
-  judges: IUser[];
+  judgesIds: string[];
   teams: ITeam[];
-  users: IUser[];
+  usersIds: string[];
 }) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isAddJudgeModalOpen, setIsAddJudgeModalOpen] = useState(false);
@@ -27,9 +28,9 @@ const AddJudgeBlock = ({
   const occupiedUserIds = new Set(
     isTeamTournament
       ? teams.flatMap((team) => {
-          return team.users?.map((user) => user.uid) || [];
+          return team.usersIds;
         })
-      : users?.map((user) => user.uid),
+      : usersIds.concat(judgesIds),
   );
 
   const handleOpenAddJudgeModal = () => {
@@ -46,7 +47,7 @@ const AddJudgeBlock = ({
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <ShieldUser className="h-5 w-5 text-primary" />
-            Судьи ({judges.length})
+            Судьи ({judgesIds.length})
           </h2>
           {currentUser.role !== "user" &&
             (tournamentStatus === "open" ||
@@ -59,13 +60,7 @@ const AddJudgeBlock = ({
             )}
         </div>
       </section>
-      {!!judges.length && (
-        <ul className="mt-2 space-y-2 rounded-lg border border-border/50 overflow-hidden">
-          {judges.map((judge, index) => (
-            <JudgeItem key={judge.uid} user={judge} index={index} />
-          ))}
-        </ul>
-      )}
+      {!!judgesIds.length && <JudgeList judgesIds={judgesIds} />}
       {currentUser.role !== "user" && (
         <CustomModal
           isOpen={isAddJudgeModalOpen}

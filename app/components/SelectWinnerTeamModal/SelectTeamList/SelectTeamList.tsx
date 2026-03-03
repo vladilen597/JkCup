@@ -4,6 +4,7 @@ import Discord from "../../Icons/Discord";
 import { SetStateAction } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import SelectTeamUserList from "./SelectTeamUserList/SelectTeamUserList";
 
 interface TeamListProps {
   teams: ITeam[];
@@ -25,8 +26,6 @@ const SelectTeamList = ({
   return (
     <ul className="space-y-2">
       {teams.map((team) => {
-        const users = team.users || [];
-
         return (
           <li
             key={team.uid}
@@ -42,44 +41,7 @@ const SelectTeamList = ({
               </h3>
             </div>
 
-            <ul className="space-y-2">
-              {users.map((user) => (
-                <li key={user.uid}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-sm">
-                      {user.photoUrl ? (
-                        <Image
-                          width={40}
-                          height={40}
-                          src={user.photoUrl}
-                          alt=""
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white">
-                          {user.displayName?.[0] || "?"}
-                        </div>
-                      )}
-                      <div>
-                        <div>
-                          <span className="truncate">{user.displayName}</span>
-                          {currentUser.uid === user.uid && (
-                            <span className="ml-2 text-xs text-orange-400">
-                              Вы
-                            </span>
-                          )}
-                        </div>
-                        {user.discord && (
-                          <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                            <Discord className="w-4 h-4" /> {user.discord}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <SelectTeamUserList usersIds={team.usersIds} />
           </li>
         );
       })}

@@ -13,17 +13,16 @@ import { db } from "@/app/utils/firebase";
 import { useParams } from "next/navigation";
 import CustomModal from "../../Shared/CustomModal/CustomModal";
 import UserAddList from "./UserAddList/UserAddList";
-import { IUser } from "@/app/utils/store/userSlice";
 import { useState } from "react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../../Shared/CustomButton/CustomButton";
+import TeamUserList from "../TeamUserList/TeamUserList";
 
 interface ITeamItemProps extends ITeam {
   filled: number;
   teams: ITeam[];
   players_per_team: number;
-  is_my_team: boolean;
   tournament_status: string;
   canJoin: boolean;
   occupiedUserIds: Set<string>;
@@ -35,9 +34,8 @@ const TeamItem = ({
   is_private,
   filled,
   players_per_team,
-  users,
+  usersIds,
   creator_uid,
-  is_my_team,
   canJoin,
   tournament_status,
   teams,
@@ -59,6 +57,7 @@ const TeamItem = ({
 
   const isEnoughRole =
     currentUser.role === "admin" || currentUser.role === "superadmin";
+  const isMyTeam = usersIds.includes(currentUser.uid);
 
   const handleDeleteTeam = async (teamId: string) => {
     try {
@@ -77,7 +76,7 @@ const TeamItem = ({
     }
   };
 
-  const handleLeaveTeam = async (clickedUser: IUser) => {
+  const handleLeaveTeam = async (clickedUserUid: string) => {
     try {
       const tournamentRef = doc(db, "tournaments", tournamentId);
 
@@ -85,7 +84,9 @@ const TeamItem = ({
         if (team.uid === uid) {
           return {
             ...team,
-            users: team.users.filter((user) => user.uid !== clickedUser.uid),
+            usersIds: team.usersIds.filter(
+              (userId) => userId !== clickedUserUid,
+            ),
           };
         } else {
           return team;
@@ -112,7 +113,7 @@ const TeamItem = ({
           if (team.uid === uid) {
             return {
               ...team,
-              users: [...team.users, currentUser],
+              usersIds: [...team.usersIds, currentUser.uid],
             };
           }
           return team;
@@ -120,7 +121,11 @@ const TeamItem = ({
       });
 
       dispatch(
-        addTeamParticipant({ tournamentId, teamId: uid, user: currentUser }),
+        addTeamParticipant({
+          tournamentId,
+          teamId: uid,
+          userUid: currentUser.uid,
+        }),
       );
     } catch (error) {
       console.log(error);
@@ -158,17 +163,13 @@ const TeamItem = ({
         </div>
 
         <div className="space-y-2">
-          {users.map((user) => (
-            <TeamUserItem
-              key={user.uid}
-              {...user}
-              isMyTeam={is_my_team}
-              isLoading={isLoading}
-              isCurrentUserCreator={currentUser.uid === creator_uid}
-              onLeaveClick={() => handleLeaveTeam(user)}
-              canLeave={tournament_status === "open"}
-            />
-          ))}
+          <TeamUserList
+            usersIds={usersIds}
+            isLoading={isLoading}
+            isCurrentUserCreator={currentUser.uid === creator_uid}
+            onLeaveClick={handleLeaveTeam}
+            canLeave={tournament_status === "open"}
+          />
           {tournament_status === "open" && (
             <JoinTeamButton
               isTeamPrivate={is_private}
@@ -176,9 +177,9 @@ const TeamItem = ({
               isLoading={isLoading}
               onJoinClick={handleJoinTeam}
               handleClickInvite={handleOpenAddTeammateModal}
-              isMyTeam={is_my_team}
+              isMyTeam={isMyTeam}
               canJoin={canJoin}
-              isTeamFull={players_per_team === users.length}
+              isTeamFull={players_per_team === usersIds.length}
             />
           )}
         </div>

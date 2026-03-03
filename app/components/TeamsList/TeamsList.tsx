@@ -5,7 +5,7 @@ import { IUser } from "@/app/utils/store/userSlice";
 
 interface TeamListProps {
   teams: ITeam[];
-  judges: IUser[];
+  judgesIds: string[];
   tournamentId: string;
   maxPlayersPerTeam: number;
   isLoading?: boolean;
@@ -15,16 +15,14 @@ interface TeamListProps {
 
 const TeamList = ({
   teams = [],
-  judges,
+  judgesIds,
   tournament_status,
   maxPlayersPerTeam,
 }: TeamListProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
 
-  const occupiedUserIds = new Set(
-    teams.flatMap((team) => team.users?.map((user) => user.uid) || []),
-  );
-  const isUserJudge = judges.some((judge) => judge.uid === currentUser.uid);
+  const occupiedUserIds = new Set(teams.flatMap((team) => team.usersIds));
+  const isUserJudge = judgesIds.includes(currentUser.uid);
 
   const isUserHasTeam = occupiedUserIds.has(currentUser?.uid || "");
   const isCurrentUserCanJoin = !isUserHasTeam && !isUserJudge;
@@ -38,9 +36,8 @@ const TeamList = ({
   return (
     <ul>
       {teams.map((team) => {
-        const users = team.users || [];
-        const filled = users.length;
-        const isMyTeam = users.some((user) => user.uid === currentUser.uid);
+        const usersIds = team.usersIds;
+        const filled = usersIds.length;
 
         return (
           <TeamItem
@@ -48,7 +45,6 @@ const TeamList = ({
             {...team}
             teams={teams}
             filled={filled}
-            is_my_team={isMyTeam}
             canJoin={isCurrentUserCanJoin}
             players_per_team={maxPlayersPerTeam}
             tournament_status={tournament_status}

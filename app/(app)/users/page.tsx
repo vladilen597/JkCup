@@ -5,16 +5,24 @@ import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import UserList from "@/app/components/UserList/UserList";
 import { IUser } from "@/app/utils/store/userSlice";
 import { Users, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Title from "@/app/components/Title/Title";
+import UserLine from "@/app/components/UserList/UserLine/UserLine";
+import SearchInput from "@/app/components/Shared/SearchInput/SearchInput";
+import { useDebounce } from "use-debounce";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleChangeQuery = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   const handleCloseModal = () => {
     setUserId("");
@@ -36,6 +44,12 @@ const UsersPage = () => {
   useEffect(() => {
     handleLoadUsers();
   }, []);
+
+  const filteredUsers = users.filter((user) =>
+    (user.displayName + user.steamDisplayName)
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  );
 
   if (loading) {
     return (
@@ -97,15 +111,21 @@ const UsersPage = () => {
       >
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
           <Users className="h-6 w-6 text-primary" />
-          Список пользователей ({users.length})
+          Список пользователей ({filteredUsers.length})
         </h2>
+        <SearchInput value={searchQuery} onChange={handleChangeQuery} />
 
-        <UserList
-          users={users}
-          showRoles
-          emptyMessage="Пока нет зарегистрированных пользователей"
-          handleClickDelete={setUserId}
-        />
+        <ul className="mt-2 flex flex-col gap-2">
+          {filteredUsers.map((user, i) => (
+            <UserLine
+              key={user.uid}
+              {...user}
+              index={i}
+              showRoles
+              onDeleteClick={() => setUserId(user.uid)}
+            />
+          ))}
+        </ul>
       </motion.section>
 
       <CustomModal isOpen={!!userId} onClose={handleCloseModal}>

@@ -17,6 +17,8 @@ import {
   Clock,
   Album,
   Archive,
+  TrophyIcon,
+  Crown,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -58,6 +60,7 @@ import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/Select
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
 import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
+import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
 
 export const statuses = {
   open: "Открыт",
@@ -95,7 +98,7 @@ const TournamentPage = () => {
   const tournamentId = params.id as string;
 
   const tournament = tournaments.find((t) => t.id === params.id);
-  console.log(tournament?.start_date);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -152,8 +155,7 @@ const TournamentPage = () => {
 
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
-  const isJoined =
-    tournament?.users?.some((u) => u.uid === currentUser?.uid) ?? false;
+  const isJoined = tournament?.usersIds?.includes(currentUser?.uid) ?? false;
 
   const handleJoinLeave = async () => {
     if (!currentUser?.uid) {
@@ -171,10 +173,7 @@ const TournamentPage = () => {
     try {
       if (isJoined) {
         await updateDoc(tournamentRef, {
-          ...tournament,
-          users: tournament.users.filter(
-            (user) => user.uid !== currentUser.uid,
-          ),
+          usersIds: arrayRemove(currentUser.uid),
         });
 
         dispatch(
@@ -185,7 +184,7 @@ const TournamentPage = () => {
         );
       } else {
         await updateDoc(tournamentRef, {
-          users: arrayUnion(currentUser),
+          usersIds: arrayUnion(currentUser.uid),
         });
         dispatch(
           addParticipant({
@@ -347,7 +346,7 @@ const TournamentPage = () => {
       const user = (await getDoc(userRef)).data();
       const tournamentRef = doc(db, "tournaments", tournamentId);
       updateDoc(tournamentRef, {
-        users: arrayRemove(user),
+        usersIds: arrayRemove(user),
       });
       dispatch(removeUserFromSingleTournament({ tournamentId, userId }));
     } catch (error) {
@@ -435,18 +434,16 @@ const TournamentPage = () => {
   const isTeamMode = tournament.type.value === "team";
   const filledSlots = isTeamMode
     ? tournament.teams?.length || 0
-    : tournament.users?.length || 0;
+    : tournament.usersIds?.length || 0;
 
   const isFull =
     tournament.players_per_team > 1
       ? tournament.teams.length === tournament.max_players
-      : tournament.users.length === tournament.max_players;
+      : tournament.usersIds.length === tournament.max_players;
 
-  const isCurrentUserJudge = tournament.judges.some(
-    (judge) => judge.uid === currentUser.uid,
-  );
+  const isCurrentUserJudge = tournament.judgesIds.includes(currentUser.uid);
   const isUserHasTeam = tournament.teams?.some((team) =>
-    team.users?.some((user) => user.uid === currentUser.uid),
+    team.usersIds?.includes(currentUser.uid),
   );
 
   const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
@@ -601,36 +598,33 @@ const TournamentPage = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="bg-gray-800/50 border-2 p-4 border-amber-300! rounded-lg overflow-hidden"
+          className="flex items-center justify-between border-2 p-4 border-amber-300! rounded-lg overflow-hidden bg-linear-120 from-40% from-black to-amber-300"
         >
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Trophy className="w-8 h-8 text-amber-300" />
-            {isTeamMode ? "Команда победителей" : "Победитель"}
-          </h3>
+          <div>
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Trophy className="w-8 h-8 text-amber-300" />
+              {isTeamMode ? "Команда победителей" : "Победитель"}
+            </h3>
 
-          {isTeamMode ? (
-            <div className="mt-8">
-              <span className="text-xl font-bold flex items-center gap-2">
-                {tournament.winner_team?.name}
-              </span>
-              <ul className="mt-2">
-                {tournament.winner_team?.users.map((user) => (
-                  <li key={user.uid} className="flex items-center gap-2">
-                    <UserInfoBlock {...user} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="mt-8">
-              <div
-                key={tournament.winner_user?.uid}
-                className="flex items-center gap-2"
-              >
-                <UserInfoBlock {...tournament.winner_user} />
+            {isTeamMode ? (
+              <div className="mt-8">
+                <span className="text-xl font-bold flex items-center gap-2">
+                  {tournament.winner_team?.name}
+                </span>
+                <WinnerTeam usersIds={tournament.winner_team?.usersIds || []} />
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="mt-8">
+                <div
+                  key={tournament.winner_user?.uid}
+                  className="flex items-center gap-2"
+                >
+                  <UserInfoBlock {...tournament.winner_user} />
+                </div>
+              </div>
+            )}
+          </div>
+          <Crown className="text-black" width={120} height={120} />
         </motion.div>
       )}
 
@@ -687,7 +681,7 @@ const TournamentPage = () => {
               {Math.round(
                 isTeamMode
                   ? (tournament.teams.length / tournament.max_teams) * 100
-                  : (tournament.users.length / tournament.max_players) * 100,
+                  : (tournament.usersIds.length / tournament.max_players) * 100,
               )}
               %
             </span>
@@ -712,10 +706,10 @@ const TournamentPage = () => {
       >
         <AddJudgeBlock
           tournamentStatus={tournament.status}
-          judges={tournament.judges}
+          judgesIds={tournament.judgesIds}
           isTeamTournament={tournament.type.value === "team"}
           teams={tournament.teams}
-          users={tournament.users}
+          usersIds={tournament.usersIds}
         />
       </motion.section>
 
@@ -744,9 +738,7 @@ const TournamentPage = () => {
                   canCreateTeam={isUserCanCreateTeam}
                   isJoinedSingleTournament={
                     !isTeamMode
-                      ? tournament.users.some(
-                          (user) => user.uid === currentUser.uid,
-                        )
+                      ? tournament.usersIds.includes(currentUser.uid)
                       : undefined
                   }
                 />
@@ -770,13 +762,13 @@ const TournamentPage = () => {
           <TeamList
             teams={tournament.teams || []}
             tournamentId={tournament.id}
-            judges={tournament.judges}
+            judgesIds={tournament.judgesIds}
             maxPlayersPerTeam={tournament.players_per_team}
             isLoading={isLoading}
             tournament_status={tournament.status}
           />
         ) : (
-          <UserList users={tournament.users || []} />
+          <UserList usersIds={tournament.usersIds} />
         )}
       </motion.section>
 
@@ -828,7 +820,7 @@ const TournamentPage = () => {
           />
         ) : (
           <SelectWinnerUserModal
-            users={tournament.users}
+            usersIds={tournament.usersIds}
             onClose={handleCloseSelectWinnerModal}
           />
         )}
