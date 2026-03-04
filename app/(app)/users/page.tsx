@@ -2,17 +2,15 @@
 
 import DeleteUserModalContent from "@/app/components/DeleteUserModalContent/DeleteUserModalContent";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
-import UserList from "@/app/components/UserList/UserList";
-import { IUser } from "@/app/utils/store/userSlice";
-import { Users, Loader2 } from "lucide-react";
-import { useState, useEffect, ChangeEvent } from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
-import Title from "@/app/components/Title/Title";
-import UserLine from "@/app/components/UserList/UserLine/UserLine";
 import SearchInput from "@/app/components/Shared/SearchInput/SearchInput";
-import { useDebounce } from "use-debounce";
+import UserLine from "@/app/components/UserList/UserLine/UserLine";
 import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
+import { useState, useEffect, ChangeEvent } from "react";
+import { IUser } from "@/app/utils/store/userSlice";
+import Title from "@/app/components/Title/Title";
+import { motion } from "framer-motion";
+import { Users } from "lucide-react";
+import axios from "axios";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -33,7 +31,7 @@ const UsersPage = () => {
     setLoading(true);
     try {
       const { data } = await axios.get("/api/users");
-
+      await setTimeout(() => {}, 5000);
       setUsers(data.users || []);
     } catch (err: any) {
       console.error(err);
