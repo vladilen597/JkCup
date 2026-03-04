@@ -55,13 +55,15 @@ const UserInfoBlock = ({
             {!!steamLink && !!steamDisplayName && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
                 <Steam className="w-4 h-4" />{" "}
-                <Link
+                <a
                   onClick={handleClickSteamLink}
                   className="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   href={steamLink}
                 >
                   {steamDisplayName}
-                </Link>
+                </a>
               </p>
             )}
           </div>
