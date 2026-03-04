@@ -51,6 +51,7 @@ const page = () => {
     rewards: [{ id: uuidv4(), value: "" }],
     status: "open",
     duration: 0,
+    useBracket: false,
   });
 
   const canCreateTournament =
@@ -169,9 +170,11 @@ const page = () => {
     setIsCreateTournamentModalOpen(false);
   };
 
-  const filteredTournaments = tournaments?.filter(
-    (tournament) => !tournament.hidden,
-  );
+  const filteredTournaments = tournaments?.filter((tournament: ITournament) => {
+    if (!tournament.hidden) return true;
+
+    return user.role !== "user";
+  });
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">

@@ -1,7 +1,7 @@
 "use client";
 
 import UserList from "@/app/components/UserList/UserList";
-import { useAppSelector, useAppDispatch } from "@/app/utils/store/hooks";
+import { useAppSelector } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
 import { motion } from "motion/react";
 import { Users, Calendar, Hash, Loader2, User, Trophy } from "lucide-react";
@@ -52,10 +52,8 @@ const trophyIndexes = {
 
 const TournamentPage = () => {
   const params = useParams();
-  const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isTournamentLoading, setIsTournamentLoading] = useState(false);
-  const tournamentId = params.id as string;
   const [tournament, setTournament] = useState<ITournament>({
     id: "",
     game: "",

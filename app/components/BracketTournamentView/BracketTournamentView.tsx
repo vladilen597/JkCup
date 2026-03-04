@@ -18,14 +18,15 @@ import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import {
   updateTournament,
   ITournament,
+  ITeam,
 } from "@/app/utils/store/tournamentsSlice";
 import UserInfoBlock from "../Shared/UserInfoBlock/UserInfoBlock";
-import axios from "axios";
 import { IUser } from "@/app/utils/store/userSlice";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { doc, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/app/utils/firebase";
+import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
 
 interface BracketProps {
   tournament: ITournament;
@@ -55,7 +56,7 @@ const MatchBox = ({ match, isAdmin, onRemoveMatch, children }: any) => {
 
 const DroppableSlot = ({
   id,
-  player,
+  participant,
   label,
   isAdmin,
   onRemove,
@@ -69,10 +70,24 @@ const DroppableSlot = ({
         isOver && isAdmin ? "bg-primary/20" : "bg-transparent"
       } ${isPlaceholder ? "border-b-0" : ""}`}
     >
-      {player ? (
+      {participant ? (
         <div className="flex items-center justify-between w-full group/player">
           <div className="flex items-center gap-2">
-            <UserInfoBlock {...player} />
+            {participant.type === "team" ? (
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-zinc-400" />
+                <div>
+                  <div className="text-sm font-medium">
+                    {participant.name || "Команда"}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    {participant.usersIds?.length || 0} игроков
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <UserInfoBlock {...participant} />
+            )}
           </div>
           {isAdmin && (
             <button
@@ -99,7 +114,7 @@ const DroppableSlot = ({
 const DraggableUser = ({ user }: { user: any }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: user.uid,
-    data: user,
+    data: { ...user, type: "player" },
   });
   return (
     <div
@@ -114,18 +129,44 @@ const DraggableUser = ({ user }: { user: any }) => {
   );
 };
 
+const DraggableTeam = ({ team }: { team: ITeam }) => {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: team.uid,
+    data: { ...team, type: "team" },
+  });
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className="flex items-center gap-2 p-2 bg-zinc-800 border border-zinc-700 rounded-lg cursor-grab hover:border-primary/50 transition-colors"
+    >
+      <GripVertical className="w-4 h-4 text-zinc-500" />
+      <div>
+        <h3 className="font-semibold">{team.name || `Team ${team.uid}`}</h3>
+        <div className="text-xs text-zinc-500">
+          {team.usersIds.length} Игроков
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BracketTournamentView = ({ tournament }: BracketProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const [globalUsers, setGlobalUsers] = useState<IUser[]>([]);
-  const [activeUser, setActiveUser] = useState<any>(null);
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [activeBlock, setActiveBlock] = useState<any>(null);
 
   const isAdmin = useMemo(
     () =>
       !!(currentUser?.role === "admin" || currentUser?.role === "superadmin"),
     [currentUser?.role],
   );
+
+  const isTeamMode = tournament.type.value === "team";
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -134,13 +175,6 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     useXarrow();
   };
 
-  useEffect(() => {
-    if (isAdmin)
-      axios
-        .get("/api/users")
-        .then((res) => setGlobalUsers(res.data.users || []));
-  }, [isAdmin]);
-
   const rounds = useMemo(
     () =>
       Array.isArray(tournament?.bracket?.rounds)
@@ -148,6 +182,21 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
         : [],
     [tournament?.bracket?.rounds],
   );
+
+  const handleLoadUsers = async () => {
+    try {
+      const users = await handleGetUsersByIds(tournament.usersIds);
+      setUsers(users);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isTeamMode) {
+      handleLoadUsers();
+    }
+  }, [isTeamMode]);
 
   const syncRounds = async (updatedRounds: any[]) => {
     const updatedBracket = { ...tournament.bracket, rounds: updatedRounds };
@@ -169,7 +218,11 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
 
   const handleAddMatch = (rIdx: number) => {
     const updated = JSON.parse(JSON.stringify(rounds));
-    updated[rIdx].matches.push({ id: uuidv4(), users: [], score: "0:0" });
+    updated[rIdx].matches.push({
+      id: uuidv4(),
+      participants: [],
+      score: "0:0",
+    });
     syncRounds(updated);
   };
 
@@ -181,10 +234,10 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     syncRounds(updated);
   };
 
-  const handleRemoveUserFromMatch = (
+  const handleRemoveParticipantFromMatch = (
     rId: string,
     mId: string,
-    userUid: string,
+    participantId: string,
   ) => {
     const updated = rounds.map((r: any) => {
       if (r.id !== rId) return r;
@@ -194,7 +247,9 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
           if (!m || m.id !== mId) return m;
           return {
             ...m,
-            users: (m.users || []).filter((u: any) => u.uid !== userUid),
+            participants: (m.participants || []).filter(
+              (p: any) => p.uid !== participantId,
+            ),
           };
         }),
       };
@@ -204,10 +259,18 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveUser(null);
+    setActiveBlock(null);
     if (!over || !isAdmin) return;
+
     const [roundId, matchId] = (over.id as string).split("|");
-    const user = active.data.current as any;
+    const participant = active.data.current as any;
+
+    const round = rounds.find((r: any) => r.id === roundId);
+    const match = round?.matches?.find((m: any) => m.id === matchId);
+
+    if (match?.users?.some((p: any) => p.uid === participant.uid)) {
+      return;
+    }
 
     const updated = rounds.map((r: any) => {
       if (r.id !== roundId) return r;
@@ -215,8 +278,10 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
         ...r,
         matches: r.matches.map((m: any) => {
           if (!m || m.id !== matchId) return m;
-          // To restore the 2-player limit, uncomment: if (m.users?.length >= 2) return m;
-          return { ...m, users: [...(m.users || []), user] };
+          return {
+            ...m,
+            participants: [...(m.participants || []), participant],
+          };
         }),
       };
     });
@@ -227,21 +292,45 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     <DndContext
       sensors={sensors}
       collisionDetection={pointerWithin}
-      onDragStart={(e) => setActiveUser(e.active.data.current)}
+      onDragStart={(e) => setActiveBlock(e.active.data.current)}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col gap-10">
+      <div className="flex gap-10 w-fit">
+        {isAdmin && (
+          <>
+            {isTeamMode ? (
+              <ul className="space-y-2">
+                {tournament.teams.map((team) => (
+                  <li key={team.uid}>
+                    <DraggableTeam team={team} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 backdrop-blur-sm mx-4">
+                <h4 className="flex items-center gap-2 mb-4 font-bold text-zinc-400 text-sm uppercase tracking-tight">
+                  <Users className="w-4 h-4" /> Доступные игроки
+                </h4>
+                <div className="flex flex-col gap-2 h-full overflow-y-auto">
+                  {users.map((u: any) => (
+                    <DraggableUser key={u.uid} user={u} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
         <div
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative overflow-x-auto pb-20 custom-scrollbar"
         >
           <Xwrapper>
-            <div className="inline-flex gap-24 items-stretch min-h-[600px] p-4">
+            <div className="inline-flex gap-24 items-stretch min-h-150 p-4">
               {rounds.map((round: any, rIdx: number) => (
                 <div
                   key={round.id}
-                  className="flex flex-col justify-around gap-4 min-w-[260px] group/round"
+                  className="flex flex-col justify-around gap-4 min-w-65 group/round"
                 >
                   <div className="flex justify-between items-center px-1 mb-4">
                     <h3 className="font-bold text-zinc-500 uppercase text-[11px] tracking-widest">
@@ -273,26 +362,27 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                             }
                           >
                             <div className="flex flex-col">
-                              {match.users?.map((u: any) => (
-                                <DroppableSlot
-                                  key={u.uid}
-                                  id={`${round.id}|${match.id}|user-${u.uid}`}
-                                  player={u}
-                                  isAdmin={isAdmin}
-                                  onRemove={() =>
-                                    handleRemoveUserFromMatch(
-                                      round.id,
-                                      match.id,
-                                      u.uid,
-                                    )
-                                  }
-                                />
-                              ))}
-                              {isAdmin && (
+                              {!!match.participants?.length ? (
+                                match.participants?.map((p: any) => (
+                                  <DroppableSlot
+                                    key={p.uid}
+                                    id={`${round.id}|${match.id}|${p.uid}`}
+                                    participant={p}
+                                    isAdmin={isAdmin}
+                                    onRemove={() =>
+                                      handleRemoveParticipantFromMatch(
+                                        round.id,
+                                        match.id,
+                                        p.uid,
+                                      )
+                                    }
+                                  />
+                                ))
+                              ) : (
                                 <DroppableSlot
                                   id={`${round.id}|${match.id}|placeholder`}
-                                  player={null}
-                                  label="Добавить игрока"
+                                  participant={null}
+                                  label="Пусто"
                                   isAdmin={isAdmin}
                                   isPlaceholder={true}
                                 />
@@ -340,26 +430,30 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
             </div>
           </Xwrapper>
         </div>
-
-        {isAdmin && globalUsers.length > 0 && (
-          <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 backdrop-blur-sm mx-4">
-            <h4 className="flex items-center gap-2 mb-4 font-bold text-zinc-400 text-sm uppercase tracking-tight">
-              <Users className="w-4 h-4" /> Доступные игроки
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {globalUsers.map((u: any) => (
-                <DraggableUser key={u.uid} user={u} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
-        {activeUser && (
-          <div className="flex items-center gap-2 bg-zinc-800 p-2 rounded-lg border-2 border-primary shadow-2xl">
-            <UserInfoBlock {...activeUser} />
-          </div>
+        {activeBlock && (
+          <>
+            {isTeamMode ? (
+              <div className="border border-zinc-700 rounded-lg bg-zinc-800 p-3">
+                <h3 className="font-semibold">
+                  {activeBlock.name || `Team ${activeBlock.uid}`}
+                </h3>
+                <div className="mt-2 space-y-2">
+                  {activeBlock.users?.map((user: IUser) => (
+                    <div key={user.uid} className="flex items-center gap-2">
+                      <UserInfoBlock {...user} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-zinc-800 p-2 rounded-lg border-2 border-primary shadow-2xl">
+                <UserInfoBlock {...activeBlock} />
+              </div>
+            )}
+          </>
         )}
       </DragOverlay>
     </DndContext>

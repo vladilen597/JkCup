@@ -24,6 +24,7 @@ interface ITournamentProps {
   status: string;
   tags: ITag[];
   maxPlayers: number;
+  hidden?: boolean;
   rewards: { id: string; value: string }[];
 }
 
@@ -45,6 +46,7 @@ const Tournament = ({
   game,
   maxPlayers,
   isFull,
+  hidden,
   rewards,
   tags,
   description,
@@ -77,6 +79,12 @@ const Tournament = ({
                   <Badge
                     text="Full"
                     className="bg-destructive/10 text-destructive border border-destructive/20"
+                  />
+                )}
+                {hidden && (
+                  <Badge
+                    text="Скрыт"
+                    className="bg-amber-400 text-black border border-destructive/20"
                   />
                 )}
                 {tags?.map((tag) => (

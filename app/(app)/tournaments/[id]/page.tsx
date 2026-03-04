@@ -85,6 +85,7 @@ export interface IEditTournament {
   type: ISelectOption;
   duration: number;
   rewards: { id: string; value: string }[];
+  useBracket?: boolean;
 }
 
 const trophyIndexes = {
@@ -127,6 +128,7 @@ const TournamentPage = () => {
     tags: tournament?.tags || [],
     rewards: tournament?.rewards || [],
     duration: tournament?.duration || 0,
+    useBracket: tournament?.useBracket || false,
   });
   const router = useRouter();
 
@@ -156,6 +158,13 @@ const TournamentPage = () => {
 
   const handleCloseCreateTeamModal = () => {
     setIsCreateTeamModalOpen(false);
+  };
+
+  const handleToggleUseBracket = () => {
+    setEditForm((prevState) => ({
+      ...prevState,
+      useBracket: !prevState.useBracket,
+    }));
   };
 
   const canEdit =
@@ -229,6 +238,7 @@ const TournamentPage = () => {
         rewards: editForm.rewards,
         duration: editForm.duration,
         tags: editForm.tags,
+        useBracket: editForm.useBracket,
       });
 
       const updatedTournaments = tournaments.map((t) =>
@@ -453,7 +463,7 @@ const TournamentPage = () => {
   );
 
   const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
-  const isBracketMode = tournament?.type?.value === "bracket";
+  const isBracketMode = tournament?.useBracket === true;
 
   const handleOpenSelectWinnerModal = () => {
     setIsWinnerModalOpen(true);
@@ -464,12 +474,12 @@ const TournamentPage = () => {
   };
 
   return (
-    <main className="max-w-5xl mx-auto w-full px-4 py-8">
+    <main className="w-full px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
+        className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-8 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
         style={{
           background:
             "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
@@ -640,7 +650,7 @@ const TournamentPage = () => {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 mb-8"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 mb-8 max-w-5xl mx-auto"
       >
         <StatCard
           icon={<Users className="h-4 w-4" />}
@@ -673,13 +683,19 @@ const TournamentPage = () => {
         />
       </motion.div>
 
+      {isBracketMode && tournament.status !== "open" && (
+        <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md max-w-480 mx-auto w-fit">
+          <BracketTournamentView tournament={tournament} />
+        </div>
+      )}
+
       {(tournament.status === "open" ||
         tournament.status === "about_to_start") && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
-          className="mb-8"
+          className="my-8 max-w-5xl mx-auto"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-muted-foreground">
@@ -708,6 +724,7 @@ const TournamentPage = () => {
       )}
 
       <motion.section
+        className="max-w-5xl mx-auto"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
@@ -722,7 +739,7 @@ const TournamentPage = () => {
       </motion.section>
 
       <motion.section
-        className="mt-4"
+        className="mt-4 max-w-5xl mx-auto"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
@@ -762,11 +779,7 @@ const TournamentPage = () => {
           </div>
         )}
 
-        {isBracketMode ? (
-          <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md">
-            <BracketTournamentView tournament={tournament} />
-          </div>
-        ) : isTeamMode ? (
+        {isTeamMode ? (
           <TeamList
             teams={tournament.teams || []}
             tournamentId={tournament.id}
@@ -799,6 +812,7 @@ const TournamentPage = () => {
           handleDeleteReward={handleDeleteReward}
           handleChangeDuration={handleChangeDuration}
           onSubmit={handleEdit}
+          handleToggleBracket={handleToggleUseBracket}
         />
       </CustomModal>
 

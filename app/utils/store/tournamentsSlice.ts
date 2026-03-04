@@ -38,8 +38,9 @@ export interface ITournament {
   creator?: IUser;
   createdAt?: string;
   startedAt?: string;
-  bracket: IBracket;
   hidden?: boolean;
+  useBracket?: boolean;
+  bracket: IBracket;
 }
 
 export interface IRound {

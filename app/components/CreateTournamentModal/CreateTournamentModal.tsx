@@ -3,7 +3,16 @@ import { SubmitEvent } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
-import { X, Plus, Clock, Users, Trophy, Gamepad2, Tag } from "lucide-react";
+import {
+  X,
+  Plus,
+  Clock,
+  Users,
+  Trophy,
+  Gamepad2,
+  Tag,
+  GitBranch,
+} from "lucide-react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
@@ -14,7 +23,6 @@ import { v4 as uuidv4 } from "uuid";
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
   { id: 2, value: "single", label: "Одиночный" },
-  { id: 3, value: "bracket", label: "Сетка" },
 ];
 
 interface ICreateTournamentModalProps {
@@ -30,6 +38,7 @@ interface ICreateTournamentModalProps {
     tags: ITag[];
     duration: number;
     rewards: { id: string; value: string }[];
+    useBracket?: boolean;
   };
   handleChange: (value: any) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
@@ -200,35 +209,51 @@ const CreateTournamentModal = ({
             />
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="useBracket"
+            checked={formData.useBracket}
+            onChange={(e) =>
+              handleChange({ ...formData, useBracket: e.target.checked })
+            }
+            className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary"
+          />
+          <label
+            htmlFor="useBracket"
+            className="flex items-center gap-2 text-sm font-medium cursor-pointer"
+          >
+            <GitBranch className="w-4 h-4" />
+            Использовать сетку
+          </label>
+        </div>
 
         <div className="flex items-center gap-2">
-          {formData.type.value !== "bracket" && (
-            <div className="w-full">
-              <label className="flex items-center gap-2 text-sm font-medium mb-1">
-                <Users className="w-4 h-4" /> Макс.{" "}
-                {formData.type.value === "team" ? "команд" : "игроков"}
-              </label>
-              <input
-                type="number"
-                value={
-                  formData.type.value === "team"
-                    ? formData.max_teams
-                    : formData.max_players
-                }
-                onChange={(e) => {
-                  handleChange({
-                    ...formData,
-                    ...(formData.type.value === "team"
-                      ? { max_teams: Number(e.target.value), rewards: [] }
-                      : { max_players: Number(e.target.value), rewards: [] }),
-                  });
-                }}
-                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                min="2"
-                required
-              />
-            </div>
-          )}
+          <div className="w-full">
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Users className="w-4 h-4" /> Макс.{" "}
+              {formData.type.value === "team" ? "команд" : "игроков"}
+            </label>
+            <input
+              type="number"
+              value={
+                formData.type.value === "team"
+                  ? formData.max_teams
+                  : formData.max_players
+              }
+              onChange={(e) => {
+                handleChange({
+                  ...formData,
+                  ...(formData.type.value === "team"
+                    ? { max_teams: Number(e.target.value), rewards: [] }
+                    : { max_players: Number(e.target.value), rewards: [] }),
+                });
+              }}
+              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              min="2"
+              required
+            />
+          </div>
           {formData.type.value === "team" && (
             <div className="w-full">
               <label className="block text-sm font-medium mb-1">

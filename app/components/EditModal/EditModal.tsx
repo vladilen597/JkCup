@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { X, Plus, Clock, Tag } from "lucide-react";
+import { X, Plus, Clock, Tag, GitBranch } from "lucide-react";
 import { ChangeEvent, FormEvent } from "react";
 import CustomSelect, {
   ISelectOption,
@@ -37,6 +37,8 @@ interface IEditModalProps {
   type: ISelectOption;
   tags: ITag[];
   rewards: { id: string; value: string }[];
+  useBracket?: boolean;
+  handleToggleBracket: () => void;
   onTagsChange: (tags: ITag[]) => void;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onTextareaChange: (value: string) => void;
@@ -65,6 +67,8 @@ const EditModal = ({
   type,
   rewards,
   tags,
+  useBracket,
+  handleToggleBracket,
   onInputChange,
   onTextareaChange,
   onTeamAmountChange,
@@ -187,6 +191,23 @@ const EditModal = ({
             value={type}
             onChange={handleChangeTournamentType}
           />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="useBracket"
+            checked={useBracket}
+            onChange={handleToggleBracket}
+            className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary"
+          />
+          <label
+            htmlFor="useBracket"
+            className="flex items-center gap-2 text-sm font-medium cursor-pointer"
+          >
+            <GitBranch className="w-4 h-4" />
+            Использовать сетку
+          </label>
         </div>
 
         <div className="flex items-center gap-2">
