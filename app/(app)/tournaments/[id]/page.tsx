@@ -565,7 +565,7 @@ const TournamentPage = () => {
           )}
         </div>
 
-        <div className="relative mt-6">
+        <div className="block relative mt-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
@@ -587,7 +587,9 @@ const TournamentPage = () => {
             status={tournament.status}
           />
 
-          <CleanHtml html={tournament.description} />
+          <div className="mt-4 whitespace-pre-wrap">
+            <CleanHtml html={tournament.description} />
+          </div>
 
           <div className="mt-2">
             <span className="block font-bold">Награды</span>

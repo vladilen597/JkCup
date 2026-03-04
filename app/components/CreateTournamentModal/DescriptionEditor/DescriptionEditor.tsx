@@ -7,11 +7,7 @@ const DescriptionEditor = ({
   value: string;
   onChange: (value: string) => void;
 }) => {
-  return (
-    <label>
-      <RichEditor value={value} onChange={onChange} />
-    </label>
-  );
+  return <RichEditor value={value} onChange={onChange} />;
 };
 
 export default DescriptionEditor;

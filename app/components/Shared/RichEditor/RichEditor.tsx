@@ -71,6 +71,8 @@ const Tiptap = ({
 
   const currentFontSize = editor.getAttributes("textStyle").fontSize || "16px";
 
+  console.log(value);
+
   return (
     <div className="rounded-lg bg-muted border border-border overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 p-3 border-b border-border bg-muted">
@@ -133,6 +135,16 @@ const Tiptap = ({
           {" "}
           1. 2. 3.{" "}
         </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().setHardBreak().run();
+          }}
+          className={cn("rounded-lg bg-primary/10 px-2 h-10")}
+        >
+          BR
+        </button>
 
         <select
           className="bg-background border rounded-md px-2 h-10 text-sm ml-auto"
@@ -151,13 +163,10 @@ const Tiptap = ({
           <option value="32px">32px</option>
         </select>
       </div>
-
       <style>{`
         .ProseMirror ul { list-style-type: disc; padding-left: 1.5rem; margin: 10px 0; }
         .ProseMirror ol { list-style-type: decimal; padding-left: 1.5rem; margin: 10px 0; }
       `}</style>
-
-      {/* Обертка с onClick принудительно ставит фокус в редактор */}
       <div
         className="p-3 cursor-text bg-background min-h-[120px]"
         onClick={() => editor.commands.focus()}

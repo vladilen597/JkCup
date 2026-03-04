@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Provider } from "react-redux";
-import { store } from "./utils/store/store";
 import "./globals.css";
 import { StoreProvider } from "./components/Shared/StoreProvider/StoreProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <StoreProvider>{children}</StoreProvider>
+        <Analytics />
       </body>
     </html>
   );

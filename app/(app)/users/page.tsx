@@ -12,10 +12,11 @@ import Title from "@/app/components/Title/Title";
 import UserLine from "@/app/components/UserList/UserLine/UserLine";
 import SearchInput from "@/app/components/Shared/SearchInput/SearchInput";
 import { useDebounce } from "use-debounce";
+import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +30,7 @@ const UsersPage = () => {
   };
 
   const handleLoadUsers = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get("/api/users");
 
@@ -50,21 +52,6 @@ const UsersPage = () => {
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase()),
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          className="text-primary"
-        >
-          <Loader2 className="h-8 w-8" />
-        </motion.div>
-        Загрузка пользователей...
-      </div>
-    );
-  }
 
   if (error) {
     return <div className="text-center py-12 text-destructive">{error}</div>;
@@ -116,15 +103,19 @@ const UsersPage = () => {
         <SearchInput value={searchQuery} onChange={handleChangeQuery} />
 
         <ul className="mt-2 flex flex-col gap-2">
-          {filteredUsers.map((user, i) => (
-            <UserLine
-              key={user.uid}
-              {...user}
-              index={i}
-              showRoles
-              onDeleteClick={() => setUserId(user.uid)}
-            />
-          ))}
+          {loading ? (
+            <UserShimmer />
+          ) : (
+            filteredUsers.map((user, i) => (
+              <UserLine
+                key={user.uid}
+                {...user}
+                index={i}
+                showRoles
+                onDeleteClick={() => setUserId(user.uid)}
+              />
+            ))
+          )}
         </ul>
       </motion.section>
 
