@@ -169,6 +169,10 @@ const page = () => {
     setIsCreateTournamentModalOpen(false);
   };
 
+  const filteredTournaments = tournaments?.filter(
+    (tournament) => !tournament.hidden,
+  );
+
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
       <motion.div
@@ -202,13 +206,13 @@ const page = () => {
         </div>
       </motion.div>
 
-      {tournaments?.length === 0 ? (
+      {filteredTournaments?.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">
           Турниров пока нет.
         </p>
       ) : (
         <ul className="space-y-3">
-          {tournaments?.map((tournament, index) => {
+          {filteredTournaments?.map((tournament, index) => {
             const isTeam = tournament.type.value === "team";
             const usersAmount = isTeam
               ? tournament.teams.length

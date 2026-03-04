@@ -39,6 +39,7 @@ export interface ITournament {
   createdAt?: string;
   startedAt?: string;
   bracket: IBracket;
+  hidden?: boolean;
 }
 
 export interface IRound {
