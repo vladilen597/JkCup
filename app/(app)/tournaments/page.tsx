@@ -36,7 +36,7 @@ const page = () => {
     useState(false);
   const [formData, setFormData] = useState<any>({
     name: "",
-    game: "",
+    game: null,
     type: {
       id: 2,
       value: "single",

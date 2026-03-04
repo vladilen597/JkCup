@@ -16,6 +16,8 @@ import dynamic from "next/dynamic";
 import { ITag } from "@/app/lib/types";
 import { v4 as uuidv4 } from "uuid";
 import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
+import GameSelect from "../Shared/GameSelect/GameSelect";
+import { IGame } from "@/app/utils/store/gamesSlice";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -27,7 +29,7 @@ const Tiptap = dynamic(
 interface IEditModalProps {
   name: string;
   description: string;
-  game: string;
+  game: IGame | null;
   start_date: string;
   max_players: number;
   max_teams: number;
@@ -44,6 +46,7 @@ interface IEditModalProps {
   onTextareaChange: (value: string) => void;
   onTeamAmountChange: (value: number) => void;
   onStartDateChange: (value: string) => void;
+  handleChangeGame: (game: IGame) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
   handleChangeMaxTeamsOrPlayers: (value: number) => void;
   handleRewardChange: (index: number, value: string) => void;
@@ -70,6 +73,7 @@ const EditModal = ({
   useBracket,
   handleToggleBracket,
   onInputChange,
+  handleChangeGame,
   onTextareaChange,
   onTeamAmountChange,
   onStartDateChange,
@@ -136,14 +140,7 @@ const EditModal = ({
           </div>
           <div className="w-full">
             <label className="block text-sm font-medium mb-1">Игра</label>
-            <input
-              name="game"
-              type="text"
-              value={game}
-              onChange={onInputChange}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
+            <GameSelect value={game} onChange={handleChangeGame} />
           </div>
         </div>
 

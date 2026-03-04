@@ -71,8 +71,6 @@ const Tiptap = ({
 
   const currentFontSize = editor.getAttributes("textStyle").fontSize || "16px";
 
-  console.log(value);
-
   return (
     <div className="rounded-lg bg-muted border border-border overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 p-3 border-b border-border bg-muted">

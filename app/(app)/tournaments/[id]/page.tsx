@@ -64,6 +64,7 @@ import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
 import CleanHtml from "@/app/components/Shared/CleanHtml/CleanHtml";
 import { ITag } from "@/app/lib/types";
 import Tag from "@/app/components/Shared/Tag/Tag";
+import { IGame } from "@/app/utils/store/gamesSlice";
 
 export const statuses = {
   open: "Открыт",
@@ -76,7 +77,7 @@ export const statuses = {
 export interface IEditTournament {
   name: string;
   description: string;
-  game: string;
+  game: IGame | null;
   max_teams: number;
   max_players: number;
   players_per_team: number;
@@ -113,7 +114,7 @@ const TournamentPage = () => {
   const [editForm, setEditForm] = useState<IEditTournament>({
     name: tournament?.name || "",
     description: tournament?.description || "",
-    game: tournament?.game || "",
+    game: tournament?.game || null,
     max_players: tournament?.max_players || 6,
     max_teams: tournament?.max_teams || 6,
     players_per_team: tournament?.players_per_team || 2,
@@ -406,6 +407,14 @@ const TournamentPage = () => {
     setEditForm((prevState) => ({
       ...prevState,
       rewards: prevState.rewards.filter((reward) => reward.id !== id),
+    }));
+  };
+
+  const handleChangeGame = (game: IGame) => {
+    console.log("game", game);
+    setEditForm((prevState) => ({
+      ...prevState,
+      game: game,
     }));
   };
 
@@ -813,6 +822,7 @@ const TournamentPage = () => {
           onTeamAmountChange={handleUpdateTeamAmount}
           onStartDateChange={handleUpdateStartDate}
           onClose={handleCloseEditModal}
+          handleChangeGame={handleChangeGame}
           handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
           handleChangeTournamentType={handleUpdateTournamentType}
           handleRewardChange={handleRewardChange}

@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { IUser } from "./userSlice";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 import { ITag } from "@/app/lib/types";
+import { IGame } from "./gamesSlice";
 
 export interface IBracket {
   rounds: {
@@ -18,7 +19,7 @@ export interface IBracket {
 
 export interface ITournament {
   id: string;
-  game: string;
+  game: IGame | null;
   max_players: number;
   name: string;
   usersIds: string[];

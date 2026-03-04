@@ -3,6 +3,8 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import Badge from "../Shared/Badge/Badge";
 import { statuses } from "@/app/(app)/tournaments/[id]/page";
+import { IGame } from "@/app/utils/store/gamesSlice";
+import Image from "next/image";
 
 interface IArchiveTournamentProps {
   id: string;
@@ -12,7 +14,7 @@ interface IArchiveTournamentProps {
   max_players: number;
   players_per_team: number;
   index: number;
-  game: string;
+  game: IGame | null;
   currentPlayers: number;
   isFull: boolean;
   description: string;
@@ -78,7 +80,17 @@ const ArchiveTournament = ({
                 />
               </div>
               <div className="flex gap-1 items-center text-sm text-neutral-300 line-clamp-1">
-                <Gamepad2 /> {game}
+                {game.image ? (
+                  <Image
+                    src={game.image}
+                    width={16}
+                    height={16}
+                    alt="Game image"
+                  />
+                ) : (
+                  <Gamepad2 />
+                )}
+                {game.name}
               </div>
               <p className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 {description}

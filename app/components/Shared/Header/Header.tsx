@@ -3,7 +3,15 @@
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import ProfileDropdown from "../ProfileDropdown/ProfileDropdown";
 import { useGoogleSignIn } from "@/app/utils/useGoogleSignIn";
-import { Trophy, ChevronDown, Users, Archive } from "lucide-react";
+import {
+  Trophy,
+  ChevronDown,
+  Users,
+  Archive,
+  Gamepad,
+  Gamepad2,
+  Ellipsis,
+} from "lucide-react";
 import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
@@ -13,6 +21,36 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import CustomButton from "../CustomButton/CustomButton";
 import Google from "../../Icons/Google";
+import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
+
+const additionalOptions = [
+  {
+    id: 1,
+    node: (
+      <Link className="flex items-center gap-2" href="/archive">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+          <Archive className="h-4 w-4 text-primary" />
+        </div>
+        <span className="font-extrabold text-lg tracking-tight text-foreground">
+          Архив
+        </span>
+      </Link>
+    ),
+  },
+  {
+    id: 2,
+    node: (
+      <Link className="flex items-center gap-2" href="/games">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+          <Gamepad2 className="h-4 w-4 text-primary" />
+        </div>
+        <span className="font-extrabold text-lg tracking-tight text-foreground">
+          Игры
+        </span>
+      </Link>
+    ),
+  },
+];
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -92,14 +130,19 @@ const Header = () => {
               Discord
             </span>
           </Link>
-          <Link href="/archive" className="flex items-center gap-2 group">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-              <Archive className="h-4 w-4 text-primary" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-foreground">
-              Архив
-            </span>
-          </Link>
+          <CustomNodeSelect
+            titleNode={
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                  <Ellipsis className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-extrabold text-lg tracking-tight text-foreground">
+                  Дополнительно
+                </span>
+              </div>
+            }
+            options={additionalOptions}
+          />
         </div>
 
         {user.uid ? (

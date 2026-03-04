@@ -3,10 +3,12 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import userSlice from "./userSlice";
 import tournamentsSlice from "./tournamentsSlice";
+import gamesSlice from "./gamesSlice";
 
 const rootReducer = combineReducers({
   user: userSlice,
   tournaments: tournamentsSlice,
+  games: gamesSlice,
 });
 
 const persistConfig = {

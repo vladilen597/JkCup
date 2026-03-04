@@ -28,7 +28,7 @@ export const selectTypeOptions = [
 interface ICreateTournamentModalProps {
   formData: {
     name: string;
-    game: string;
+    game: null;
     type: ISelectOption;
     description: string;
     max_players: number;
@@ -52,6 +52,7 @@ import dynamic from "next/dynamic";
 import { ITag } from "@/app/lib/types";
 import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
 import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
+import GameSelect from "../Shared/GameSelect/GameSelect";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -145,7 +146,11 @@ const CreateTournamentModal = ({
               <Gamepad2 className="w-4 h-4" />
               Игра
             </label>
-            <input
+            <GameSelect
+              value={formData.game}
+              onChange={(value) => handleChange({ ...formData, game: value })}
+            />
+            {/* <input
               type="text"
               value={formData.game}
               onChange={(e) =>
@@ -153,7 +158,7 @@ const CreateTournamentModal = ({
               }
               className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               required
-            />
+            /> */}
           </div>
         </div>
 

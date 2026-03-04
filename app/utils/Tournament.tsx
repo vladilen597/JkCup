@@ -7,6 +7,8 @@ import CleanHtml from "../components/Shared/CleanHtml/CleanHtml";
 import { ITag } from "../lib/types";
 import { cn } from "@/lib/utils";
 import Tag from "../components/Shared/Tag/Tag";
+import { IGame } from "./store/gamesSlice";
+import Image from "next/image";
 
 interface ITournamentProps {
   id: string;
@@ -16,7 +18,7 @@ interface ITournamentProps {
   max_players: number;
   players_per_team: number;
   index: number;
-  game: string;
+  game: IGame | null;
   currentPlayers: number;
   isFull: boolean;
   description: string;
@@ -91,8 +93,19 @@ const Tournament = ({
                   <Tag key={tag.id} {...tag} />
                 ))}
               </div>
-              <div className="flex gap-1 items-center text-sm text-neutral-300 line-clamp-1">
-                <Gamepad2 /> {game}
+              <div className="flex gap-2 items-center text-sm text-neutral-300 line-clamp-1">
+                {game.image ? (
+                  <Image
+                    className="rounded"
+                    src={game.image}
+                    width={16}
+                    height={16}
+                    alt="Game image"
+                  />
+                ) : (
+                  <Gamepad2 />
+                )}
+                <span className="font-bold">{game.name}</span>
               </div>
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />

@@ -56,7 +56,7 @@ const TournamentPage = () => {
   const [isTournamentLoading, setIsTournamentLoading] = useState(false);
   const [tournament, setTournament] = useState<ITournament>({
     id: "",
-    game: "",
+    game: null,
     description: "",
     name: "",
     usersIds: [],
