@@ -37,7 +37,12 @@ const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
       <ul className="flex flex-col gap-2 max-h-75 overflow-y-auto">
         {users.map((user, index) => {
           return (
-            <JudgeAddItem user={user} index={index} onClose={handleClose} />
+            <JudgeAddItem
+              key={user.uid}
+              user={user}
+              index={index}
+              onClose={handleClose}
+            />
           );
         })}
       </ul>

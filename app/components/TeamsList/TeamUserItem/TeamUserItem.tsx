@@ -3,6 +3,7 @@ import { DoorOpen, Loader2 } from "lucide-react";
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 import { IUser } from "@/app/utils/store/userSlice";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ITeamUserItemProps extends IUser {
   isLoading: boolean;
@@ -26,12 +27,20 @@ const TeamUserItem = ({
   onLeaveClick,
 }: ITeamUserItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
+  const router = useRouter();
 
   const isCurrentUser = currentUser.uid === uid;
 
+  const handleClickLine = () => {
+    router.push("/users/" + uid);
+  };
+
   return (
     <li className="flex items-center justify-between">
-      <Link href={"/users/" + uid} className="rounded-lg w-full">
+      <div
+        className="rounded-lg w-full cursor-pointer"
+        onClick={handleClickLine}
+      >
         <div key={uid} className="flex items-center gap-3 text-sm">
           <UserInfoBlock
             uid={uid}
@@ -59,7 +68,7 @@ const TeamUserItem = ({
               )}
             </button>
           )}
-      </Link>
+      </div>
     </li>
   );
 };

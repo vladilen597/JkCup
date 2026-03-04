@@ -52,6 +52,7 @@ const page = () => {
     status: "open",
     duration: 0,
     useBracket: false,
+    hidden: false,
   });
 
   const canCreateTournament =

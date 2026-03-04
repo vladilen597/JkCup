@@ -39,6 +39,7 @@ interface ICreateTournamentModalProps {
     duration: number;
     rewards: { id: string; value: string }[];
     useBracket?: boolean;
+    hidden?: boolean;
   };
   handleChange: (value: any) => void;
   handleChangeTournamentType: (value: ISelectOption) => void;
@@ -50,6 +51,7 @@ interface ICreateTournamentModalProps {
 import dynamic from "next/dynamic";
 import { ITag } from "@/app/lib/types";
 import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
+import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -93,7 +95,7 @@ const CreateTournamentModal = ({
         ...prev.tags,
         {
           id: uuidv4(),
-          value: "", // Пустой для ввода
+          value: "",
           bgColor: randomColor.bg,
           textColor: randomColor.text,
         },
@@ -209,24 +211,17 @@ const CreateTournamentModal = ({
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="useBracket"
-            checked={formData.useBracket}
-            onChange={(e) =>
-              handleChange({ ...formData, useBracket: e.target.checked })
-            }
-            className="w-4 h-4 rounded border-border bg-muted text-primary focus:ring-primary"
-          />
-          <label
-            htmlFor="useBracket"
-            className="flex items-center gap-2 text-sm font-medium cursor-pointer"
-          >
-            <GitBranch className="w-4 h-4" />
-            Использовать сетку
-          </label>
-        </div>
+
+        <CustomCheckbox
+          label="Использовать сетку"
+          checked={formData.useBracket}
+          onChange={() =>
+            handleChange((prevState) => ({
+              ...formData,
+              useBracket: !prevState.useBracket,
+            }))
+          }
+        />
 
         <div className="flex items-center gap-2">
           <div className="w-full">
@@ -275,21 +270,35 @@ const CreateTournamentModal = ({
             </div>
           )}
         </div>
-        <div>
-          <label className="flex gap-2 items-center text-sm font-medium mb-1">
-            <Clock className="w-4 h-4" /> Длительность
-          </label>
-          <DurationPicker
-            valueMs={formData.duration}
-            onChange={(value) => {
-              handleChange((prevState: any) => {
-                return {
-                  ...prevState,
-                  duration: value,
-                };
-              });
-            }}
-          />
+
+        <div className="flex items-center gap-2">
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">
+              Дата начала
+            </label>
+            <DateTimePicker
+              value={formData.start_date}
+              onChange={(value) =>
+                handleChange({ ...formData, start_date: value })
+              }
+            />
+          </div>
+          <div className="w-full">
+            <label className="flex gap-2 items-center text-sm font-medium mb-1">
+              <Clock className="w-4 h-4" /> Длительность
+            </label>
+            <DurationPicker
+              valueMs={formData.duration}
+              onChange={(value) => {
+                handleChange((prevState: any) => {
+                  return {
+                    ...prevState,
+                    duration: value,
+                  };
+                });
+              }}
+            />
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -366,15 +375,16 @@ const CreateTournamentModal = ({
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Дата начала</label>
-          <DateTimePicker
-            value={formData.start_date}
-            onChange={(value) =>
-              handleChange({ ...formData, start_date: value })
-            }
-          />
-        </div>
+        <CustomCheckbox
+          label="Скрытый турнир"
+          checked={formData.hidden}
+          onChange={() =>
+            handleChange((prevState) => ({
+              ...prevState,
+              hidden: !prevState.hidden,
+            }))
+          }
+        />
       </div>
 
       <div className="mt-6 flex gap-2">

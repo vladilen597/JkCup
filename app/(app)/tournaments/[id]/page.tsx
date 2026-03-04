@@ -89,9 +89,9 @@ export interface IEditTournament {
 }
 
 const trophyIndexes = {
-  1: <Trophy className="h-4 w-4 text-[#EFBF04]" />,
-  2: <Trophy className="h-4 w-4 text-[#C4C4C4]" />,
-  3: <Trophy className="h-4 w-4 text-[#CE8946]" />,
+  1: <Trophy className="h-6 w-6 text-[#EFBF04]" />,
+  2: <Trophy className="h-6 w-6 text-[#C4C4C4]" />,
+  3: <Trophy className="h-6 w-6 text-[#CE8946]" />,
 };
 
 const TournamentPage = () => {
@@ -590,26 +590,6 @@ const TournamentPage = () => {
           <div className="mt-4 whitespace-pre-wrap">
             <CleanHtml html={tournament.description} />
           </div>
-
-          <div className="mt-2">
-            <span className="block font-bold">Награды</span>
-            {!!tournament.rewards?.length && (
-              <ul className="mt-2">
-                {tournament.rewards?.map((reward, index) => (
-                  <div className="flex items-center gap-1" key={reward.id}>
-                    <span className="text-xs gap-2 w-4 text-center">
-                      {trophyIndexes[
-                        (index + 1) as keyof typeof trophyIndexes
-                      ] || index + 1}
-                    </span>
-                    <span className="text-sm text-neutral-400">
-                      {reward.value}
-                    </span>
-                  </div>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
       </motion.div>
 
@@ -651,8 +631,34 @@ const TournamentPage = () => {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto"
+      >
+        <span className="text-xs text-muted-foreground font-medium">
+          Награды
+        </span>
+        {!!tournament.rewards?.length && (
+          <ul className="mt-2">
+            {tournament.rewards?.map((reward, index) => (
+              <div className="flex items-center gap-2" key={reward.id}>
+                <span className="text-xs w-6 text-center">
+                  {trophyIndexes[(index + 1) as keyof typeof trophyIndexes] ||
+                    index + 1}
+                </span>
+                <span className="text-lg font-bold font-mono text-foreground">
+                  {reward.value}
+                </span>
+              </div>
+            ))}
+          </ul>
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 mb-8 max-w-5xl mx-auto"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 mb-8 max-w-5xl mx-auto"
       >
         <StatCard
           icon={<Users className="h-4 w-4" />}

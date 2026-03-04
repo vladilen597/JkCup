@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { IUser } from "@/app/utils/store/userSlice";
+import { useRouter } from "next/navigation";
 
 const roleSelectOptions = [
   {
@@ -55,8 +56,12 @@ const UserLine: React.FC<UserLineProps> = ({
     label: "Пользователь",
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
-
+  const router = useRouter();
   const isSuperAdmin = currentUser.role === "superadmin";
+
+  const handleClickLine = () => {
+    router.push("/users/" + uid);
+  };
 
   const handleUpdateRole = async (value: {
     id: number;
@@ -84,7 +89,7 @@ const UserLine: React.FC<UserLineProps> = ({
   }, []);
 
   return (
-    <Link href={"/users/" + uid}>
+    <div className="cursor-pointer" onClick={handleClickLine}>
       <motion.li
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
@@ -138,7 +143,7 @@ const UserLine: React.FC<UserLineProps> = ({
             </button>
           )}
       </motion.li>
-    </Link>
+    </div>
   );
 };
 

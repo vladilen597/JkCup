@@ -64,7 +64,7 @@ const PortalModal = ({
       <div
         ref={containerRef}
         className={cn(
-          "relative max-h-[90vh] overflow-y-auto bg-card rounded-xl p-6 z-10 max-w-2xl w-full mt-2",
+          "relative max-h-[90vh] overflow-y-auto bg-card rounded-xl p-6 z-10 max-w-4xl w-full mt-2",
           fullscreen ? "w-full h-full" : "",
           contentClassName,
         )}

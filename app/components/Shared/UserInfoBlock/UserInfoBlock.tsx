@@ -3,7 +3,6 @@ import { IUser } from "@/app/utils/store/userSlice";
 import Image from "next/image";
 import Discord from "../../Icons/Discord";
 import Steam from "../../Icons/Steam";
-import Link from "next/link";
 import { MouseEvent } from "react";
 
 const UserInfoBlock = ({

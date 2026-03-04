@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import Link from "next/link";
 import { Loader2, X } from "lucide-react";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { db } from "@/app/utils/firebase";
 import { IUser } from "@/app/utils/store/userSlice";
 import { removeJudge } from "@/app/utils/store/tournamentsSlice";
@@ -21,6 +21,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
   const { uid, role } = user;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const handleRemoveJudge = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -39,10 +40,14 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
     }
   };
 
+  const handleClickLine = () => {
+    router.push("/users/" + uid);
+  };
+
   return (
-    <Link
-      href={"/users/" + uid}
+    <div
       className="not-first:border-t border-t-border/50"
+      onClick={handleClickLine}
     >
       <motion.li
         initial={{ opacity: 0 }}
@@ -67,7 +72,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
           </>
         )}
       </motion.li>
-    </Link>
+    </div>
   );
 };
 

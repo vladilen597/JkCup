@@ -245,13 +245,27 @@ const EditModal = ({
           )}
         </div>
 
-        <div>
-          <label className="text-sm font-medium mb-1 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            Длительность
-          </label>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">
+              Дата начала
+            </label>
+            <DarkDateTimePicker
+              value={start_date}
+              onChange={(value) => onStartDateChange(value)}
+            />
+          </div>
+          <div className="w-full">
+            <label className="text-sm font-medium mb-1 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Длительность
+            </label>
 
-          <DurationPicker valueMs={duration} onChange={handleChangeDuration} />
+            <DurationPicker
+              valueMs={duration}
+              onChange={handleChangeDuration}
+            />
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -310,14 +324,6 @@ const EditModal = ({
               ))}
             </div>
           )}
-        </div>
-
-        <div className="mt-3">
-          <label className="block text-sm font-medium mb-1">Дата начала</label>
-          <DarkDateTimePicker
-            value={start_date}
-            onChange={(value) => onStartDateChange(value)}
-          />
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
