@@ -114,6 +114,8 @@ const CreateTournamentModal = ({
     }));
   };
 
+  console.log(formData.game);
+
   const canAddMoreRewards =
     formData.type.value === "team"
       ? formData.max_teams > formData.rewards.length

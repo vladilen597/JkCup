@@ -1,17 +1,42 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, Suspense } from "react";
 import Header from "../components/Shared/Header/Header";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import CustomButton from "../components/Shared/CustomButton/CustomButton";
 
 type Props = {
   children: ReactNode;
 };
 
-const layout = ({ children }: Props) => {
+const ErrorComponent = () => {
   return (
-    <div className="font-inter">
-      <Header />
-      {children}
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="text-center p-8 max-w-md ">
+        <h2 className="text-2xl font-bold text-white mb-4 text-center">
+          😕 Что-то пошло не так
+        </h2>
+        <p className="text-gray-300 mb-6">
+          Произошла ошибка при загрузке страницы. Пожалуйста, попробуйте
+          обновить страницу.
+        </p>
+        <CustomButton
+          className="mx-auto"
+          label="Перезагрузить страницу"
+          onClick={() => window.location.reload()}
+        />
+      </div>
     </div>
   );
 };
 
-export default layout;
+const Layout = ({ children }: Props) => {
+  return (
+    <div className="font-inter">
+      <Header />
+      <ErrorBoundary errorComponent={ErrorComponent}>{children}</ErrorBoundary>
+    </div>
+  );
+};
+
+export default Layout;

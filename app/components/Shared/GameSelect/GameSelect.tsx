@@ -122,7 +122,7 @@ const GameSelect = ({
       {required && (
         <input
           type="text"
-          value={value?.id || ""}
+          value={value?.name}
           onChange={() => {}}
           required={required}
           className="sr-only"
