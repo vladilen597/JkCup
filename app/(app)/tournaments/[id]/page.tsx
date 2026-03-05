@@ -262,7 +262,7 @@ const TournamentPage = () => {
 
   const isFull =
     tournament.players_per_team > 1
-      ? tournament.teams.length === tournament.max_players
+      ? tournament.teams.length === tournament.max_teams
       : tournament.usersIds.length === tournament.max_players;
 
   const isCurrentUserJudge = tournament.judgesIds.includes(currentUser.uid);
