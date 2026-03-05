@@ -180,12 +180,16 @@ const TournamentPage = () => {
     try {
       const tournamentDoc = await getDoc(tournamentRef);
 
+      const tournamentLoadedData = tournamentDoc.data() as
+        | ITournament
+        | undefined;
+
       const tournamentData = {
-        ...tournamentDoc.data(),
+        ...tournamentLoadedData,
         id: tournamentDoc.id,
       };
 
-      if (tournamentData) {
+      if (tournamentLoadedData) {
         if (tournaments.some((tournament) => tournament.id === tournamentId)) {
           dispatch(updateTournament(tournamentData as ITournament));
         } else {
@@ -239,9 +243,6 @@ const TournamentPage = () => {
     }
   };
 
-  const canEditTournament =
-    currentUser?.role === "admin" || currentUser?.role === "superadmin";
-
   if (isTournamentLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2">
@@ -252,7 +253,12 @@ const TournamentPage = () => {
   }
 
   if (!tournament) {
-    return <div className="p-8 text-center">Турнир не найден</div>;
+    return (
+      <div className="flex flex-col font-mono! items-center justify-center min-h-[80vh]">
+        <h2 className="text-[120px] font-bold! font-mono! text-primary">404</h2>
+        <span className="text-[24px]">Турнир не найден</span>
+      </div>
+    );
   }
 
   const isTeamMode = tournament.type.value === "team";

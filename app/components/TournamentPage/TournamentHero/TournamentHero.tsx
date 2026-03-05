@@ -42,7 +42,8 @@ const TournamentHero = ({
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const canEditTournament = currentUser?.role !== "user";
+  const canEditTournament =
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
   const handleCloseRegistration = async () => {
     try {

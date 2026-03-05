@@ -2,6 +2,9 @@ import JudgeAddItem from "./JudgeAddItem/JudgeAddItem";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
+import Skeleton from "react-loading-skeleton";
+import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 
 interface IJudgeAddListProps {
   occupiedUserIds: Set<string>;
@@ -10,8 +13,10 @@ interface IJudgeAddListProps {
 
 const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
   const [users, setUsers] = useState<IUser[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLoadUsers = async () => {
+    setIsLoading(true);
     try {
       const { data } = await axios.get("/api/users");
 
@@ -21,6 +26,8 @@ const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
       setUsers(filteredUsers);
     } catch (err: any) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,18 +41,22 @@ const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
         <h3 className="text-xl font-bold">Добавить судью</h3>
       </div>
 
-      <ul className="flex flex-col gap-2 max-h-75 overflow-y-auto">
-        {users.map((user, index) => {
-          return (
-            <JudgeAddItem
-              key={user.uid}
-              user={user}
-              index={index}
-              onClose={handleClose}
-            />
-          );
-        })}
-      </ul>
+      {isLoading ? (
+        <UserShimmer />
+      ) : (
+        <ul className="flex flex-col gap-2 max-h-175 overflow-y-auto">
+          {users.map((user, index) => {
+            return (
+              <JudgeAddItem
+                key={user.uid}
+                user={user}
+                index={index}
+                onClose={handleClose}
+              />
+            );
+          })}
+        </ul>
+      )}
     </>
   );
 };

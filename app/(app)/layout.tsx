@@ -4,15 +4,20 @@ import { ReactNode } from "react";
 import Header from "../components/Shared/Header/Header";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import CustomButton from "../components/Shared/CustomButton/CustomButton";
+import { useAppDispatch } from "../utils/store/hooks";
+import { setTournaments } from "../utils/store/tournamentsSlice";
 
 type Props = {
   children: ReactNode;
 };
 
 const ErrorComponent = () => {
+  const dispatch = useAppDispatch();
+
   const handleClickClear = () => {
-    localStorage.clear();
-    window.location.reload();
+    dispatch(setTournaments([]));
+
+    window.location.href = "/tournaments";
   };
 
   return (
