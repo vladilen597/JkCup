@@ -14,7 +14,7 @@ const GameLine = ({
     <div className="bg-muted/40 border border-border/50 rounded-lg p-2 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Image
-          className="rounded"
+          className="rounded h-10 w-10 object-cover"
           src={image}
           width={40}
           height={40}
