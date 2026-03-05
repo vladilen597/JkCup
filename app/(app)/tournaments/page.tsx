@@ -48,7 +48,7 @@ const page = () => {
     players_per_team: 2,
     start_date: "",
     tags: [],
-    rewards: [{ id: uuidv4(), value: "" }],
+    rewards: [],
     status: "open",
     duration: 0,
     useBracket: false,
@@ -209,45 +209,38 @@ const page = () => {
           <TournamentStats />
         </div>
       </motion.div>
+      <ul className="space-y-3">
+        {filteredTournaments?.map((tournament, index) => {
+          const isTeam = tournament.type.value === "team";
+          const usersAmount = isTeam
+            ? tournament.teams.length
+            : tournament.usersIds?.length || 0;
+          const teamsAmount = tournament.teams.length || 0;
+          const fillPercent = isTeam
+            ? Math.round((teamsAmount / tournament.max_teams) * 100)
+            : Math.round((usersAmount / tournament.max_players) * 100);
+          const isFull = isTeam
+            ? teamsAmount >= tournament.max_teams
+            : usersAmount >= tournament.max_players;
+          const maxPlayers = isTeam
+            ? tournament.max_teams
+            : tournament.max_players;
 
-      {filteredTournaments?.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">
-          Турниров пока нет.
-        </p>
-      ) : (
-        <ul className="space-y-3">
-          {filteredTournaments?.map((tournament, index) => {
-            const isTeam = tournament.type.value === "team";
-            const usersAmount = isTeam
-              ? tournament.teams.length
-              : tournament.usersIds?.length || 0;
-            const teamsAmount = tournament.teams.length || 0;
-            const fillPercent = isTeam
-              ? Math.round((teamsAmount / tournament.max_teams) * 100)
-              : Math.round((usersAmount / tournament.max_players) * 100);
-            const isFull = isTeam
-              ? teamsAmount >= tournament.max_teams
-              : usersAmount >= tournament.max_players;
-            const maxPlayers = isTeam
-              ? tournament.max_teams
-              : tournament.max_players;
-
-            return (
-              <Tournament
-                key={tournament.id}
-                index={index}
-                {...tournament}
-                description={tournament.description}
-                currentPlayers={usersAmount}
-                maxPlayers={maxPlayers}
-                isTeam={isTeam}
-                isFull={isFull}
-                fillPercent={fillPercent}
-              />
-            );
-          })}
-        </ul>
-      )}
+          return (
+            <Tournament
+              key={tournament.id}
+              index={index}
+              {...tournament}
+              description={tournament.description}
+              currentPlayers={usersAmount}
+              maxPlayers={maxPlayers}
+              isTeam={isTeam}
+              isFull={isFull}
+              fillPercent={fillPercent}
+            />
+          );
+        })}
+      </ul>
       {canCreateTournament && (
         <CustomModal
           isOpen={isCreateTournamentModalOpen}

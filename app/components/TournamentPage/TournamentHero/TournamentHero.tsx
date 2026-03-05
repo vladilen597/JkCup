@@ -3,7 +3,7 @@ import {
   updateTournamentStatus,
 } from "@/app/utils/store/tournamentsSlice";
 import CustomButton from "../../Shared/CustomButton/CustomButton";
-import { Album, Archive, Edit, Trash2, Trophy } from "lucide-react";
+import { Album, Archive, Edit, Gamepad2, Trash2, Trophy } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
@@ -22,6 +22,7 @@ import Tag from "../../Shared/Tag/Tag";
 import Title from "../../Title/Title";
 import TournamentDurationDisplay from "../../Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
+import Badge from "../../Shared/Badge/Badge";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -189,12 +190,20 @@ const TournamentHero = ({
       <div className="block relative mt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-              {statuses[tournament.status as keyof typeof statuses]}
-            </span>
+            <Badge
+              className="bg-primary/10 text-primary font-bold tracking-wider"
+              text={statuses[tournament.status as keyof typeof statuses]}
+            />
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
               {isTeamMode ? "Командный" : "Одиночный"}
             </span>
+
+            {tournament.hidden && (
+              <Badge
+                text="Скрыт"
+                className="bg-amber-400 text-black border border-destructive/20"
+              />
+            )}
             {tournament.tags?.map((tag) => (
               <Tag key={tag.id} {...tag} />
             ))}
@@ -202,6 +211,22 @@ const TournamentHero = ({
         </div>
 
         <Title title={tournament.name} className="mt-2" />
+
+        <div className="mt-2 flex items-center gap-2">
+          {tournament.game?.image ? (
+            <Image
+              className="object-cover rounded"
+              src={tournament.game?.image}
+              width={32}
+              height={32}
+              alt="Game image"
+            />
+          ) : (
+            <Gamepad2 />
+          )}
+          <span className="font-bold">{tournament.game?.name}</span>
+        </div>
+
         <TournamentDurationDisplay
           duration={tournament.duration}
           startedAt={tournament.startedAt}

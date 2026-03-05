@@ -2,7 +2,6 @@ import { useAppSelector } from "@/app/utils/store/hooks";
 import { DoorOpen, Loader2 } from "lucide-react";
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 import { IUser } from "@/app/utils/store/userSlice";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface ITeamUserItemProps extends IUser {
@@ -51,24 +50,24 @@ const TeamUserItem = ({
             steamLink={steamLink}
           />
         </div>
-        {isMyTeam &&
-          ((isCurrentUser && !isCurrentUserCreator && canLeave) ||
-            (!isCurrentUser && isCurrentUserCreator && canLeave)) && (
-            <button
-              onClick={onLeaveClick}
-              disabled={isLoading}
-              className="cursor-pointer"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-              ) : (
-                <div className="p-2 bg-red-600/80 rounded-sm">
-                  <DoorOpen className="w-4 h-4" />
-                </div>
-              )}
-            </button>
-          )}
       </div>
+      {isMyTeam &&
+        ((isCurrentUser && !isCurrentUserCreator && canLeave) ||
+          (!isCurrentUser && isCurrentUserCreator && canLeave)) && (
+          <button
+            onClick={onLeaveClick}
+            disabled={isLoading}
+            className="cursor-pointer"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+            ) : (
+              <div className="p-2 bg-red-600/80 rounded-sm">
+                <DoorOpen className="w-4 h-4" />
+              </div>
+            )}
+          </button>
+        )}
     </li>
   );
 };

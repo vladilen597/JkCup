@@ -1,6 +1,7 @@
 import useTournamentUsersRealtime from "@/app/utils/useTournamentUsersRealtime";
 import { Loader2, Sword, Swords, User, Users } from "lucide-react";
 import React from "react";
+import CountUp from "react-countup";
 
 const TournamentStats: React.FC = () => {
   const {
@@ -8,18 +9,9 @@ const TournamentStats: React.FC = () => {
     totalSingleTournaments,
     totalTeamTournaments,
     totalTeams,
-    loading,
   } = useTournamentUsersRealtime({
     onlyActive: false,
   });
-
-  if (loading) {
-    return (
-      <div className="tournament-stats loading w-full flex justify-center items-center h-15.5">
-        <Loader2 className="animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center gap-2">
@@ -28,7 +20,7 @@ const TournamentStats: React.FC = () => {
         <div>
           <span className="text-xs text-muted-foreground">Участники</span>
           <p className="text-sm font-bold text-foreground font-display">
-            {totalJoinedUsers.toLocaleString()}
+            <CountUp start={0} end={totalJoinedUsers} />
           </p>
         </div>
       </div>
@@ -37,7 +29,7 @@ const TournamentStats: React.FC = () => {
         <div>
           <span className="text-xs text-muted-foreground">Команды</span>
           <p className="text-sm font-bold text-foreground font-display">
-            {totalTeams.toLocaleString()}
+            <CountUp start={0} end={totalTeams} />
           </p>
         </div>
       </div>
@@ -48,7 +40,7 @@ const TournamentStats: React.FC = () => {
             Командных турниров
           </span>
           <p className="text-sm font-bold text-foreground font-display">
-            {totalTeamTournaments.toLocaleString()}
+            <CountUp start={0} end={totalTeamTournaments} />
           </p>
         </div>
       </div>
@@ -59,7 +51,7 @@ const TournamentStats: React.FC = () => {
             Одиночных турниров
           </span>
           <p className="text-sm font-bold text-foreground font-display">
-            {totalSingleTournaments.toLocaleString()}
+            <CountUp start={0} end={totalSingleTournaments} />
           </p>
         </div>
       </div>

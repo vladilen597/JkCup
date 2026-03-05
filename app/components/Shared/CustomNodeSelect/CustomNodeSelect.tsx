@@ -1,5 +1,12 @@
 import { ChevronDown } from "lucide-react";
-import { MouseEvent, ReactNode, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  MouseEvent,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 export interface ISelectOption {
@@ -10,7 +17,6 @@ export interface ISelectOption {
 interface ICustomSelectProps {
   titleNode: ReactNode;
   containerClassName?: string;
-  triggerClassName?: string;
   options: ISelectOption[];
 }
 
@@ -31,16 +37,6 @@ const labelVariants = {
   },
 };
 
-const triggerVariants = {
-  expanded: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  collapsed: {
-    transform: "rotate(0deg)",
-  },
-};
-
 const contentVariants = {
   expanded: {
     opacity: 1,
@@ -54,7 +50,6 @@ const contentVariants = {
 
 const CustomNodeSelect = ({
   containerClassName,
-  triggerClassName,
   titleNode,
   options,
 }: ICustomSelectProps) => {
@@ -97,7 +92,9 @@ const CustomNodeSelect = ({
             animate="expanded"
             exit="collapsed"
           >
-            {options.map((option) => option.node)}
+            {options.map((option) => (
+              <Fragment key={option.id}>{option.node}</Fragment>
+            ))}
           </motion.ul>
         )}
       </AnimatePresence>

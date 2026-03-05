@@ -114,8 +114,6 @@ const CreateTournamentModal = ({
     }));
   };
 
-  console.log(formData.game);
-
   const canAddMoreRewards =
     formData.type.value === "team"
       ? formData.max_teams > formData.rewards.length
@@ -134,6 +132,7 @@ const CreateTournamentModal = ({
           <div className="w-full">
             <label className="block text-sm font-medium mb-1">Название</label>
             <input
+              name="name"
               type="text"
               value={formData.name}
               onChange={(e) =>
@@ -317,7 +316,7 @@ const CreateTournamentModal = ({
           </div>
 
           {formData.rewards.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-2">
+            <p className="text-sm text-muted-foreground">
               Награды не добавлены
             </p>
           ) : (
@@ -362,11 +361,8 @@ const CreateTournamentModal = ({
                           ),
                         }))
                       }
-                      disabled={formData.rewards.length <= 1}
                     >
-                      <X
-                        className={`w-4 h-4 ${formData.rewards.length <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-                      />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>

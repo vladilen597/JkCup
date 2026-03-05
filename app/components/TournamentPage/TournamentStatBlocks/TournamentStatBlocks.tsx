@@ -24,16 +24,16 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
 
   return (
     <section>
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto"
-      >
-        <span className="text-xs text-muted-foreground font-medium">
-          Награды
-        </span>
-        {!!tournament.rewards?.length && (
+      {!!tournament.rewards.length && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto"
+        >
+          <span className="text-xs text-muted-foreground font-medium">
+            Награды
+          </span>
           <ul className="mt-2">
             {tournament.rewards?.map((reward, index) => (
               <div className="flex items-center gap-2" key={reward.id}>
@@ -47,8 +47,8 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
               </div>
             ))}
           </ul>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

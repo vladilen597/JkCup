@@ -21,6 +21,7 @@ const GamesPage = () => {
   const [gameId, setGameId] = useState("");
   const dispatch = useAppDispatch();
   const { games } = useAppSelector((state) => state.games);
+  const { user: currentUser } = useAppSelector((state) => state.user);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleCloseModal = () => {
@@ -94,11 +95,14 @@ const GamesPage = () => {
             <Gamepad2 className="h-6 w-6 text-primary" />
             Список игр ({games.length})
           </h2>
-          <CustomButton
-            icon={<Plus />}
-            label="Добавить"
-            onClick={handleOpenModal}
-          />
+          {(currentUser.role === "admin" ||
+            currentUser.role === "superadmin") && (
+            <CustomButton
+              icon={<Plus />}
+              label="Добавить"
+              onClick={handleOpenModal}
+            />
+          )}
         </div>
 
         <ul className="mt-6 flex flex-col gap-2">

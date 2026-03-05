@@ -122,6 +122,8 @@ const Header = () => {
           <Link
             href="https://discord.gg/S6QMcETh4d"
             className="flex items-center gap-2 group"
+            referrerPolicy="no-referrer"
+            target="_blank"
           >
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
               <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />

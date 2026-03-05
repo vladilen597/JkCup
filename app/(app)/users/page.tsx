@@ -12,6 +12,30 @@ import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 import CountUp from "react-countup";
 import axios from "axios";
+import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
+
+const roles = [
+  {
+    id: 1,
+    label: "Все",
+    value: "any",
+  },
+  {
+    id: 2,
+    label: "Суперадмин",
+    value: "superadmin",
+  },
+  {
+    id: 3,
+    label: "Админ",
+    value: "admin",
+  },
+  {
+    id: 4,
+    label: "Пользователь",
+    value: "user",
+  },
+];
 
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -19,6 +43,7 @@ const UsersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRole, setSelectedRole] = useState(roles[0]);
 
   const handleChangeQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -46,10 +71,12 @@ const UsersPage = () => {
     handleLoadUsers();
   }, []);
 
-  const filteredUsers = users.filter((user) =>
-    (user.displayName + user.steamDisplayName)
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase()),
+  const filteredUsers = users.filter(
+    (user) =>
+      (user.displayName + user.steamDisplayName)
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) &&
+      (selectedRole.value === "any" || selectedRole.value === user.role),
   );
 
   if (error) {
@@ -99,7 +126,15 @@ const UsersPage = () => {
           <Users className="h-6 w-6 text-primary" />
           Список пользователей
         </h2>
-        <SearchInput value={searchQuery} onChange={handleChangeQuery} />
+        <div className="flex items-stretch gap-2">
+          <SearchInput value={searchQuery} onChange={handleChangeQuery} />
+          <CustomSelect
+            containerClassName="min-w-40"
+            options={roles}
+            value={selectedRole}
+            onChange={setSelectedRole}
+          />
+        </div>
 
         <ul className="mt-2 flex flex-col gap-2">
           {loading ? (

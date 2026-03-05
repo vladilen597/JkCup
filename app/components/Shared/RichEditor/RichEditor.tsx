@@ -166,7 +166,7 @@ const Tiptap = ({
         .ProseMirror ol { list-style-type: decimal; padding-left: 1.5rem; margin: 10px 0; }
       `}</style>
       <div
-        className="p-3 cursor-text bg-background min-h-[120px]"
+        className="p-3 cursor-text bg-background min-h-30"
         onClick={() => editor.commands.focus()}
       >
         <EditorContent editor={editor} />

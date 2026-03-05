@@ -344,11 +344,8 @@ const EditTournamentModal = ({
                       className="absolute right-2 cursor-pointer text-muted-foreground hover:text-destructive transition-colors"
                       type="button"
                       onClick={() => handleDeleteReward(reward.id)}
-                      disabled={tournamentData.rewards.length <= 1}
                     >
-                      <X
-                        className={`w-4 h-4 ${tournamentData.rewards.length <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-                      />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>
