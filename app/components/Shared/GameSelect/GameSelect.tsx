@@ -8,10 +8,12 @@ import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 
 interface IGameSelectProps {
-  value: IGame;
+  value: IGame | null;
   containerClassName?: string;
   triggerClassName?: string;
   onChange: (value: IGame) => void;
+  required?: boolean;
+  error?: boolean;
 }
 
 const containerVariants = {
@@ -25,16 +27,6 @@ const containerVariants = {
 const labelVariants = {
   expanded: {
     transform: "rotate(180deg)",
-  },
-  collapsed: {
-    transform: "rotate(0deg)",
-  },
-};
-
-const triggerVariants = {
-  expanded: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
   },
   collapsed: {
     transform: "rotate(0deg)",
@@ -56,6 +48,8 @@ const GameSelect = ({
   value,
   containerClassName,
   onChange,
+  required = false,
+  error = false,
 }: IGameSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLLabelElement>(null);
@@ -86,6 +80,10 @@ const GameSelect = ({
     handleLoadGames();
   }, []);
 
+  const borderClass = error
+    ? "border-red-500 focus:border-red-500"
+    : "border-border";
+
   return (
     <motion.label
       ref={containerRef}
@@ -93,7 +91,7 @@ const GameSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative bg-muted rounded-lg ${containerClassName}`}
+      className={`block border relative bg-muted rounded-lg ${borderClass} ${containerClassName}`}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center p-3 justify-between text-sm">
@@ -107,7 +105,9 @@ const GameSelect = ({
               alt="Game image"
             />
           )}
-          {value?.name || "Не выбрано"}
+          <span className={!value && required ? "text-muted-foreground" : ""}>
+            {value?.name || (required ? "Выберите игру" : "Не выбрано")}
+          </span>
         </div>
         <motion.div
           variants={labelVariants}
@@ -118,31 +118,51 @@ const GameSelect = ({
           <ChevronDown className="h-4 w-4" />
         </motion.div>
       </motion.div>
+
+      {required && (
+        <input
+          type="text"
+          value={value?.id || ""}
+          onChange={() => {}}
+          required={required}
+          className="sr-only"
+          tabIndex={-1}
+        />
+      )}
+
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none"
+            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none max-h-60 overflow-y-auto"
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"
             exit="collapsed"
           >
-            {games.map((game) => (
-              <li
-                key={game.id}
-                className={`flex items-center gap-2 p-3 hover:bg-primary-foreground/50 ${game.id === value?.id && "bg-primary-foreground/80"}`}
-                onClick={() => onChange(game)}
-              >
-                <Image
-                  className="rounded"
-                  src={game.image}
-                  width={16}
-                  height={16}
-                  alt="Game image"
-                />
-                <span>{game.name}</span>
+            {games.length === 0 ? (
+              <li className="p-3 text-muted-foreground text-center">
+                Загрузка игр...
               </li>
-            ))}
+            ) : (
+              games.map((game) => (
+                <li
+                  key={game.id}
+                  className={`flex items-center gap-2 p-3 hover:bg-primary-foreground/50 cursor-pointer ${
+                    game.id === value?.id && "bg-primary-foreground/80"
+                  }`}
+                  onClick={() => onChange(game)}
+                >
+                  <Image
+                    className="rounded"
+                    src={game.image}
+                    width={16}
+                    height={16}
+                    alt={game.name}
+                  />
+                  <span>{game.name}</span>
+                </li>
+              ))
+            )}
           </motion.ul>
         )}
       </AnimatePresence>

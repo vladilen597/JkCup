@@ -10,6 +10,7 @@ import { IUser } from "@/app/utils/store/userSlice";
 import Title from "@/app/components/Title/Title";
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
+import CountUp from "react-countup";
 import axios from "axios";
 
 const UsersPage = () => {
@@ -96,7 +97,7 @@ const UsersPage = () => {
       >
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
           <Users className="h-6 w-6 text-primary" />
-          Список пользователей ({filteredUsers.length})
+          Список пользователей
         </h2>
         <SearchInput value={searchQuery} onChange={handleChangeQuery} />
 
@@ -132,7 +133,6 @@ function StatCard({
   icon,
   label,
   value,
-  highlight = false,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -147,11 +147,11 @@ function StatCard({
           {label}
         </span>
       </div>
-      <span
-        className={`text-2xl font-bold font-mono ${highlight ? "text-primary" : "text-foreground"}`}
-      >
-        {value}
-      </span>
+      <CountUp
+        className="text-2xl font-bold font-mono text-primary"
+        start={0}
+        end={+value}
+      />
     </div>
   );
 }

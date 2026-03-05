@@ -43,28 +43,22 @@ import {
   updateTournamentStatus,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
-import EditModal from "@/app/components/EditModal/EditModal";
-import StatCard from "@/app/components/Shared/StatCard/StatCard";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
 import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
-import { v4 as uuidv4 } from "uuid";
-import Image from "next/image";
-import TournamentDurationDisplay from "@/app/components/Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
-import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
-import Title from "@/app/components/Title/Title";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
 import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
 import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
-import CleanHtml from "@/app/components/Shared/CleanHtml/CleanHtml";
 import { ITag } from "@/app/lib/types";
-import Tag from "@/app/components/Shared/Tag/Tag";
 import { IGame } from "@/app/utils/store/gamesSlice";
+import TournamentHero from "@/app/components/TournamentPage/TournamentHero/TournamentHero";
+import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
+import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
 
 export const statuses = {
   open: "Открыт",
@@ -87,13 +81,8 @@ export interface IEditTournament {
   duration: number;
   rewards: { id: string; value: string }[];
   useBracket?: boolean;
+  hidden: boolean;
 }
-
-const trophyIndexes = {
-  1: <Trophy className="h-6 w-6 text-[#EFBF04]" />,
-  2: <Trophy className="h-6 w-6 text-[#C4C4C4]" />,
-  3: <Trophy className="h-6 w-6 text-[#CE8946]" />,
-};
 
 const TournamentPage = () => {
   const params = useParams();
@@ -111,46 +100,10 @@ const TournamentPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState<IEditTournament>({
-    name: tournament?.name || "",
-    description: tournament?.description || "",
-    game: tournament?.game || null,
-    max_players: tournament?.max_players || 6,
-    max_teams: tournament?.max_teams || 6,
-    players_per_team: tournament?.players_per_team || 2,
-    start_date: tournament?.start_date
-      ? new Date(tournament.start_date).toString()
-      : "",
-    type: tournament?.type || {
-      id: 1,
-      value: "team",
-      label: "Командный",
-    },
-    tags: tournament?.tags || [],
-    rewards: tournament?.rewards || [],
-    duration: tournament?.duration || 0,
-    useBracket: tournament?.useBracket || false,
-  });
   const router = useRouter();
 
   const handleOpenEditModal = () => {
     setShowEditModal(true);
-  };
-
-  const handleUpdateEditField = (event: ChangeEvent<HTMLInputElement>) => {
-    setEditForm({ ...editForm, [event.target.name]: event.target.value });
-  };
-
-  const handleUpdateTextField = (value: string) => {
-    setEditForm({ ...editForm, description: value });
-  };
-
-  const handleUpdateTeamAmount = (value: number) => {
-    setEditForm({ ...editForm, players_per_team: value });
-  };
-
-  const handleUpdateStartDate = (value: string) => {
-    setEditForm({ ...editForm, start_date: value });
   };
 
   const handleOpenCreateTeamModal = () => {
@@ -159,13 +112,6 @@ const TournamentPage = () => {
 
   const handleCloseCreateTeamModal = () => {
     setIsCreateTeamModalOpen(false);
-  };
-
-  const handleToggleUseBracket = () => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      useBracket: !prevState.useBracket,
-    }));
   };
 
   const canEdit =
@@ -216,120 +162,16 @@ const TournamentPage = () => {
     }
   };
 
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canEdit || !tournament?.id) return;
-
-    setIsLoading(true);
-    setErrorMsg("");
-
-    const tournamentRef = doc(db, "tournaments", tournament.id);
-
-    try {
-      await updateDoc(tournamentRef, {
-        name: editForm.name,
-        description: editForm.description,
-        game: editForm.game,
-        max_players: editForm.max_players,
-        max_teams: editForm.max_teams,
-        players_per_team: editForm.players_per_team,
-        start_date: editForm.start_date
-          ? new Date(editForm.start_date).toString()
-          : null,
-        rewards: editForm.rewards,
-        duration: editForm.duration,
-        tags: editForm.tags,
-        useBracket: editForm.useBracket,
-      });
-
-      const updatedTournaments = tournaments.map((t) =>
-        t.id === tournament.id ? { ...t, ...editForm } : t,
-      );
-      dispatch(setTournaments(updatedTournaments));
-
-      setShowEditModal(false);
-    } catch (error: any) {
-      console.log(error);
-      setErrorMsg("Не удалось обновить турнир");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCloseRegistration = async () => {
-    try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "about_to_start",
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "about_to_start",
-          }),
-        );
-      }
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    }
-  };
-
-  const handleStartTournament = async () => {
-    try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "in_progress",
-          startedAt: new Date().toString(),
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "in_progress",
-            startedAt: new Date().toString(),
-          }),
-        );
-      }
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    }
-  };
-
   const handleCloseEditModal = () => {
     setShowEditModal(false);
   };
 
+  const handleOpenDeleteModal = () => {
+    setShowDeleteConfirm(true);
+  };
+
   const handleCloseDeleteModal = () => {
     setShowDeleteConfirm(false);
-  };
-
-  const handleChangeMaxTeamsOrPlayers = (value: number) => {
-    if (editForm.type.value === "team") {
-      setEditForm((prevState) => ({
-        ...prevState,
-        max_teams: value,
-      }));
-    } else {
-      setEditForm((prevState) => ({
-        ...prevState,
-        max_players: value,
-      }));
-    }
-  };
-
-  const handleChangeDuration = (value: number) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      duration: value,
-    }));
-  };
-
-  const handleUpdateTournamentType = (value: ISelectOption) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      type: value,
-    }));
   };
 
   const handleLoadTournament = async () => {
@@ -371,52 +213,9 @@ const TournamentPage = () => {
     }
   };
 
-  const handleArhiveTournament = async () => {
-    try {
-      const tournamentDoc = doc(db, "tournaments", tournamentId);
-      await addDoc(collection(db, "archivedTournaments"), tournament);
-      await deleteDoc(tournamentDoc);
-
-      router.replace("/tournaments");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     handleLoadTournament();
   }, []);
-
-  const handleRewardChange = (index: number, value: string) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: prevState.rewards.map((reward, i) =>
-        i === index ? { ...reward, value } : reward,
-      ),
-    }));
-  };
-
-  const handleAddReward = () => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: [...prevState.rewards, { id: uuidv4(), value: "" }],
-    }));
-  };
-
-  const handleDeleteReward = (id: string) => {
-    setEditForm((prevState) => ({
-      ...prevState,
-      rewards: prevState.rewards.filter((reward) => reward.id !== id),
-    }));
-  };
-
-  const handleChangeGame = (game: IGame) => {
-    console.log("game", game);
-    setEditForm((prevState) => ({
-      ...prevState,
-      game: game,
-    }));
-  };
 
   const handleDelete = async () => {
     if (!canEdit || !tournament?.id) return;
@@ -484,123 +283,12 @@ const TournamentPage = () => {
 
   return (
     <main className="w-full px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-8 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            {canEditTournament && (
-              <div className="flex items-center gap-4">
-                {tournament.creator && (
-                  <div className="">
-                    <span className="text-sm">Создатель</span>
-                    <div className="mt-1 flex gap-2 items-center">
-                      <Image
-                        width={32}
-                        height={32}
-                        className="w-6 h-6 rounded-full"
-                        src={tournament?.creator?.photoUrl || ""}
-                        alt="User photo"
-                      />
-                      <div>
-                        <span className="text-xs font-bold">
-                          {tournament?.creator?.displayName}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {tournament?.createdAt && (
-                  <div className="">
-                    <span className="text-sm">Время создания</span>
-                    <div className="mt-1 flex gap-2 items-center">
-                      {format(tournament?.createdAt, "dd.MM.yyyy HH:mm")}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          {canEditTournament && (
-            <div className="flex gap-3">
-              {tournament.status === "open" && (
-                <CustomButton
-                  icon={<Album className="h-4 w-4" />}
-                  label="Закрыть регистрацию"
-                  onClick={handleCloseRegistration}
-                />
-              )}
-              {tournament.status === "about_to_start" && (
-                <CustomButton
-                  icon={<Trophy className="h-4 w-4" />}
-                  label="Начать турнир"
-                  onClick={handleStartTournament}
-                />
-              )}
-              {tournament.status === "in_progress" && (
-                <CustomButton
-                  icon={<Trophy className="h-4 w-4" />}
-                  label="Закончить и выбрать победителя"
-                  onClick={handleOpenSelectWinnerModal}
-                />
-              )}
-              {tournament.status === "finished" && (
-                <CustomButton
-                  icon={<Archive className="h-4 w-4" />}
-                  label="Архивировать"
-                  onClick={handleArhiveTournament}
-                />
-              )}
-              {tournament.status !== "finished" && (
-                <CustomButton
-                  icon={<Edit className="h-4 w-4 text-amber-600" />}
-                  className="py-1.5 px-2.5 bg-amber-600/20 hover:bg-amber-600/40 text-white border border-amber-600!"
-                  onClick={handleOpenEditModal}
-                />
-              )}
-              <CustomButton
-                icon={<Trash2 className="h-4 w-4 text-red-600" />}
-                className="py-1.5 px-2.5 bg-red-600/20 hover:bg-red-600/40 text-white border border-red-600!"
-                onClick={() => setShowDeleteConfirm(true)}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="block relative mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-wider">
-                {statuses[tournament.status as keyof typeof statuses]}
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                {isTeamMode ? "Командный" : "Одиночный"}
-              </span>
-              {tournament.tags?.map((tag) => (
-                <Tag key={tag.id} {...tag} />
-              ))}
-            </div>
-          </div>
-
-          <Title title={tournament.name} className="mt-2" />
-          <TournamentDurationDisplay
-            duration={tournament.duration}
-            startedAt={tournament.startedAt}
-            status={tournament.status}
-          />
-
-          <div className="mt-4 whitespace-pre-wrap">
-            <CleanHtml html={tournament.description} />
-          </div>
-        </div>
-      </motion.div>
+      <TournamentHero
+        tournament={tournament}
+        onDeleteClick={handleOpenDeleteModal}
+        handleClickDeleteWinner={handleOpenSelectWinnerModal}
+        handleClickEdit={handleOpenEditModal}
+      />
 
       {tournament.status === "finished" && (
         <motion.div
@@ -637,68 +325,7 @@ const TournamentPage = () => {
         </motion.div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto"
-      >
-        <span className="text-xs text-muted-foreground font-medium">
-          Награды
-        </span>
-        {!!tournament.rewards?.length && (
-          <ul className="mt-2">
-            {tournament.rewards?.map((reward, index) => (
-              <div className="flex items-center gap-2" key={reward.id}>
-                <span className="text-xs w-6 text-center">
-                  {trophyIndexes[(index + 1) as keyof typeof trophyIndexes] ||
-                    index + 1}
-                </span>
-                <span className="text-lg font-bold font-mono text-foreground">
-                  {reward.value}
-                </span>
-              </div>
-            ))}
-          </ul>
-        )}
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 mb-8 max-w-5xl mx-auto"
-      >
-        <StatCard
-          icon={<Users className="h-4 w-4" />}
-          label="Формат"
-          value={
-            isTeamMode
-              ? `${tournament.players_per_team}v${tournament.players_per_team}`
-              : "1v1"
-          }
-        />
-        <StatCard
-          icon={<Hash className="h-4 w-4" />}
-          label={isTeamMode ? "Команд" : "Игроков"}
-          value={`${filledSlots} / ${isTeamMode ? tournament.max_teams : tournament.max_players}`}
-        />
-        <StatCard
-          icon={<Calendar className="h-4 w-4" />}
-          label="Начало"
-          value={
-            tournament.start_date
-              ? format(new Date(tournament.start_date), "dd/MM/yyyy HH:mm")
-              : "Скоро"
-          }
-        />
-        <StatCard
-          icon={<User className="h-4 w-4" />}
-          label="Статус"
-          value={statuses[tournament.status as keyof typeof statuses] || "—"}
-          highlight
-        />
-      </motion.div>
+      <TournamentStatBlocks tournament={tournament} />
 
       {isBracketMode && tournament.status !== "open" && (
         <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md max-w-480 mx-auto w-fit">
@@ -811,26 +438,9 @@ const TournamentPage = () => {
       </motion.section>
 
       <CustomModal isOpen={showEditModal} onClose={handleCloseEditModal}>
-        <EditModal
-          {...editForm}
-          isLoading={isLoading}
-          onTagsChange={(newTags) =>
-            setEditForm({ ...editForm, tags: newTags })
-          }
-          onInputChange={handleUpdateEditField}
-          onTextareaChange={handleUpdateTextField}
-          onTeamAmountChange={handleUpdateTeamAmount}
-          onStartDateChange={handleUpdateStartDate}
+        <EditTournamentModal
+          tournament={tournament}
           onClose={handleCloseEditModal}
-          handleChangeGame={handleChangeGame}
-          handleChangeMaxTeamsOrPlayers={handleChangeMaxTeamsOrPlayers}
-          handleChangeTournamentType={handleUpdateTournamentType}
-          handleRewardChange={handleRewardChange}
-          handleAddReward={handleAddReward}
-          handleDeleteReward={handleDeleteReward}
-          handleChangeDuration={handleChangeDuration}
-          onSubmit={handleEdit}
-          handleToggleBracket={handleToggleUseBracket}
         />
       </CustomModal>
 

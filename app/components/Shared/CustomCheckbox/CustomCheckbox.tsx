@@ -1,50 +1,36 @@
-// CustomCheckbox.tsx
 import { Check } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 
 interface CustomCheckboxProps {
+  name?: string;
   checked: boolean;
-  onChange: (checked: boolean) => void;
   label?: string;
   disabled?: boolean;
   className?: string;
   labelClassName?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const CustomCheckbox = ({
+  name,
   checked,
-  onChange,
   label,
   disabled = false,
   className = "",
   labelClassName = "",
+  onChange,
 }: CustomCheckboxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.checked);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === " " || e.key === "Enter") {
-      e.preventDefault();
-      if (!disabled) {
-        onChange(!checked);
-      }
-    }
-  };
-
   return (
-    <label
-      className={`flex items-center gap-2 ${className}`}
-      onKeyDown={handleKeyDown}
-    >
+    <label className={`flex items-center gap-2 ${className}`}>
       <div className="relative flex items-center justify-center h-5 w-5 border border-zinc-600 rounded overflow-hidden">
         <input
+          name={name}
           ref={inputRef}
           type="checkbox"
           checked={checked}
-          onChange={handleChange}
+          onChange={onChange}
           disabled={disabled}
           className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-inherit"
         />

@@ -12,6 +12,7 @@ import {
   Gamepad2,
   Tag,
   GitBranch,
+  Calendar,
 } from "lucide-react";
 import CustomButton, {
   BUTTON_TYPES,
@@ -149,16 +150,8 @@ const CreateTournamentModal = ({
             <GameSelect
               value={formData.game}
               onChange={(value) => handleChange({ ...formData, game: value })}
-            />
-            {/* <input
-              type="text"
-              value={formData.game}
-              onChange={(e) =>
-                handleChange({ ...formData, game: e.target.value })
-              }
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               required
-            /> */}
+            />
           </div>
         </div>
 
@@ -278,8 +271,8 @@ const CreateTournamentModal = ({
 
         <div className="flex items-center gap-2">
           <div className="w-full">
-            <label className="block text-sm font-medium mb-1">
-              Дата начала
+            <label className="flex items-center gap-2 text-sm font-medium mb-1">
+              <Calendar className="w-4 h-4" /> Дата начала
             </label>
             <DateTimePicker
               value={formData.start_date}

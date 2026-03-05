@@ -90,14 +90,14 @@ const Tournament = ({
                   />
                 )}
                 {tags?.map((tag) => (
-                  <Tag key={tag.id} {...tag} />
+                  <Tag key={tag?.id} {...tag} />
                 ))}
               </div>
               <div className="flex gap-2 items-center text-sm text-neutral-300 line-clamp-1">
-                {game.image ? (
+                {game?.image ? (
                   <Image
                     className="rounded"
-                    src={game.image}
+                    src={game?.image}
                     width={16}
                     height={16}
                     alt="Game image"
@@ -105,7 +105,7 @@ const Tournament = ({
                 ) : (
                   <Gamepad2 />
                 )}
-                <span className="font-bold">{game.name}</span>
+                <span className="font-bold">{game?.name}</span>
               </div>
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />
