@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, Suspense } from "react";
+import { ReactNode } from "react";
 import Header from "../components/Shared/Header/Header";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import CustomButton from "../components/Shared/CustomButton/CustomButton";
@@ -10,6 +10,11 @@ type Props = {
 };
 
 const ErrorComponent = () => {
+  const handleClickClear = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-[50vh] flex items-center justify-center">
       <div className="text-center p-8 max-w-md ">
@@ -25,6 +30,16 @@ const ErrorComponent = () => {
           label="Перезагрузить страницу"
           onClick={() => window.location.reload()}
         />
+        <div className="mt-6 text-gray-500 text-sm">
+          Если ошибка не пропадает - нажмите{" "}
+          <button
+            className="underline"
+            type="button"
+            onClick={handleClickClear}
+          >
+            сюда
+          </button>
+        </div>
       </div>
     </div>
   );
