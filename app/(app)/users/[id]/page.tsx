@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import {
   ChangeEvent,
+  Fragment,
   MouseEvent,
   SubmitEvent,
   useEffect,
@@ -18,6 +19,9 @@ import { motion } from "framer-motion";
 import { Camera, Loader2 } from "lucide-react";
 import Steam from "@/app/components/Icons/Steam";
 import Link from "next/link";
+import CustomInput from "@/app/components/Shared/CustomInput/CustomInput";
+import MultipleGameSelect from "@/app/components/MultipleGameSelect/MultipleGameSelect";
+import { IGame } from "@/app/utils/store/gamesSlice";
 
 export const roles = {
   user: "Пользователь",
@@ -43,6 +47,7 @@ const page = () => {
     role: "user",
     steamLink: "",
     steamDisplayName: "",
+    games: [],
   });
   const [imageFile, setImageFile] = useState<string | ArrayBuffer | null>("");
   const [steamLinkError, setSteamLinkError] = useState("");
@@ -53,13 +58,6 @@ const page = () => {
   const dispatch = useAppDispatch();
 
   const userDocRef = doc(db, "users", params.id as string);
-
-  const handleUpdateInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setUserInfo((prevState) => ({
-      ...prevState,
-      [event.target.name]: event.target.value,
-    }));
-  };
 
   const handleUpdateSteamAccount = (event: ChangeEvent<HTMLInputElement>) => {
     if (
@@ -75,6 +73,27 @@ const page = () => {
     setUserInfo((prevState) => ({
       ...prevState,
       steamLink: event.target.value,
+    }));
+  };
+
+  const handleUpdateInput = (event: ChangeEvent<HTMLInputElement>) => {
+    setUserInfo((prevState) => ({
+      ...prevState,
+      [event.target.name]: event.target.value,
+    }));
+  };
+
+  const handleRemoveGame = (id: string) => {
+    setUserInfo((prevState) => ({
+      ...prevState,
+      games: prevState.games.filter((game) => game.id !== id),
+    }));
+  };
+
+  const handleAddGame = (value: IGame) => {
+    setUserInfo((prevState) => ({
+      ...prevState,
+      games: [...prevState.games, value],
     }));
   };
 
@@ -129,6 +148,7 @@ const page = () => {
         discord: userInfo.discord,
         displayName: userInfo.displayName,
         steamLink: userInfo.steamLink,
+        games: userInfo.games,
         steamDisplayName: steamDisplayNameString,
         ...(imageFile ? { photoUrl: imageFile } : {}),
       });
@@ -252,112 +272,131 @@ const page = () => {
         </div>
       </motion.div>
 
+      <motion.h2
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="text-2xl font-bold"
+      >
+        Информация о пользователе
+      </motion.h2>
       <motion.form
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="mt-8 max-w-lg space-y-6"
+        className="mt-8 space-y-6 grid grid-cols-2 w-full gap-4"
         onSubmit={handleSubmit}
       >
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-2xl font-bold"
-        >
-          Информация о пользователе
-        </motion.h2>
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="space-y-4"
+          className="space-y-4 w-full"
+        >
+          <CustomInput
+            label="Имя пользователя на сайте"
+            name="displayName"
+            value={userInfo.displayName}
+            onChange={handleUpdateInput}
+            disabled={!currentUser}
+            placeholder="JohnDoe"
+          />
+
+          <CustomInput
+            label="Discord"
+            name="discord"
+            value={userInfo.discord}
+            onChange={handleUpdateInput}
+            disabled={!currentUser}
+            icon={<Discord className="h-4 w-4" />}
+            description={
+              isCurrentUser ? (
+                <span className="block text-xs leading-5 text-neutral-400 mt-1">
+                  Скопируйте имя пользователя в Discord и вставьте сюда
+                </span>
+              ) : (
+                ""
+              )
+            }
+            placeholder="johndoediscord"
+          />
+
+          <CustomInput
+            label="Ссылка на профиль Steam"
+            name="steamLink"
+            value={userInfo.steamLink}
+            onChange={handleUpdateSteamAccount}
+            placeholder={
+              isCurrentUser
+                ? "https://steamcommunity.com/id/username123"
+                : "Не указана"
+            }
+            icon={<Steam className="h-4 w-4 text-white" />}
+            description={
+              isCurrentUser ? (
+                <>
+                  <span className="block text-xs leading-5 text-neutral-400 mt-1">
+                    Найти ссылку на свой Steam-аккаунт можно{" "}
+                    <Link
+                      href="https://steamcommunity.com/my/profile"
+                      className="underline"
+                    >
+                      здесь
+                    </Link>
+                  </span>
+                  <span className="block text-xs leading-5 text-red-400 mt-1">
+                    {steamLinkError}
+                  </span>
+                </>
+              ) : (
+                ""
+              )
+            }
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
         >
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Имя пользователя на сайте
-            </label>
-            <input
-              name="displayName"
-              type="text"
-              value={userInfo.displayName}
-              onChange={handleUpdateInput}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
-              disabled={!isCurrentUser}
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-1">
-              <Discord className="h-4 w-4" />
-              Discord
-            </label>
-            <input
-              name="discord"
-              type="text"
-              value={userInfo.discord}
-              onChange={handleUpdateInput}
-              placeholder={isCurrentUser ? "discordUser" : "Не указан"}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
-              disabled={!isCurrentUser}
-            />
-            {isCurrentUser && (
-              <span className="block text-xs leading-5 text-neutral-400 mt-1">
-                Скопируйте имя пользователя в Discord и вставьте сюда
-              </span>
+            <span className="text-sm font-medium mb-1 block">
+              Предпочитаемые игры
+            </span>
+            {isCurrentUser ? (
+              <MultipleGameSelect
+                value={userInfo.games}
+                onChange={handleAddGame}
+                handleDelete={handleRemoveGame}
+              />
+            ) : (
+              <div className="flex items-center flex-wrap gap-2 p-1 border relative bg-muted rounded-lg">
+                {userInfo?.games?.length ? (
+                  userInfo?.games.map((game) => (
+                    <div
+                      key={game.id}
+                      className="flex bg-primary/20 p-1.5 rounded-lg items-center gap-2"
+                    >
+                      {game?.image && (
+                        <Image
+                          className="rounded object-cover h-4 w-4"
+                          src={game.image}
+                          width={16}
+                          height={16}
+                          alt="Game image"
+                        />
+                      )}
+                      <span className="text-sm">{game?.name}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-1.5 text-white/40">
+                    Нет предпочитаемых игр
+                  </div>
+                )}
+              </div>
             )}
           </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-1">
-              <Steam className="h-4 w-4 text-white" />
-              Ссылка на профиль Steam
-            </label>
-            <input
-              name="steamLink"
-              type="text"
-              value={userInfo.steamLink}
-              onChange={handleUpdateSteamAccount}
-              placeholder={
-                isCurrentUser
-                  ? "https://steamcommunity.com/id/username123"
-                  : "Не указана"
-              }
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
-              disabled={!isCurrentUser}
-            />
-            {isCurrentUser && (
-              <>
-                <span className="block text-xs leading-5 text-neutral-400 mt-1">
-                  Найти ссылку на свой Steam-аккаунт можно{" "}
-                  <Link
-                    href="https://steamcommunity.com/my/profile"
-                    className="underline"
-                  >
-                    здесь
-                  </Link>
-                </span>
-                <span className="block text-xs leading-5 text-red-400 mt-1">
-                  {steamLinkError}
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* <div>
-            <label className="flex items-center gap-2 text-sm font-medium mb-1">
-              <Clock className="h-4 w-4" />
-              Зарегистрирован
-            </label>
-            <input
-              name="discord"
-              type="text"
-              value={format(userInfo.createdAt, "dd.MM.yyyy HH:mm")}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
-              disabled
-            />
-          </div> */}
         </motion.div>
 
         {isCurrentUser && (
@@ -365,7 +404,7 @@ const page = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="flex items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60 cursor-pointer"
+            className="flex w-fit items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60 cursor-pointer"
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}

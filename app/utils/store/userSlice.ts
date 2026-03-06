@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { IGame } from "./gamesSlice";
 
 export interface IUser {
   uid: string;
@@ -11,6 +12,7 @@ export interface IUser {
   steamLink?: string;
   steamDisplayName?: string;
   role: "user" | "admin" | "superadmin";
+  games?: IGame[];
 }
 
 const initialState: { user: IUser } = {
@@ -23,6 +25,7 @@ const initialState: { user: IUser } = {
     role: "user",
     steamLink: "",
     steamDisplayName: "",
+    games: [],
   },
 };
 

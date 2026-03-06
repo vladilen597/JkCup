@@ -89,7 +89,7 @@ const TournamentPage = () => {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { tournaments } = useAppSelector((state) => state.tournaments);
-  const [isTournamentLoading, setIsTournamentLoading] = useState(false);
+  const [isTournamentLoading, setIsTournamentLoading] = useState(true);
   const tournamentId = params.id as string;
 
   const tournament = tournaments.find((t) => t.id === params.id);
@@ -114,9 +114,13 @@ const TournamentPage = () => {
     setIsCreateTeamModalOpen(false);
   };
 
-  const canEdit =
-    currentUser?.role === "superadmin" || currentUser?.role === "admin";
-  const isJoined = tournament?.usersIds?.includes(currentUser?.uid) ?? false;
+  const handleOpenSelectWinnerModal = () => {
+    setIsWinnerModalOpen(true);
+  };
+
+  const handleCloseSelectWinnerModal = () => {
+    setIsWinnerModalOpen(false);
+  };
 
   const handleJoinLeave = async () => {
     if (!currentUser?.uid) {
@@ -252,7 +256,7 @@ const TournamentPage = () => {
     );
   }
 
-  if (!tournament) {
+  if (!tournament && !isTournamentLoading) {
     return (
       <div className="flex flex-col font-mono! items-center justify-center min-h-[80vh]">
         <h2 className="text-[120px] font-bold! font-mono! text-primary">404</h2>
@@ -279,13 +283,9 @@ const TournamentPage = () => {
   const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
   const isBracketMode = tournament?.useBracket === true;
 
-  const handleOpenSelectWinnerModal = () => {
-    setIsWinnerModalOpen(true);
-  };
-
-  const handleCloseSelectWinnerModal = () => {
-    setIsWinnerModalOpen(false);
-  };
+  const canEdit =
+    currentUser?.role === "superadmin" || currentUser?.role === "admin";
+  const isJoined = tournament?.usersIds?.includes(currentUser?.uid) ?? false;
 
   return (
     <main className="w-full px-4 py-8">

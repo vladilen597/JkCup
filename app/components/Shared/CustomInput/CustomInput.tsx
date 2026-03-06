@@ -9,6 +9,9 @@ interface ICustomInputProps {
   icon?: ReactNode;
   type?: "text" | "numeric";
   required?: boolean;
+  disabled?: boolean;
+  description?: ReactNode;
+  placeholder?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -21,12 +24,15 @@ const CustomInput = memo(
     icon,
     type = "text",
     required = false,
+    disabled = false,
+    description,
+    placeholder,
     onChange,
   }: ICustomInputProps) => {
     return (
-      <label className={cn("w-full", className)}>
+      <label className={cn("w-full block", className)}>
         {!!label && (
-          <span className="block text-sm font-medium">
+          <span className="flex items-center gap-2 text-sm font-medium">
             {!!icon && <span>{icon}</span>}
             {label}
           </span>
@@ -38,7 +44,14 @@ const CustomInput = memo(
           onChange={onChange}
           className="mt-1 w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
           required={required}
+          disabled={disabled}
+          placeholder={placeholder}
         />
+        {description && (
+          <p className="block text-xs leading-5 text-neutral-400 mt-1">
+            {description}
+          </p>
+        )}
       </label>
     );
   },

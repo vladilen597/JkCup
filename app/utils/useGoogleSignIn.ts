@@ -38,6 +38,7 @@ export function useGoogleSignIn() {
           role: userSnap.data().role,
           steamLink: userSnap.data().steamLink,
           steamDisplayName: userSnap.data().steamDisplayName,
+          games: userSnap.data().games,
         };
 
         await setDoc(
@@ -56,6 +57,7 @@ export function useGoogleSignIn() {
           role: "user" as "user" | "admin" | "superadmin",
           steamLink: "",
           steamDisplayName: "",
+          games: [],
         };
 
         await setDoc(userRef, userData);

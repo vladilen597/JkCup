@@ -32,6 +32,7 @@ export const GET = async () => {
       createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || null,
       steamLink: doc.data().steamLink,
       steamDisplayName: doc.data().steamDisplayName,
+      games: doc.data().games,
     }));
 
     users.sort((a, b) => {
