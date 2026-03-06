@@ -98,7 +98,7 @@ const GameSelect = ({
         <div className="flex items-center gap-2">
           {value?.image && (
             <Image
-              className="rounded"
+              className="rounded h-4 w-4 object-cover"
               src={value.image}
               width={16}
               height={16}
@@ -153,7 +153,7 @@ const GameSelect = ({
                   onClick={() => onChange(game)}
                 >
                   <Image
-                    className="rounded"
+                    className="rounded h-4 w-4 object-cover"
                     src={game.image}
                     width={16}
                     height={16}

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import Tag from "../components/Shared/Tag/Tag";
 import { IGame } from "./store/gamesSlice";
 import Image from "next/image";
+import { useAppSelector } from "./store/hooks";
 
 interface ITournamentProps {
   id: string;
@@ -53,6 +54,8 @@ const Tournament = ({
   tags,
   description,
 }: ITournamentProps) => {
+  const { user: currentUser } = useAppSelector((state) => state.user);
+
   return (
     <motion.li
       initial={{ opacity: 0, y: 10 }}
@@ -107,6 +110,13 @@ const Tournament = ({
                 )}
                 <span className="font-bold">{game?.name}</span>
               </div>
+              {currentUser.games.some(
+                (userGame) => userGame.id === game.id,
+              ) && (
+                <span className="text-xs text-primary">
+                  Турнир по одной из ваших игр
+                </span>
+              )}
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />
               </div>

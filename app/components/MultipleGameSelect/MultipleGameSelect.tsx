@@ -102,7 +102,7 @@ const MultipleGameSelect = ({
             value?.map((game) => (
               <div
                 key={game.id}
-                className="flex bg-primary/20 p-1.5 rounded-lg items-center gap-2"
+                className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
               >
                 {game?.image && (
                   <Image
@@ -176,7 +176,7 @@ const MultipleGameSelect = ({
                     }}
                   >
                     <Image
-                      className="rounded"
+                      className="rounded h-4 w-4 object-cover"
                       src={game.image}
                       width={16}
                       height={16}
