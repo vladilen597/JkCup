@@ -138,28 +138,28 @@ const TeamItem = ({
     <>
       <li
         key={uid}
-        className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 hover:border-primary/50 transition-all not-first:mt-2"
+        className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 hover:border-primary/50 transition-all"
       >
         <div className="flex justify-between items-center mb-3">
+          <h3 className="font-bold text-lg">
+            {name || `Команда ${uid.slice(0, 6)}`}
+          </h3>
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-lg">
-              {name || `Команда ${uid.slice(0, 6)}`}
-            </h3>
             {is_private && <Lock className="w-4 h-4 text-neutral-500" />}
+            <span className="text-sm text-gray-400">
+              {filled} / {players_per_team}
+            </span>
             {((creator_uid === currentUser.uid &&
               tournament_status === "open") ||
               isEnoughRole) && (
               <CustomButton
-                className="p-1 rounded-sm"
+                className="p-1 rounded-sm bg-red-600/20 border border-red-600!"
                 buttonType={BUTTON_TYPES.DANGER}
-                icon={<Trash2 className="w-4 h-4" />}
+                icon={<Trash2 className="w-4 h-4 text-red-600" />}
                 onClick={() => handleDeleteTeam(uid)}
               />
             )}
           </div>
-          <span className="text-sm text-gray-400">
-            {filled} / {players_per_team}
-          </span>
         </div>
 
         <div className="space-y-2">

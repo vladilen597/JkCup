@@ -34,7 +34,7 @@ const TeamList = ({
   }
 
   return (
-    <ul>
+    <ul className="grid grid-cols-2 gap-2">
       {teams.map((team) => {
         const usersIds = team.usersIds;
         const filled = usersIds.length;
