@@ -9,6 +9,7 @@ interface IPortalModalProps {
   children: React.ReactNode;
   contentClassName?: string;
   isOpen: boolean;
+  containerClassName?: string;
   onClose?: () => void;
 }
 
@@ -20,6 +21,7 @@ const PortalModal = ({
   fullscreen,
   children,
   contentClassName,
+  containerClassName,
   isOpen,
   onClose,
 }: IPortalModalProps) => {
@@ -58,7 +60,10 @@ const PortalModal = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center backdrop-blur-xl"
+      className={cn(
+        "fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center backdrop-blur-xl",
+        containerClassName,
+      )}
     >
       <div className="absolute top-0 left-0 bg-black/50 h-full w-full"></div>
       <div
@@ -87,6 +92,7 @@ const CustomModal = ({
   isOpen,
   fullscreen,
   contentClassName,
+  containerClassName,
   onClose,
 }: ICustomModalProps) => {
   return (

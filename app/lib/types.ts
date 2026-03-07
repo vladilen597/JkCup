@@ -10,3 +10,10 @@ export interface ITag {
   bgColor: string;
   textColor: string;
 }
+
+export interface INotification {
+  id: string;
+  title: string;
+  description: string;
+  created_at: FirestoreTimestamp;
+}

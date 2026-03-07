@@ -8,6 +8,11 @@ export enum BUTTON_TYPES {
   DANGER = "DANGER",
 }
 
+export enum BUTTON_STYLES {
+  DEFAULT = "DEFAULT",
+  OUTLINE = "OUTLINE",
+}
+
 interface ICustomButtonProps {
   label?: string;
   type?: "button" | "submit";
@@ -17,6 +22,7 @@ interface ICustomButtonProps {
   className?: string;
   disabled?: boolean;
   buttonType?: BUTTON_TYPES;
+  buttonStyle?: BUTTON_STYLES;
   onClick?: () => void;
 }
 
@@ -29,6 +35,7 @@ const CustomButton = ({
   className,
   disabled,
   buttonType,
+  buttonStyle,
   onClick,
 }: ICustomButtonProps) => {
   return (
@@ -40,6 +47,8 @@ const CustomButton = ({
           "bg-muted text-muted-foreground hover:bg-muted/80",
         buttonType === BUTTON_TYPES.DANGER &&
           "bg-red-600 text-white hover:bg-red-700",
+        buttonStyle === BUTTON_STYLES.OUTLINE &&
+          "bg-transparent border border-primary! text-primary hover:bg-primary/20",
         className,
       )}
       disabled={disabled}

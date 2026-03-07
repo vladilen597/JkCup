@@ -11,6 +11,7 @@ import {
   Gamepad,
   Gamepad2,
   Ellipsis,
+  Bell,
 } from "lucide-react";
 import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
@@ -22,12 +23,14 @@ import { db } from "@/app/utils/firebase";
 import CustomButton from "../CustomButton/CustomButton";
 import Google from "../../Icons/Google";
 import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
+import CustomDrawer from "../CustomDrawer/CustomDrawer";
+import Notifications from "../../Notifications/Notifications";
 
 const additionalOptions = [
   {
     id: 1,
     node: (
-      <Link className="flex items-center gap-2" href="/archive">
+      <Link className="flex items-center gap-2 group" href="/archive">
         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
           <Archive className="h-4 w-4 text-primary" />
         </div>
@@ -40,7 +43,7 @@ const additionalOptions = [
   {
     id: 2,
     node: (
-      <Link className="flex items-center gap-2" href="/games">
+      <Link className="flex items-center gap-2 group" href="/games">
         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
           <Gamepad2 className="h-4 w-4 text-primary" />
         </div>
@@ -54,12 +57,21 @@ const additionalOptions = [
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { user } = useAppSelector((state) => state.user);
   const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
 
   const handleCloseProfileDropdown = () => {
     setIsProfileOpen(false);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsNotificationsOpen(false);
+  };
+
+  const handleOpenDrawer = () => {
+    setIsNotificationsOpen(true);
   };
 
   const handleLogOut = () => {
@@ -134,7 +146,7 @@ const Header = () => {
           </Link>
           <CustomNodeSelect
             titleNode={
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 group cursor-pointer">
                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
                   <Ellipsis className="h-4 w-4 text-primary" />
                 </div>
@@ -147,44 +159,60 @@ const Header = () => {
           />
         </div>
 
-        {user.uid ? (
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen((p) => !p)}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-            >
-              <span className="text-sm font-medium text-foreground">
-                {user.displayName}
-              </span>
-              <img
-                className="h-8 w-8 rounded-full ring-2 ring-primary/30"
-                src={user.photoUrl}
-                alt={user.displayName}
-                referrerPolicy="no-referrer"
-              />
-              <ChevronDown
-                className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            <AnimatePresence>
-              {isProfileOpen && (
-                <ProfileDropdown
-                  userId={user.uid}
-                  handleClickLogout={handleLogOut}
-                  onClose={handleCloseProfileDropdown}
+        <div className="flex items-center gap-2">
+          {user.uid ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen((p) => !p)}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+              >
+                <span className="text-sm font-medium text-foreground">
+                  {user.displayName}
+                </span>
+                <img
+                  className="h-8 w-8 rounded-full ring-2 ring-primary/30"
+                  src={user.photoUrl}
+                  alt={user.displayName}
+                  referrerPolicy="no-referrer"
                 />
-              )}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <CustomButton
-            label="Войти"
-            icon={<Google />}
-            onClick={handleGoogleSignIn}
-          />
-        )}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <ProfileDropdown
+                    userId={user.uid}
+                    handleClickLogout={handleLogOut}
+                    onClose={handleCloseProfileDropdown}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <CustomButton
+              label="Войти"
+              icon={<Google />}
+              onClick={handleGoogleSignIn}
+            />
+          )}
+          <button
+            className="cursor-pointer"
+            type="button"
+            onClick={handleOpenDrawer}
+          >
+            <Bell className="w-5 h-5 text-primary" />
+          </button>
+        </div>
       </div>
+      <AnimatePresence>
+        {isNotificationsOpen && (
+          <CustomDrawer onClose={handleCloseDrawer}>
+            <Notifications />
+          </CustomDrawer>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
