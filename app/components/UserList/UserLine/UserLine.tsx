@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
-import { X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import Link from "next/link";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,7 @@ interface UserLineProps extends IUser {
   hideDelete?: boolean;
   index?: number;
   onDeleteClick: () => void;
+  onBlockClick: () => void;
 }
 
 const UserLine: React.FC<UserLineProps> = ({
@@ -45,6 +46,7 @@ const UserLine: React.FC<UserLineProps> = ({
   steamDisplayName,
   steamLink,
   onDeleteClick,
+  onBlockClick,
 }) => {
   const [userRole, setUserRole] = useState<{
     id: number;
@@ -125,6 +127,18 @@ const UserLine: React.FC<UserLineProps> = ({
               </div>
             )}
           </>
+        )}
+        {onBlockClick && currentUser.role === "superadmin" && (
+          <button
+            type="button"
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBlockClick();
+            }}
+          >
+            <Lock className="text-neutral-500 w-4 h-4" />
+          </button>
         )}
         {!hideDelete &&
           currentUser.role === "superadmin" &&

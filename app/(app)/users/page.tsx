@@ -67,6 +67,16 @@ const UsersPage = () => {
     }
   };
 
+  const handleBlockUser = async (id: string) => {
+    try {
+      const { data } = await axios.post("/api/users/disable", {
+        id,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     handleLoadUsers();
   }, []);
@@ -147,6 +157,7 @@ const UsersPage = () => {
                 index={i}
                 showRoles
                 onDeleteClick={() => setUserId(user.uid)}
+                onBlockClick={() => handleBlockUser(user.uid)}
               />
             ))
           )}
