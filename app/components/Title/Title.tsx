@@ -9,7 +9,7 @@ const Title = ({ title, className }: ITitleProps) => {
   return (
     <h1
       className={cn(
-        "text-4xl md:text-5xl font-black tracking-tight",
+        "text-2xl md:text-5xl font-black tracking-tight",
         className,
       )}
     >

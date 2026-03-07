@@ -4,13 +4,23 @@ import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ICustomDrawer {
   children?: ReactNode;
+  className?: string;
+  title?: string;
+  position?: "right" | "left";
   onClose: () => void;
 }
 
-const CustomDrawer = ({ onClose, children }: ICustomDrawer) => {
+const CustomDrawer = ({
+  onClose,
+  className,
+  title = "",
+  position = "right",
+  children,
+}: ICustomDrawer) => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -27,18 +37,23 @@ const CustomDrawer = ({ onClose, children }: ICustomDrawer) => {
       onClick={onClose}
     >
       <motion.div
-        initial={{ x: "100%" }}
+        initial={position === "right" ? { x: "100%" } : { x: "-100%" }}
         animate={{ x: 0 }}
-        exit={{ x: "100%" }}
+        exit={position === "right" ? { x: "100%" } : { x: "-100%" }}
         transition={{
           ease: "circOut",
           duration: 0.4,
         }}
-        className="fixed h-screen right-0 w-full max-w-md bg-background rounded-l-4xl shadow-2xl"
+        className={cn(
+          "fixed h-screen w-full max-w-md bg-background shadow-2xl",
+          position === "right" && "right-0 rounded-l-4xl",
+          position === "left" && "left-0 right-auto  rounded-r-4xl",
+          className,
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6">
-          <h2 className="text-xl font-bold">Уведомления</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           <button className="cursor-pointer" type="button" onClick={onClose}>
             <X className="text-neutral-400" />
           </button>

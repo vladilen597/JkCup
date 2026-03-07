@@ -284,7 +284,7 @@ const page = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="mt-8 space-y-6 grid grid-cols-2 w-full gap-4"
+        className="mt-8 grid grid-cols-1 md:grid-cols-2 w-full gap-4"
         onSubmit={handleSubmit}
       >
         <motion.div
@@ -318,7 +318,7 @@ const page = () => {
                 ""
               )
             }
-            placeholder="johndoediscord"
+            placeholder="discord"
           />
 
           <CustomInput
@@ -404,7 +404,7 @@ const page = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="flex w-fit items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60 cursor-pointer"
+            className="flex w-full justify-center md:justify-start md:w-fit items-center gap-2 mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-md disabled:opacity-60 cursor-pointer"
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}

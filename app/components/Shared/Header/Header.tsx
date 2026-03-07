@@ -12,6 +12,7 @@ import {
   Gamepad2,
   Ellipsis,
   Bell,
+  Menu,
 } from "lucide-react";
 import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
@@ -58,6 +59,7 @@ const additionalOptions = [
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false);
   const { user } = useAppSelector((state) => state.user);
   const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
@@ -72,6 +74,14 @@ const Header = () => {
 
   const handleOpenDrawer = () => {
     setIsNotificationsOpen(true);
+  };
+
+  const handleCloseNavDrawer = () => {
+    setIsNavigationDrawerOpen(false);
+  };
+
+  const handleOpenNavDrawer = () => {
+    setIsNavigationDrawerOpen(true);
   };
 
   const handleLogOut = () => {
@@ -114,7 +124,88 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <button
+          className="block lg:hidden"
+          type="button"
+          onClick={handleOpenNavDrawer}
+        >
+          <Menu />
+        </button>
+        <AnimatePresence>
+          {isNavigationDrawerOpen && (
+            <CustomDrawer
+              className="min-w-auto w-fit"
+              title="Навигация"
+              position="left"
+              onClose={handleCloseNavDrawer}
+            >
+              <div className="flex flex-col gap-8 px-6 w-fit">
+                <Link
+                  href="/tournaments"
+                  className="flex items-center gap-2 group"
+                  onClick={handleCloseNavDrawer}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Trophy className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Турниры
+                  </span>
+                </Link>
+                <Link
+                  href="/users"
+                  className="flex items-center gap-2 group"
+                  onClick={handleCloseNavDrawer}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Users className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Пользователи
+                  </span>
+                </Link>
+                <Link
+                  href="https://discord.gg/S6QMcETh4d"
+                  className="flex items-center gap-2 group"
+                  referrerPolicy="no-referrer"
+                  target="_blank"
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Discord
+                  </span>
+                </Link>
+                <Link
+                  className="flex items-center gap-2 group"
+                  href="/games"
+                  onClick={handleCloseNavDrawer}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Gamepad2 className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Игры
+                  </span>
+                </Link>
+                <Link
+                  className="flex items-center gap-2 group"
+                  href="/archive"
+                  onClick={handleCloseNavDrawer}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Archive className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Архив
+                  </span>
+                </Link>
+              </div>
+            </CustomDrawer>
+          )}
+        </AnimatePresence>
+        <div className="lg:flex hidden items-center gap-8">
           <Link href="/tournaments" className="flex items-center gap-2 group">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
               <Trophy className="h-4 w-4 text-primary" />
@@ -208,7 +299,7 @@ const Header = () => {
       </div>
       <AnimatePresence>
         {isNotificationsOpen && (
-          <CustomDrawer onClose={handleCloseDrawer}>
+          <CustomDrawer title="Уведомления" onClose={handleCloseDrawer}>
             <Notifications />
           </CustomDrawer>
         )}

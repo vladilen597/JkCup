@@ -102,13 +102,13 @@ const TournamentHero = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-8 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
+      className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-4 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
       style={{
         background:
           "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
       }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between">
         <div>
           {canEditTournament && (
             <div className="flex items-center gap-4">

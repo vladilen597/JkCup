@@ -14,7 +14,7 @@ const TournamentStats: React.FC = () => {
   });
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-card px-4 py-2">
         <User className="text-primary w-4 h-4" />
         <div>
