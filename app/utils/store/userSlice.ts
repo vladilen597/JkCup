@@ -11,8 +11,9 @@ export interface IUser {
   lastSignIn?: string;
   steamLink?: string;
   steamDisplayName?: string;
-  role: "user" | "admin" | "superadmin";
+  role: "guest" | "user" | "admin" | "superadmin";
   games?: IGame[];
+  status?: "blocked" | "active";
 }
 
 const initialState: { user: IUser } = {

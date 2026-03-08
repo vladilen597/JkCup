@@ -24,13 +24,15 @@ import MultipleGameSelect from "@/app/components/MultipleGameSelect/MultipleGame
 import { IGame } from "@/app/utils/store/gamesSlice";
 
 export const roles = {
-  user: "Пользователь",
+  user: "Участник",
   admin: "Админ",
   superadmin: "Суперадмин",
+  guest: "Гость",
 };
 
 export const roleColors = {
-  user: "text-neutral-400",
+  guest: "text-neutral-500",
+  user: "text-neutral-100",
   admin: "text-primary",
   superadmin: "text-yellow-400",
 };
@@ -249,7 +251,8 @@ const page = () => {
               {userInfo.displayName}
             </motion.h1>
 
-            {currentUser.role !== "user" && (
+            {(currentUser.role === "admin" ||
+              currentUser.role === "superadmin") && (
               <motion.p
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

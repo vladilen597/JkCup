@@ -54,7 +54,7 @@ export function useGoogleSignIn() {
           email: firebaseUser.email || "",
           discord: "",
           createdAt: new Date().toString(),
-          role: "user" as "user" | "admin" | "superadmin",
+          role: "guest" as "guest" | "user" | "admin" | "superadmin",
           steamLink: "",
           steamDisplayName: "",
           games: [],

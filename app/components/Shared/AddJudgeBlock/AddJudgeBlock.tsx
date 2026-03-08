@@ -49,7 +49,8 @@ const AddJudgeBlock = ({
             <ShieldUser className="h-5 w-5 text-primary" />
             Судьи ({judgesIds.length})
           </h2>
-          {currentUser.role !== "user" &&
+          {(currentUser.role === "superadmin" ||
+            currentUser.role === "admin") &&
             (tournamentStatus === "open" ||
               tournamentStatus === "about_to_start") && (
               <CustomButton
@@ -61,7 +62,7 @@ const AddJudgeBlock = ({
         </div>
       </section>
       {!!judgesIds.length && <JudgeList judgesIds={judgesIds} />}
-      {currentUser.role !== "user" && (
+      {(currentUser.role === "superadmin" || currentUser.role === "admin") && (
         <CustomModal
           isOpen={isAddJudgeModalOpen}
           onClose={handleCloseAddJudgeModal}

@@ -13,6 +13,8 @@ import { Users } from "lucide-react";
 import CountUp from "react-countup";
 import axios from "axios";
 import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/app/utils/firebase";
 
 const roles = [
   {
@@ -32,8 +34,13 @@ const roles = [
   },
   {
     id: 4,
-    label: "Пользователь",
+    label: "Участник",
     value: "user",
+  },
+  {
+    id: 5,
+    label: "Гость",
+    value: "guest",
   },
 ];
 
@@ -57,7 +64,6 @@ const UsersPage = () => {
     setLoading(true);
     try {
       const { data } = await axios.get("/api/users");
-      await setTimeout(() => {}, 5000);
       setUsers(data.users || []);
     } catch (err: any) {
       console.error(err);
@@ -67,13 +73,61 @@ const UsersPage = () => {
     }
   };
 
-  const handleBlockUser = async (id: string) => {
+  const handleUnlockUser = async (id: string) => {
     try {
-      const { data } = await axios.post("/api/users/disable", {
+      await axios.post("/api/users/enable", {
         id,
       });
+      const userRef = doc(db, "users", id);
+      await updateDoc(userRef, {
+        status: "active",
+      });
+      setUsers((prevState) =>
+        prevState.map((user) => {
+          if (user.uid === id) {
+            return {
+              ...user,
+              status: "active",
+            };
+          }
+          return user;
+        }),
+      );
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleBlockUser = async (id: string) => {
+    try {
+      await axios.post("/api/users/disable", {
+        id,
+      });
+      const userRef = doc(db, "users", id);
+      await updateDoc(userRef, {
+        status: "blocked",
+      });
+      setUsers((prevState) =>
+        prevState.map((user) => {
+          if (user.uid === id) {
+            return {
+              ...user,
+              status: "blocked",
+            };
+          }
+          return user;
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleBlockClick = (id: string, status: "blocked" | "active") => {
+    if (status === "active") {
+      handleBlockUser(id);
+    } else {
+      handleUnlockUser(id);
     }
   };
 
@@ -157,7 +211,7 @@ const UsersPage = () => {
                 index={i}
                 showRoles
                 onDeleteClick={() => setUserId(user.uid)}
-                onBlockClick={() => handleBlockUser(user.uid)}
+                onBlockClick={() => handleBlockClick(user.uid, user.status)}
               />
             ))
           )}

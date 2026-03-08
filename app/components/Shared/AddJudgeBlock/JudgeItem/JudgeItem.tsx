@@ -60,7 +60,8 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
         <div className="flex items-center gap-3">
           <UserInfoBlock {...user} />
         </div>
-        {currentUser.role !== "user" && (
+        {(currentUser.role === "superadmin" ||
+          currentUser.role === "admin") && (
           <>
             {isLoading ? (
               <Loader2 className="animate-spin" />

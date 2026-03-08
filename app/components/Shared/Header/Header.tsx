@@ -91,7 +91,7 @@ const Header = () => {
         displayName: "Anonymous",
         photoUrl: "",
         email: "",
-        role: "user",
+        role: "guest",
         discord: "",
       }),
     );

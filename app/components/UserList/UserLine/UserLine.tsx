@@ -9,7 +9,6 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
 import { Lock, X } from "lucide-react";
-import Link from "next/link";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useRouter } from "next/navigation";
 
@@ -17,12 +16,17 @@ const roleSelectOptions = [
   {
     id: 1,
     value: "user",
-    label: "Пользователь",
+    label: "Участник",
   },
   {
     id: 2,
     value: "admin",
     label: "Админ",
+  },
+  {
+    id: 3,
+    value: "guest",
+    label: "Гость",
   },
 ];
 
@@ -31,7 +35,7 @@ interface UserLineProps extends IUser {
   hideDelete?: boolean;
   index?: number;
   onDeleteClick: () => void;
-  onBlockClick: () => void;
+  onBlockClick?: () => void;
 }
 
 const UserLine: React.FC<UserLineProps> = ({
@@ -45,6 +49,7 @@ const UserLine: React.FC<UserLineProps> = ({
   hideDelete,
   steamDisplayName,
   steamLink,
+  status,
   onDeleteClick,
   onBlockClick,
 }) => {
@@ -53,9 +58,9 @@ const UserLine: React.FC<UserLineProps> = ({
     value: string;
     label: string;
   }>({
-    id: 1,
-    value: "user",
-    label: "Пользователь",
+    id: 3,
+    value: "guest",
+    label: "Гость",
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
@@ -128,18 +133,27 @@ const UserLine: React.FC<UserLineProps> = ({
             )}
           </>
         )}
-        {onBlockClick && currentUser.role === "superadmin" && (
-          <button
-            type="button"
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onBlockClick();
-            }}
-          >
-            <Lock className="text-neutral-500 w-4 h-4" />
-          </button>
-        )}
+        {onBlockClick &&
+          currentUser.role === "superadmin" &&
+          role !== "superadmin" && (
+            <button
+              type="button"
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                onBlockClick();
+              }}
+            >
+              <Lock
+                style={
+                  status === "blocked"
+                    ? { color: "#fb2c36" }
+                    : { color: "#737373" }
+                }
+                className="w-4 h-4"
+              />
+            </button>
+          )}
         {!hideDelete &&
           currentUser.role === "superadmin" &&
           role !== "superadmin" &&

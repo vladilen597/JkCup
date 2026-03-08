@@ -33,6 +33,7 @@ export const GET = async () => {
       steamLink: doc.data().steamLink,
       steamDisplayName: doc.data().steamDisplayName,
       games: doc.data().games,
+      status: doc.data().status,
     }));
 
     users.sort((a, b) => {
