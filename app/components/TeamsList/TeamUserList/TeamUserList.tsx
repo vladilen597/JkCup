@@ -3,6 +3,7 @@ import TeamUserItem from "../TeamUserItem/TeamUserItem";
 import { IUser } from "@/app/utils/store/userSlice";
 import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
 import { useAppSelector } from "@/app/utils/store/hooks";
+import { Loader2 } from "lucide-react";
 
 const TeamUserList = ({
   usersIds,

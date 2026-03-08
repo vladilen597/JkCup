@@ -21,7 +21,8 @@ const JudgeAddList = ({ occupiedUserIds, handleClose }: IJudgeAddListProps) => {
       const { data } = await axios.get("/api/users");
 
       const filteredUsers = data.users.filter(
-        (user: IUser) => !occupiedUserIds.has(user.uid),
+        (user: IUser) =>
+          !occupiedUserIds.has(user.uid) && user.role !== "guest",
       );
       setUsers(filteredUsers);
     } catch (err: any) {

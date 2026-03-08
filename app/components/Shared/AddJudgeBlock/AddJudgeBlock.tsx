@@ -64,6 +64,7 @@ const AddJudgeBlock = ({
       {!!judgesIds.length && <JudgeList judgesIds={judgesIds} />}
       {(currentUser.role === "superadmin" || currentUser.role === "admin") && (
         <CustomModal
+          containerClassName="max-h-[80vh]"
           isOpen={isAddJudgeModalOpen}
           onClose={handleCloseAddJudgeModal}
         >

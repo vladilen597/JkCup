@@ -23,9 +23,10 @@ const TeamList = ({
 
   const occupiedUserIds = new Set(teams.flatMap((team) => team.usersIds));
   const isUserJudge = judgesIds.includes(currentUser.uid);
+  const isUserGuest = currentUser.role === "guest";
 
   const isUserHasTeam = occupiedUserIds.has(currentUser?.uid || "");
-  const isCurrentUserCanJoin = !isUserHasTeam && !isUserJudge;
+  const isCurrentUserCanJoin = !isUserHasTeam && !isUserJudge && !isUserGuest;
 
   if (teams.length === 0) {
     return (
