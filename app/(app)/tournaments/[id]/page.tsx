@@ -40,7 +40,6 @@ import {
   removeUserFromSingleTournament,
   setTournaments,
   updateTournament,
-  updateTournamentStatus,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
@@ -280,7 +279,8 @@ const TournamentPage = () => {
     team.usersIds?.includes(currentUser.uid),
   );
 
-  const isUserCanCreateTeam = !isCurrentUserJudge && !isUserHasTeam;
+  const isUserCanCreateTeam =
+    !isCurrentUserJudge && !isUserHasTeam && currentUser.role !== "guest";
   const isBracketMode = tournament?.useBracket === true;
 
   const canEdit =

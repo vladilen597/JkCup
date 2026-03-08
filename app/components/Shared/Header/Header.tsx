@@ -19,13 +19,16 @@ import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import CustomButton from "../CustomButton/CustomButton";
 import Google from "../../Icons/Google";
 import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
 import CustomDrawer from "../CustomDrawer/CustomDrawer";
 import Notifications from "../../Notifications/Notifications";
+import Image from "next/image";
+import { roleColors, roles } from "@/app/(app)/users/[id]/page";
+import { cn } from "@/lib/utils";
 
 const additionalOptions = [
   {
@@ -102,24 +105,26 @@ const Header = () => {
     signIn();
   };
 
-  const handleGetUser = async () => {
-    try {
-      if (user.uid) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = (await getDoc(userRef)).data();
-
-        if (userSnap) {
-          dispatch(setUser(userSnap as IUser));
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    handleGetUser();
-  }, []);
+    if (!user.uid) return;
+
+    const userRef = doc(db, "users", user.uid);
+
+    const unsubscribe = onSnapshot(
+      userRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data() as IUser;
+          dispatch(setUser(userData));
+        }
+      },
+      (error) => {
+        console.error("Ошибка при получении данных пользователя:", error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [user.uid, dispatch]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
@@ -257,10 +262,22 @@ const Header = () => {
                 onClick={() => setIsProfileOpen((p) => !p)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <span className="text-sm font-medium text-foreground">
-                  {user.displayName}
-                </span>
-                <img
+                <div>
+                  <span className="block text-sm font-medium text-foreground">
+                    {user.displayName}
+                  </span>
+                  <span
+                    className={cn(
+                      "block text-[9px] text-right",
+                      roleColors[user?.role],
+                    )}
+                  >
+                    {roles[user.role]}
+                  </span>
+                </div>
+                <Image
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full ring-2 ring-primary/30"
                   src={user.photoUrl}
                   alt={user.displayName}
