@@ -11,12 +11,16 @@ type Props = {
   children: ReactNode;
 };
 
-const ErrorComponent = () => {
+type ErrorComponentProps = {
+  error: Error & { digest?: string };
+  reset: () => void;
+};
+
+const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
   const dispatch = useAppDispatch();
 
   const handleClickClear = () => {
     dispatch(setTournaments([]));
-
     window.location.href = "/tournaments";
   };
 
@@ -26,23 +30,34 @@ const ErrorComponent = () => {
         <h2 className="text-2xl font-bold text-white mb-4 text-center">
           😕 Что-то пошло не так
         </h2>
+
+        <div className="bg-red-900/20 border border-red-500/50 p-4 rounded-lg mb-6 text-left">
+          <p className="text-red-400 font-mono text-sm wrap-break-word">
+            {error.message || "Неизвестная ошибка"}
+          </p>
+          {error.digest && (
+            <p className="text-gray-500 text-xs mt-2">ID: {error.digest}</p>
+          )}
+        </div>
+
         <p className="text-gray-300 mb-6">
-          Произошла ошибка при загрузке страницы. Пожалуйста, попробуйте
-          обновить страницу.
+          Пожалуйста, попробуйте обновить страницу или вернуться назад.
         </p>
+
         <CustomButton
           className="mx-auto"
-          label="Перезагрузить страницу"
-          onClick={() => window.location.reload()}
+          label="Попробовать снова"
+          onClick={() => reset()}
         />
+
         <div className="mt-6 text-gray-500 text-sm">
           Если ошибка не пропадает - нажмите{" "}
           <button
-            className="underline"
+            className="underline hover:text-white transition-colors"
             type="button"
             onClick={handleClickClear}
           >
-            сюда
+            очистить данные
           </button>
         </div>
       </div>

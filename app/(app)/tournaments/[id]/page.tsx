@@ -32,6 +32,7 @@ import {
   arrayRemove,
   addDoc,
   collection,
+  onSnapshot,
 } from "firebase/firestore";
 import {
   addParticipant,
@@ -177,34 +178,41 @@ const TournamentPage = () => {
     setShowDeleteConfirm(false);
   };
 
-  const handleLoadTournament = async () => {
+  useEffect(() => {
     setIsTournamentLoading(true);
+
     const tournamentRef = doc(db, "tournaments", params.id as string);
-    try {
-      const tournamentDoc = await getDoc(tournamentRef);
 
-      const tournamentLoadedData = tournamentDoc.data() as
-        | ITournament
-        | undefined;
+    const unsubscribe = onSnapshot(
+      tournamentRef,
+      (tournamentDoc) => {
+        try {
+          if (tournamentDoc.exists()) {
+            const tournamentData = {
+              ...(tournamentDoc.data() as ITournament),
+              id: tournamentDoc.id,
+            };
 
-      const tournamentData = {
-        ...tournamentLoadedData,
-        id: tournamentDoc.id,
-      };
-
-      if (tournamentLoadedData) {
-        if (tournaments.some((tournament) => tournament.id === tournamentId)) {
-          dispatch(updateTournament(tournamentData as ITournament));
-        } else {
-          dispatch(setTournaments([tournamentData as ITournament]));
+            if (tournaments.some((t) => t.id === tournamentDoc.id)) {
+              dispatch(updateTournament(tournamentData));
+            } else {
+              dispatch(setTournaments([tournamentData]));
+            }
+          }
+        } catch (error) {
+          console.error("Ошибка при получении данных:", error);
+        } finally {
+          setIsTournamentLoading(false);
         }
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsTournamentLoading(false);
-    }
-  };
+      },
+      (error) => {
+        console.error("Ошибка Snapshot:", error);
+        setIsTournamentLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [params.id, dispatch]);
 
   const handleRemoveUserFromTournament = async (userId: string) => {
     try {
@@ -219,10 +227,6 @@ const TournamentPage = () => {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    handleLoadTournament();
-  }, []);
 
   const handleDelete = async () => {
     if (!canEdit || !tournament?.id) return;
