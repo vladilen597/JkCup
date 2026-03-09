@@ -114,6 +114,13 @@ const EditTournamentModal = ({
     }));
   };
 
+  const handleChangeRules = (value: string) => {
+    setTournamentData((prevState) => ({
+      ...prevState,
+      rules: value,
+    }));
+  };
+
   const handleRewardChange = (index: number, value: string) => {
     setTournamentData((prevState) => ({
       ...prevState,
@@ -232,6 +239,11 @@ const EditTournamentModal = ({
             value={tournamentData.description}
             onChange={handleChangeDescription}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Правила</label>
+          <Tiptap value={tournamentData.rules} onChange={handleChangeRules} />
         </div>
 
         <div className="col-span-2">

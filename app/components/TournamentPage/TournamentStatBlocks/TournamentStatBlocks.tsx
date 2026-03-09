@@ -4,6 +4,7 @@ import { statuses } from "@/app/(app)/tournaments/[id]/page";
 import StatCard from "../../Shared/StatCard/StatCard";
 import { motion } from "motion/react";
 import { format } from "date-fns";
+import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
 
 interface ITournamentStatBlocksProps {
   tournament: ITournament;
@@ -47,6 +48,21 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
               </div>
             ))}
           </ul>
+        </motion.div>
+      )}
+      {!!tournament.rules && tournament.rules !== "<p></p>" && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
+        >
+          <span className="text-xs text-muted-foreground font-medium">
+            Правила
+          </span>
+          <div className="mt-4 whitespace-pre-wrap">
+            <CleanHtml html={tournament.rules} />
+          </div>
         </motion.div>
       )}
       <motion.div

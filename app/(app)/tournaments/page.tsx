@@ -118,6 +118,7 @@ const page = () => {
         teams: [],
         judgesIds: [],
         createdAt: new Date(),
+        rules: "",
 
         bracket: isBracket
           ? {

@@ -42,6 +42,7 @@ export interface ITournament {
   hidden?: boolean;
   useBracket?: boolean;
   bracket: IBracket;
+  rules?: string;
 }
 
 export interface IRound {
