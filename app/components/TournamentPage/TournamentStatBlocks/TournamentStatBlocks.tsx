@@ -50,7 +50,7 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
           </ul>
         </motion.div>
       )}
-      {!!tournament.rules && tournament.rules !== "<p></p>" && (
+      {!!tournament.rules && tournament?.rules !== "<p></p>" && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
             Правила
           </span>
           <div className="mt-4 whitespace-pre-wrap">
-            <CleanHtml html={tournament.rules} />
+            <CleanHtml html={tournament?.rules} />
           </div>
         </motion.div>
       )}
