@@ -46,7 +46,6 @@ import TeamList from "@/app/components/TeamsList/TeamsList";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
 import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
-import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
 import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
 import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
@@ -54,8 +53,6 @@ import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/Select
 import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
 import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
-import { ITag } from "@/app/lib/types";
-import { IGame } from "@/app/utils/store/gamesSlice";
 import TournamentHero from "@/app/components/TournamentPage/TournamentHero/TournamentHero";
 import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
 import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
@@ -67,22 +64,6 @@ export const statuses = {
   in_progress: "LIVE",
   finished: "Окончен",
 };
-
-export interface IEditTournament {
-  name: string;
-  description: string;
-  game: IGame | null;
-  max_teams: number;
-  max_players: number;
-  players_per_team: number;
-  start_date: string;
-  tags: ITag[];
-  type: ISelectOption;
-  duration: number;
-  rewards: { id: string; value: string }[];
-  useBracket?: boolean;
-  hidden: boolean;
-}
 
 const TournamentPage = () => {
   const params = useParams();
