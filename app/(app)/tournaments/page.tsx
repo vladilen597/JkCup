@@ -156,6 +156,7 @@ const page = () => {
         winner_team: null,
         winner_user: null,
         judgesIds: [],
+        stream_link: "",
       });
 
       dispatch(

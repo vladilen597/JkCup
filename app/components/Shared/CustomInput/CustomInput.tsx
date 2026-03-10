@@ -42,7 +42,10 @@ const CustomInput = memo(
           type={type}
           value={value}
           onChange={onChange}
-          className="mt-1 w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+          className={cn(
+            "w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary",
+            label && "mt-1",
+          )}
           required={required}
           disabled={disabled}
           placeholder={placeholder}

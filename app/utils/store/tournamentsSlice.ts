@@ -43,6 +43,7 @@ export interface ITournament {
   useBracket?: boolean;
   bracket: IBracket;
   rules?: string;
+  stream_link?: string;
 }
 
 export interface IRound {
@@ -73,6 +74,18 @@ const tournamentsSlice = createSlice({
       state.tournaments = state.tournaments.map((tournament) => {
         if (tournament.id === action.payload.id) {
           return action.payload;
+        } else {
+          return tournament;
+        }
+      });
+    },
+    updateTournamentStreamLink: (
+      state,
+      action: PayloadAction<{ tournamentId: string; link: string }>,
+    ) => {
+      state.tournaments = state.tournaments.map((tournament) => {
+        if (tournament.id === action.payload.tournamentId) {
+          return { ...tournament, stream_link: action.payload.link };
         } else {
           return tournament;
         }
@@ -405,6 +418,7 @@ export const {
   addMatchToRound,
   advanceWinner,
   removeMatchFromRound,
+  updateTournamentStreamLink,
 } = tournamentsSlice.actions;
 
 export default tournamentsSlice.reducer;

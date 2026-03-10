@@ -58,6 +58,7 @@ import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStat
 import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
 import Script from "next/script";
 import TwitchPlayer from "@/app/components/Shared/StreamFrame/StreamFrame";
+import CustomInput from "@/app/components/Shared/CustomInput/CustomInput";
 
 export const statuses = {
   open: "Открыт",
@@ -321,13 +322,18 @@ const TournamentPage = () => {
       <TournamentStatBlocks tournament={tournament} />
 
       {tournament.status === "in_progress" && (
-        <div className="mx-auto max-w-7xl mb-12 shadow-xl shadow-[#6441a5]">
+        <div className="mx-auto max-w-7xl mb-12">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
             strategy="lazyOnload"
           />
 
-          <TwitchPlayer />
+          {tournament.stream_link && (
+            <TwitchPlayer
+              tournamentId={tournament.id}
+              link={tournament.stream_link}
+            />
+          )}
         </div>
       )}
 
