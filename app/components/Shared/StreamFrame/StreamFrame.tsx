@@ -9,7 +9,7 @@ const TwitchPlayer = () => {
           new (window as any).Twitch.Embed("twitch-embed", {
             width: "100%",
             height: 720,
-            channel: "recrent",
+            channel: "araysee",
             parent: ["jk-cup.vercel.app", "localhost"],
             layout: "video",
           });
