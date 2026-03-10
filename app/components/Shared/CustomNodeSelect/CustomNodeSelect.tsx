@@ -91,6 +91,9 @@ const CustomNodeSelect = ({
             initial="collapsed"
             animate="expanded"
             exit="collapsed"
+            transition={{
+              ease: "easeInOut",
+            }}
           >
             {options.map((option) => (
               <Fragment key={option.id}>{option.node}</Fragment>

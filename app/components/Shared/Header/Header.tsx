@@ -19,7 +19,7 @@ import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import CustomButton from "../CustomButton/CustomButton";
 import Google from "../../Icons/Google";
@@ -306,11 +306,11 @@ const Header = () => {
             />
           )}
           <button
-            className="cursor-pointer"
+            className="cursor-pointer group"
             type="button"
             onClick={handleOpenDrawer}
           >
-            <Bell className="w-5 h-5 text-primary" />
+            <Bell className="w-5 h-5 text-primary/80 group-hover:text-primary transition-colors" />
           </button>
         </div>
       </div>
