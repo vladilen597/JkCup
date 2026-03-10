@@ -22,7 +22,7 @@ const GameLine = ({
         />
         <span className="">{name}</span>
       </div>
-      {(currentUser.role === "admin" || currentUser.role === "superadmin") && (
+      {currentUser.role === "superadmin" && (
         <button
           className="text-neutral-500"
           type="button"

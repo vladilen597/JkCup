@@ -24,9 +24,11 @@ const DeleteGameModalContent = ({
 
   const handleDeleteGame = async () => {
     setIsLoading(true);
+
+    console.log(gameId);
     try {
       const gameDoc = doc(db, "games", gameId);
-      deleteDoc(gameDoc);
+      await deleteDoc(gameDoc);
       dispatch(deleteGame(gameId));
       onClose();
       onSubmit();

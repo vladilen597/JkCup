@@ -1,5 +1,5 @@
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { AlertCircle, Camera, Gamepad2 } from "lucide-react";
 import { ChangeEvent, SubmitEvent, useState } from "react";
 import { db } from "@/app/utils/firebase";
@@ -64,8 +64,9 @@ const AddNewGameModal = ({ onClose }: IAddNewGameModalProps) => {
     setIsLoading(true);
     const id = uuidv4();
     try {
-      await addDoc(collection(db, "games"), {
-        id,
+      const newGameRef = doc(collection(db, "games"));
+      await setDoc(newGameRef, {
+        id: newGameRef.id,
         name,
         image,
       });
