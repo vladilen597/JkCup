@@ -15,8 +15,8 @@ import { useRouter } from "next/navigation";
 const roleSelectOptions = [
   {
     id: 1,
-    value: "user",
-    label: "Участник",
+    value: "guest",
+    label: "Гость",
   },
   {
     id: 2,
@@ -25,8 +25,8 @@ const roleSelectOptions = [
   },
   {
     id: 3,
-    value: "guest",
-    label: "Гость",
+    value: "user",
+    label: "Участник",
   },
 ];
 
@@ -58,7 +58,7 @@ const UserLine: React.FC<UserLineProps> = ({
     value: string;
     label: string;
   }>({
-    id: 3,
+    id: 1,
     value: "guest",
     label: "Гость",
   });
@@ -138,7 +138,7 @@ const UserLine: React.FC<UserLineProps> = ({
           role !== "superadmin" && (
             <button
               type="button"
-              className="cursor-pointer"
+              className="cursor-pointer hover:bg-background/60 rounded-full transition-colors p-1.5"
               onClick={(e) => {
                 e.stopPropagation();
                 onBlockClick();
@@ -150,7 +150,7 @@ const UserLine: React.FC<UserLineProps> = ({
                     ? { color: "#fb2c36" }
                     : { color: "#737373" }
                 }
-                className="w-4 h-4"
+                className="w-4 h-4 transition-colors"
               />
             </button>
           )}
@@ -160,6 +160,7 @@ const UserLine: React.FC<UserLineProps> = ({
           currentUser.uid !== uid &&
           onDeleteClick && (
             <button
+              className="cursor-pointer hover:bg-background/60 rounded-full p-1 transition-colors"
               type="button"
               onClick={(e) => {
                 e.preventDefault();

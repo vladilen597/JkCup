@@ -124,7 +124,7 @@ const UsersPage = () => {
   };
 
   const handleBlockClick = (id: string, status: "blocked" | "active") => {
-    if (status === "active") {
+    if (status === "active" || typeof status === "undefined") {
       handleBlockUser(id);
     } else {
       handleUnlockUser(id);

@@ -46,7 +46,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
 
   return (
     <div
-      className="not-first:border-t border-t-border/50"
+      className="not-first:border-t border-t-border/50 cursor-pointer"
       onClick={handleClickLine}
     >
       <motion.li
@@ -66,8 +66,11 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
             {isLoading ? (
               <Loader2 className="animate-spin" />
             ) : (
-              <button onClick={handleRemoveJudge}>
-                <X className="text-neutral-500" />
+              <button
+                onClick={handleRemoveJudge}
+                className="rounded-full p-1 hover:bg-background/60 hover:text-white! group transition-colors cursor-pointer"
+              >
+                <X className="text-neutral-500 group-hover:text-white transition-colors" />
               </button>
             )}
           </>
