@@ -321,7 +321,7 @@ const TournamentPage = () => {
       <TournamentStatBlocks tournament={tournament} />
 
       {tournament.status === "in_progress" && (
-        <div className="mx-auto max-w-7xl shadow-xl shadow-[#6441a5]">
+        <div className="mx-auto max-w-7xl mb-2 shadow-xl shadow-[#6441a5]">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
             strategy="lazyOnload"
