@@ -321,7 +321,7 @@ const TournamentPage = () => {
       <TournamentStatBlocks tournament={tournament} />
 
       {tournament.status === "in_progress" && (
-        <div className="mx-auto max-w-7xl mb-2 shadow-xl shadow-[#6441a5]">
+        <div className="mx-auto max-w-7xl mb-12 shadow-xl shadow-[#6441a5]">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
             strategy="lazyOnload"
@@ -343,7 +343,7 @@ const TournamentPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
-          className="my-8 max-w-5xl mx-auto"
+          className="mt-8 max-w-5xl mx-auto"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-muted-foreground">
@@ -372,7 +372,7 @@ const TournamentPage = () => {
       )}
 
       <motion.section
-        className="max-w-5xl mx-auto"
+        className="mt-8 max-w-5xl mx-auto"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
