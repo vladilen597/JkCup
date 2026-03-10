@@ -56,6 +56,8 @@ import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
 import TournamentHero from "@/app/components/TournamentPage/TournamentHero/TournamentHero";
 import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
 import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
+import Script from "next/script";
+import TwitchPlayer from "@/app/components/Shared/StreamFrame/StreamFrame";
 
 export const statuses = {
   open: "Открыт",
@@ -317,6 +319,17 @@ const TournamentPage = () => {
       )}
 
       <TournamentStatBlocks tournament={tournament} />
+
+      {tournament.status === "in_progress" && (
+        <div className="mx-auto max-w-7xl shadow-xl shadow-[#6441a5]">
+          <Script
+            src="https://embed.twitch.tv/embed/v1.js"
+            strategy="lazyOnload"
+          />
+
+          <TwitchPlayer />
+        </div>
+      )}
 
       {isBracketMode && tournament.status !== "open" && (
         <div className="mt-6 bg-muted/20 rounded-2xl p-6 border border-border/50 backdrop-blur-md max-w-480 mx-auto w-fit">

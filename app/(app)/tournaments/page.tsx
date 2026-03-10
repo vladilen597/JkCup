@@ -4,6 +4,9 @@ import CreateTournamentModal from "@/app/components/CreateTournamentModal/Create
 import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
+import TwitchEmbed from "@/app/components/Shared/StreamFrame/StreamFrame";
+import VideoPlayer from "@/app/components/Shared/StreamFrame/StreamFrame";
+import StreamFrame from "@/app/components/Shared/StreamFrame/StreamFrame";
 import Title from "@/app/components/Title/Title";
 import TournamentStats from "@/app/components/TournamentStats/TournamentStats";
 import { db } from "@/app/utils/firebase";
@@ -24,6 +27,7 @@ import {
 } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { Trophy, Plus } from "lucide-react";
+import Script from "next/script";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 

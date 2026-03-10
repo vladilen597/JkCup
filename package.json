@@ -37,6 +37,7 @@
     "react-datetime-picker": "^7.0.1",
     "react-dom": "19.2.3",
     "react-loading-skeleton": "^3.5.0",
+    "react-player": "^3.4.0",
     "react-redux": "^9.2.0",
     "react-xarrows": "^2.0.2",
     "reactjs-tiptap-editor": "^1.0.17",
