@@ -132,7 +132,6 @@ const GamesPage = () => {
         <DeleteGameModalContent
           gameId={gameId}
           onClose={handleCloseDeleteModal}
-          onSubmit={handleLoadGames}
         />
       </CustomModal>
     </main>

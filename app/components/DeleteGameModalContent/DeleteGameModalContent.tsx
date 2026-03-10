@@ -11,13 +11,11 @@ import { useState } from "react";
 interface IDeleteUserModalContentProps {
   gameId: string;
   onClose: () => void;
-  onSubmit: () => void;
 }
 
 const DeleteGameModalContent = ({
   gameId,
   onClose,
-  onSubmit,
 }: IDeleteUserModalContentProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -25,13 +23,11 @@ const DeleteGameModalContent = ({
   const handleDeleteGame = async () => {
     setIsLoading(true);
 
-    console.log(gameId);
     try {
       const gameDoc = doc(db, "games", gameId);
       await deleteDoc(gameDoc);
       dispatch(deleteGame(gameId));
       onClose();
-      onSubmit();
     } catch (error) {
       console.log(error);
     } finally {
