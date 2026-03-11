@@ -322,18 +322,16 @@ const TournamentPage = () => {
       <TournamentStatBlocks tournament={tournament} />
 
       {tournament.status === "in_progress" && (
-        <div className="mx-auto max-w-7xl mb-12">
+        <div className="mx-auto max-w-7xl mb-12 border border-border">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
             strategy="lazyOnload"
           />
 
-          {tournament.stream_link && (
-            <TwitchPlayer
-              tournamentId={tournament.id}
-              link={tournament.stream_link}
-            />
-          )}
+          <TwitchPlayer
+            tournamentId={tournament.id}
+            link={tournament?.stream_link}
+          />
         </div>
       )}
 

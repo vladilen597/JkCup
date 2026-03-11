@@ -57,14 +57,13 @@ const TwitchPlayer = ({
 
   return (
     <div>
-      <div className="shadow-xl shadow-[#6441a5]">
-        <Script src="https://embed.twitch.tv/embed/v1.js" onLoad={initPlayer} />
-        <div id="twitch-embed" key={link}></div>
-      </div>
-      {(currentUser.role === "admin" || currentUser.role === "superadmin") && (
-        <div className="mt-8 flex items-stretch gap-2 max-w-md">
-          <CustomInput value={twitchLink} onChange={handleChangeTwitchLink} />
-          <CustomButton label="Обновить" onClick={handleUpdateLink} />
+      {link && (
+        <div className="shadow-xl shadow-neon">
+          <Script
+            src="https://embed.twitch.tv/embed/v1.js"
+            onLoad={initPlayer}
+          />
+          <div id="twitch-embed" key={link}></div>
         </div>
       )}
     </div>

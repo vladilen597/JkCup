@@ -27,6 +27,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/app/utils/firebase";
 import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
+import ChangeInfoInput from "./ChangeInfoInput/ChangeInfoInput";
 
 interface BracketProps {
   tournament: ITournament;
@@ -364,19 +365,21 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                             <div className="flex flex-col">
                               {!!match.participants?.length ? (
                                 match.participants?.map((p: any) => (
-                                  <DroppableSlot
-                                    key={p.uid}
-                                    id={`${round.id}|${match.id}|${p.uid}`}
-                                    participant={p}
-                                    isAdmin={isAdmin}
-                                    onRemove={() =>
-                                      handleRemoveParticipantFromMatch(
-                                        round.id,
-                                        match.id,
-                                        p.uid,
-                                      )
-                                    }
-                                  />
+                                  <div key={p.uid}>
+                                    <DroppableSlot
+                                      key={p.uid}
+                                      id={`${round.id}|${match.id}|${p.uid}`}
+                                      participant={p}
+                                      isAdmin={isAdmin}
+                                      onRemove={() =>
+                                        handleRemoveParticipantFromMatch(
+                                          round.id,
+                                          match.id,
+                                          p.uid,
+                                        )
+                                      }
+                                    />
+                                  </div>
                                 ))
                               ) : (
                                 <DroppableSlot
@@ -385,6 +388,31 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                                   label="Пусто"
                                   isAdmin={isAdmin}
                                   isPlaceholder={true}
+                                />
+                              )}
+
+                              {isAdmin && (
+                                <ChangeInfoInput
+                                  roundId={round.id}
+                                  matchId={match.id}
+                                  currentValue={match.info || ""}
+                                  onUpdate={(rId, mId, info) => {
+                                    const updatedRounds = rounds.map(
+                                      (r: any) =>
+                                        r.id === rId
+                                          ? {
+                                              ...r,
+                                              matches: r.matches.map(
+                                                (m: any) =>
+                                                  m.id === mId
+                                                    ? { ...m, info }
+                                                    : m,
+                                              ),
+                                            }
+                                          : r,
+                                    );
+                                    syncRounds(updatedRounds);
+                                  }}
                                 />
                               )}
                             </div>

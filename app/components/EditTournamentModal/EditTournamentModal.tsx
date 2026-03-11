@@ -312,6 +312,14 @@ const EditTournamentModal = ({
           </div>
         </div>
 
+        <CustomInput
+          name="stream_link"
+          label="Название канала"
+          description="Название канала берется в ссылке стрима после https://twitch.tv/"
+          value={tournamentData.stream_link}
+          onChange={handleInputChange}
+        />
+
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Награды</label>
