@@ -51,6 +51,8 @@ const useTournamentUsersRealtime = (
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
 
+          if (data.hidden) return;
+
           const users = (data.usersIds || data.joinedUsers || []) as IUser[];
           data.teams.forEach((team: ITeam) => {
             totalUsers += team.usersIds.length;
