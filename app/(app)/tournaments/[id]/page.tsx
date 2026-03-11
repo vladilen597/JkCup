@@ -274,7 +274,7 @@ const TournamentPage = () => {
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
   const isJoined = tournament?.usersIds?.includes(currentUser?.uid) ?? false;
-
+  console.log(tournament.stream_link);
   return (
     <main className="w-full px-4 py-8">
       <TournamentHero
@@ -321,17 +321,14 @@ const TournamentPage = () => {
 
       <TournamentStatBlocks tournament={tournament} />
 
-      {tournament.status === "in_progress" && (
+      {tournament.status === "in_progress" && tournament.stream_link?.[0] && (
         <div className="mx-auto max-w-7xl mb-12 border border-border">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
             strategy="lazyOnload"
           />
 
-          <TwitchPlayer
-            tournamentId={tournament.id}
-            link={tournament?.stream_link}
-          />
+          <TwitchPlayer link={tournament?.stream_link} />
         </div>
       )}
 

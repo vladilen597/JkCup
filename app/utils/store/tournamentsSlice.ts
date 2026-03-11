@@ -10,7 +10,7 @@ export interface IBracket {
     matches: {
       id: string;
       users: IUser[];
-      score: string;
+      info: string;
     }[];
   }[];
   currentRound: number;

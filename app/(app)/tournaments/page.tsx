@@ -137,7 +137,6 @@ const page = () => {
                       player1: null,
                       player2: null,
                       winner: null,
-                      score: "",
                     },
                   ],
                 },

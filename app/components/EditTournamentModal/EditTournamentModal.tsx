@@ -97,7 +97,7 @@ const EditTournamentModal = ({
     if (e.target.type === "text") {
       setTournamentData((prevState) => ({
         ...prevState,
-        [e.target.name]: [e.target.value],
+        [e.target.name]: e.target.value,
       }));
     } else {
       setTournamentData((prevState) => ({
@@ -313,6 +313,7 @@ const EditTournamentModal = ({
         </div>
 
         <CustomInput
+          type="text"
           name="stream_link"
           label="Название канала"
           description="Название канала берется в ссылке стрима после https://twitch.tv/"

@@ -1,40 +1,9 @@
 "use client";
+
 import Script from "next/script";
-import { ChangeEvent, useEffect, useState } from "react";
-import CustomInput from "../CustomInput/CustomInput";
-import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
-import CustomButton from "../CustomButton/CustomButton";
-import { updateTournamentStreamLink } from "@/app/utils/store/tournamentsSlice";
+import { useEffect } from "react";
 
-const TwitchPlayer = ({
-  tournamentId,
-  link,
-}: {
-  tournamentId: string;
-  link: string;
-}) => {
-  const [twitchLink, setTwitchLink] = useState(link);
-  const { user: currentUser } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
-
-  const handleChangeTwitchLink = (e: ChangeEvent<HTMLInputElement>) => {
-    setTwitchLink(e.target.value);
-  };
-
-  const handleUpdateLink = async () => {
-    try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      await updateDoc(tournamentRef, {
-        stream_link: twitchLink,
-      });
-      dispatch(updateTournamentStreamLink({ tournamentId, link: twitchLink }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+const TwitchPlayer = ({ link }: { link: string }) => {
   const initPlayer = () => {
     const container = document.getElementById("twitch-embed");
     if ((window as any).Twitch && container) {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Xarrow, { useXarrow, Xwrapper } from "react-xarrows";
-import { Plus, Trash2, Users, GripVertical, X } from "lucide-react";
+import { Plus, Trash2, Users, GripVertical, X, Trophy } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "@/app/utils/firebase";
 import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
 import ChangeInfoInput from "./ChangeInfoInput/ChangeInfoInput";
+import { cn } from "@/lib/utils";
 
 interface BracketProps {
   tournament: ITournament;
@@ -56,20 +57,29 @@ const MatchBox = ({ match, isAdmin, onRemoveMatch, children }: any) => {
 };
 
 const DroppableSlot = ({
+  winnerId,
   id,
   participant,
   label,
   isAdmin,
   onRemove,
   isPlaceholder,
+  onWinnerClick,
 }: any) => {
   const { isOver, setNodeRef } = useDroppable({ id, disabled: !isAdmin });
+
+  console.log(participant?.uid);
   return (
     <div
       ref={setNodeRef}
-      className={`w-full relative p-2 min-h-13 border-b border-zinc-800/50 flex items-center justify-between transition-colors duration-200 ${
-        isOver && isAdmin ? "bg-primary/20" : "bg-transparent"
-      } ${isPlaceholder ? "border-b-0" : ""}`}
+      className={cn(
+        "w-full relative p-2 min-h-13 border-b border-zinc-800/50 flex items-center justify-between transition-colors duration-200",
+        isOver && isAdmin ? "bg-primary/20" : "bg-transparent",
+        participant?.uid && participant?.uid === winnerId
+          ? "bg-green-400/20"
+          : "",
+        isPlaceholder && "border-b-0",
+      )}
     >
       {participant ? (
         <div className="flex items-center justify-between w-full group/player">
@@ -91,16 +101,28 @@ const DroppableSlot = ({
             )}
           </div>
           {isAdmin && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onRemove();
-              }}
-              className="p-1 opacity-0 group-hover/player:opacity-100 hover:bg-red-500/20 rounded text-zinc-500 hover:text-red-400 transition-all cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            <>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onWinnerClick();
+                }}
+                className="p-1 opacity-0 group-hover/player:opacity-100 hover:bg-green-500/20 rounded text-zinc-500 hover:text-green-400 transition-all cursor-pointer"
+              >
+                <Trophy className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRemove();
+                }}
+                className="p-1 opacity-0 group-hover/player:opacity-100 hover:bg-red-500/20 rounded text-zinc-500 hover:text-red-400 transition-all cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
         </div>
       ) : (
@@ -222,7 +244,6 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     updated[rIdx].matches.push({
       id: uuidv4(),
       participants: [],
-      score: "0:0",
     });
     syncRounds(updated);
   };
@@ -231,6 +252,23 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     const updated = rounds.map((r: any) => {
       if (r.id !== rId) return r;
       return { ...r, matches: r.matches.filter((m: any) => m && m.id !== mId) };
+    });
+    syncRounds(updated);
+  };
+
+  const handleSetWinner = (rId: string, mId: string, participantId: string) => {
+    const updated = rounds.map((r: any) => {
+      if (r.id !== rId) return r;
+      return {
+        ...r,
+        matches: r.matches.map((m: any) => {
+          if (!m || m.id !== mId) return m;
+          return {
+            ...m,
+            winnerId: participantId,
+          };
+        }),
+      };
     });
     syncRounds(updated);
   };
@@ -371,8 +409,16 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                                       id={`${round.id}|${match.id}|${p.uid}`}
                                       participant={p}
                                       isAdmin={isAdmin}
+                                      winnerId={match.winnerId}
                                       onRemove={() =>
                                         handleRemoveParticipantFromMatch(
+                                          round.id,
+                                          match.id,
+                                          p.uid,
+                                        )
+                                      }
+                                      onWinnerClick={() =>
+                                        handleSetWinner(
                                           round.id,
                                           match.id,
                                           p.uid,
