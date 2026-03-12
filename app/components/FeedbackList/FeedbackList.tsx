@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 export interface IFeedback {
   id: string;
   creator: IUser;
-  createdAt: FirestoreTimestamp;
+  created_at: FirestoreTimestamp;
   text: string;
 }
 
