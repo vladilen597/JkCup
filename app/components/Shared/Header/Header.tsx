@@ -14,6 +14,7 @@ import {
   Bell,
   Menu,
   FileQuestionMark,
+  NotebookPen,
 } from "lucide-react";
 import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
@@ -92,6 +93,12 @@ const mobileLinks = links.concat([
     href: "/faq",
     icon: <FileQuestionMark className={linkIconClassname} />,
   },
+  {
+    id: 7,
+    title: "Обратная связь",
+    href: "/contact",
+    icon: <NotebookPen className={linkIconClassname} />,
+  },
 ]);
 
 const additionalOptions = [
@@ -130,6 +137,19 @@ const additionalOptions = [
         </div>
         <span className="font-extrabold text-lg tracking-tight text-foreground">
           FAQ
+        </span>
+      </Link>
+    ),
+  },
+  {
+    id: 4,
+    node: (
+      <Link className="flex items-center gap-2 group" href="/contact">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+          <NotebookPen className="h-4 w-4 text-primary" />
+        </div>
+        <span className="font-extrabold text-lg tracking-tight text-foreground">
+          Обратная связь
         </span>
       </Link>
     ),

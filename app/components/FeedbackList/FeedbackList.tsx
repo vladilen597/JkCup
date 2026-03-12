@@ -46,7 +46,7 @@ const FeedbackList = () => {
   }
 
   return (
-    <ul className="max-h-100 space-y-2 px-2">
+    <ul className="max-h-100 space-y-2 p-2">
       {feedbacks.map((feedback) => (
         <FeedbackItem key={feedback.id} {...feedback} />
       ))}

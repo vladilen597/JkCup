@@ -7,27 +7,17 @@ import Title from "@/app/components/Title/Title";
 import { SubmitEvent, useState } from "react";
 import { ChevronDown, NotebookPen } from "lucide-react";
 import { db } from "@/app/utils/firebase";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import FeedbackList from "@/app/components/FeedbackList/FeedbackList";
-
-const contentVariants = {
-  expanded: {
-    opacity: 1,
-    height: "auto",
-  },
-  collapsed: {
-    opacity: 0,
-    height: 0,
-  },
-};
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFeedbackSent, setIsFeedbackSent] = useState(false);
-  const [text, setText] = useState("");
-  const { user: currentUser } = useAppSelector((state) => state.user);
   const [isFeedbacksExpanded, setIsFeedbacksExpanded] = useState(false);
+  const [text, setText] = useState("");
+
+  const { user: currentUser } = useAppSelector((state) => state.user);
 
   const handleToggleExpanded = () => {
     setIsFeedbacksExpanded((prevState) => !prevState);
