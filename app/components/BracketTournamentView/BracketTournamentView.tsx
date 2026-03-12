@@ -29,6 +29,8 @@ import { db } from "@/app/utils/firebase";
 import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
 import ChangeInfoInput from "./ChangeInfoInput/ChangeInfoInput";
 import { cn } from "@/lib/utils";
+import Discord from "../Icons/Discord";
+import Steam from "../Icons/Steam";
 
 interface BracketProps {
   tournament: ITournament;
@@ -68,7 +70,9 @@ const DroppableSlot = ({
 }: any) => {
   const { isOver, setNodeRef } = useDroppable({ id, disabled: !isAdmin });
 
-  console.log(participant?.uid);
+  const { user: currentUser } = useAppSelector((state) => state.user);
+  const isCurrentUser = currentUser.uid === participant?.uid;
+
   return (
     <div
       ref={setNodeRef}
@@ -97,7 +101,32 @@ const DroppableSlot = ({
                 </div>
               </div>
             ) : (
-              <UserInfoBlock {...participant} />
+              <div>
+                <p className="font-semibold text-foreground truncate leading-5 text-sm">
+                  {participant.displayName}
+                  {isCurrentUser && (
+                    <span className="ml-2 text-xs leading-0 text-orange-400">
+                      Вы
+                    </span>
+                  )}
+                </p>
+                <div className="flex items-center gap-2">
+                  {participant.discord && (
+                    <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
+                      <Discord className="w-4 h-4" /> {participant.discord}
+                    </p>
+                  )}
+                  {!!participant.steamLink &&
+                    !!participant.steamDisplayName && (
+                      <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
+                        <Steam className="w-4 h-4" />{" "}
+                        <span className="underline" rel="noopener noreferrer">
+                          {participant.steamDisplayName}
+                        </span>
+                      </p>
+                    )}
+                </div>
+              </div>
             )}
           </div>
           {isAdmin && (
@@ -319,7 +348,16 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
           if (!m || m.id !== matchId) return m;
           return {
             ...m,
-            participants: [...(m.participants || []), participant],
+            participants: [
+              ...(m.participants || []),
+              {
+                uid: participant.uid,
+                displayName: participant.displayName,
+                discord: participant.discord,
+                steamLink: participant.steamLink,
+                steamDisplayName: participant.steamDisplayName,
+              },
+            ],
           };
         }),
       };
@@ -373,7 +411,13 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                 >
                   <div className="flex justify-between items-center px-1 mb-4">
                     <h3 className="font-bold text-zinc-500 uppercase text-[11px] tracking-widest">
-                      Раунд {rIdx + 1}
+                      {rIdx + 1 === rounds?.length
+                        ? "Победитель"
+                        : rIdx + 1 === rounds?.length - 1
+                          ? "Финал"
+                          : rIdx + 1 === rounds?.length - 2
+                            ? "Полуфинал"
+                            : `Раунд ${rIdx + 1}`}
                     </h3>
                     {isAdmin && (
                       <button
@@ -437,30 +481,25 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                                 />
                               )}
 
-                              {isAdmin && (
-                                <ChangeInfoInput
-                                  roundId={round.id}
-                                  matchId={match.id}
-                                  currentValue={match.info || ""}
-                                  onUpdate={(rId, mId, info) => {
-                                    const updatedRounds = rounds.map(
-                                      (r: any) =>
-                                        r.id === rId
-                                          ? {
-                                              ...r,
-                                              matches: r.matches.map(
-                                                (m: any) =>
-                                                  m.id === mId
-                                                    ? { ...m, info }
-                                                    : m,
-                                              ),
-                                            }
-                                          : r,
-                                    );
-                                    syncRounds(updatedRounds);
-                                  }}
-                                />
-                              )}
+                              <ChangeInfoInput
+                                roundId={round.id}
+                                matchId={match.id}
+                                currentValue={match.info || ""}
+                                disabled={!isAdmin}
+                                onUpdate={(rId, mId, info) => {
+                                  const updatedRounds = rounds.map((r: any) =>
+                                    r.id === rId
+                                      ? {
+                                          ...r,
+                                          matches: r.matches.map((m: any) =>
+                                            m.id === mId ? { ...m, info } : m,
+                                          ),
+                                        }
+                                      : r,
+                                  );
+                                  syncRounds(updatedRounds);
+                                }}
+                              />
                             </div>
                           </MatchBox>
 
