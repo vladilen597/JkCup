@@ -59,6 +59,7 @@ import EditTournamentModal from "@/app/components/EditTournamentModal/EditTourna
 import Script from "next/script";
 import TwitchPlayer from "@/app/components/Shared/StreamFrame/StreamFrame";
 import CustomInput from "@/app/components/Shared/CustomInput/CustomInput";
+import Link from "next/link";
 
 export const statuses = {
   open: "Открыт",
@@ -289,7 +290,7 @@ const TournamentPage = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="flex items-center justify-between border-2 p-4 border-amber-300! rounded-lg overflow-hidden bg-linear-120 from-40% from-black to-amber-300"
+          className="max-w-5xl mx-auto flex items-center justify-between border-2 p-4 border-amber-300! rounded-lg overflow-hidden bg-linear-120 from-40% from-black to-amber-300"
         >
           <div>
             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -320,6 +321,22 @@ const TournamentPage = () => {
       )}
 
       <TournamentStatBlocks tournament={tournament} />
+
+      {tournament.status === "finished" && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mb-6 max-w-5xl mx-auto bg-card border border-border p-3 rounded-lg"
+        >
+          <p>
+            По желанию, оставьте ваш отзыв о проведенном турнире на{" "}
+            <Link href="/contact" className="underline">
+              странице обратной связи
+            </Link>
+          </p>
+        </motion.section>
+      )}
 
       {tournament.status === "in_progress" && tournament.stream_link?.[0] && (
         <div className="mx-auto max-w-7xl mb-12 border border-border">
