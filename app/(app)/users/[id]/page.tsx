@@ -7,14 +7,7 @@ import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import {
-  ChangeEvent,
-  Fragment,
-  MouseEvent,
-  SubmitEvent,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Loader2 } from "lucide-react";
 import Steam from "@/app/components/Icons/Steam";
@@ -377,7 +370,7 @@ const page = () => {
                 {userInfo?.games?.length ? (
                   userInfo?.games.map((game) => (
                     <div
-                      key={game.id}
+                      key={game.uid}
                       className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
                     >
                       {game?.image && (

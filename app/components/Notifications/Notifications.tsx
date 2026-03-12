@@ -19,7 +19,6 @@ import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
 import CustomInput from "../Shared/CustomInput/CustomInput";
-import { v4 as uuidv4 } from "uuid";
 import { useAppSelector } from "@/app/utils/store/hooks";
 
 const Notifications = () => {

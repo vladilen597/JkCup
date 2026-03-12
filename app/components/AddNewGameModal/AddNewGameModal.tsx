@@ -70,7 +70,7 @@ const AddNewGameModal = ({ onClose }: IAddNewGameModalProps) => {
         name,
         image,
       });
-      dispatch(addGame({ id, name, image }));
+      dispatch(addGame({ id, name, image, uid: newGameRef.id }));
       onClose();
     } catch (error) {
       console.log(error);

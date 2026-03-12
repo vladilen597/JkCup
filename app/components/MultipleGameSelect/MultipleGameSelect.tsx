@@ -70,7 +70,6 @@ const MultipleGameSelect = ({
       const snap = getDocs(q);
       const data = (await snap).docs.map((doc) => ({
         ...(doc.data() as IGame),
-        uid: doc.id,
       }));
       dispatch(setGames(data));
     } catch (err: any) {
@@ -85,7 +84,7 @@ const MultipleGameSelect = ({
   const borderClass = error
     ? "border-red-500 focus:border-red-500"
     : "border-border";
-
+  console.log(games);
   return (
     <motion.div
       ref={containerRef}

@@ -13,11 +13,12 @@ import {
   Ellipsis,
   Bell,
   Menu,
+  FileQuestionMark,
 } from "lucide-react";
 import { IUser, setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
@@ -29,6 +30,69 @@ import Notifications from "../../Notifications/Notifications";
 import Image from "next/image";
 import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import { cn } from "@/lib/utils";
+
+const linkIconClassname = "h-4 w-4 text-primary";
+
+type ReferrerPolicy =
+  | "no-referrer"
+  | "no-referrer-when-downgrade"
+  | "origin"
+  | "origin-when-cross-origin"
+  | "same-origin"
+  | "strict-origin"
+  | "strict-origin-when-cross-origin"
+  | "unsafe-url";
+
+const links: {
+  id: number;
+  title: string;
+  href: string;
+  icon: ReactNode;
+  target?: string;
+  referrerPolicy?: ReferrerPolicy;
+}[] = [
+  {
+    id: 1,
+    title: "Турниры",
+    href: "/tournaments",
+    icon: <Trophy className={linkIconClassname} />,
+  },
+  {
+    id: 2,
+    title: "Пользователи",
+    href: "/users",
+    icon: <Users className={linkIconClassname} />,
+  },
+  {
+    id: 3,
+    title: "Discord",
+    href: "https://discord.gg/S6QMcETh4d",
+    icon: <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />,
+    target: "_blank",
+    referrerPolicy: "no-referrer",
+  },
+];
+
+const mobileLinks = links.concat([
+  {
+    id: 4,
+    title: "Игры",
+    href: "/games",
+    icon: <Gamepad2 className={linkIconClassname} />,
+  },
+  {
+    id: 5,
+    title: "Архив",
+    href: "/archive",
+    icon: <Archive className={linkIconClassname} />,
+  },
+  {
+    id: 6,
+    title: "FAQ",
+    href: "/faq",
+    icon: <FileQuestionMark className={linkIconClassname} />,
+  },
+]);
 
 const additionalOptions = [
   {
@@ -53,6 +117,19 @@ const additionalOptions = [
         </div>
         <span className="font-extrabold text-lg tracking-tight text-foreground">
           Игры
+        </span>
+      </Link>
+    ),
+  },
+  {
+    id: 3,
+    node: (
+      <Link className="flex items-center gap-2 group" href="/faq">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+          <FileQuestionMark className="h-4 w-4 text-primary" />
+        </div>
+        <span className="font-extrabold text-lg tracking-tight text-foreground">
+          FAQ
         </span>
       </Link>
     ),
@@ -145,101 +222,48 @@ const Header = () => {
               onClose={handleCloseNavDrawer}
             >
               <div className="flex flex-col gap-8 px-6 w-fit">
-                <Link
-                  href="/tournaments"
-                  className="flex items-center gap-2 group"
-                  onClick={handleCloseNavDrawer}
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                    <Trophy className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-extrabold text-lg tracking-tight text-foreground">
-                    Турниры
-                  </span>
-                </Link>
-                <Link
-                  href="/users"
-                  className="flex items-center gap-2 group"
-                  onClick={handleCloseNavDrawer}
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-extrabold text-lg tracking-tight text-foreground">
-                    Пользователи
-                  </span>
-                </Link>
-                <Link
-                  href="https://discord.gg/S6QMcETh4d"
-                  className="flex items-center gap-2 group"
-                  referrerPolicy="no-referrer"
-                  target="_blank"
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                    <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-extrabold text-lg tracking-tight text-foreground">
-                    Discord
-                  </span>
-                </Link>
-                <Link
-                  className="flex items-center gap-2 group"
-                  href="/games"
-                  onClick={handleCloseNavDrawer}
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                    <Gamepad2 className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-extrabold text-lg tracking-tight text-foreground">
-                    Игры
-                  </span>
-                </Link>
-                <Link
-                  className="flex items-center gap-2 group"
-                  href="/archive"
-                  onClick={handleCloseNavDrawer}
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                    <Archive className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-extrabold text-lg tracking-tight text-foreground">
-                    Архив
-                  </span>
-                </Link>
+                {mobileLinks.map((mobileLink) => (
+                  <Link
+                    key={mobileLink.id}
+                    href={mobileLink.href}
+                    target={mobileLink.target}
+                    referrerPolicy={mobileLink.referrerPolicy}
+                    onClick={
+                      mobileLink.target
+                        ? undefined
+                        : () => handleCloseNavDrawer()
+                    }
+                    className="flex items-center gap-2 group"
+                  >
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                      {mobileLink.icon}
+                    </div>
+                    <span className="font-extrabold text-lg tracking-tight text-foreground">
+                      {mobileLink.title}
+                    </span>
+                  </Link>
+                ))}
               </div>
             </CustomDrawer>
           )}
         </AnimatePresence>
         <div className="lg:flex hidden items-center gap-8">
-          <Link href="/tournaments" className="flex items-center gap-2 group">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-              <Trophy className="h-4 w-4 text-primary" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-foreground">
-              Турниры
-            </span>
-          </Link>
-          <Link href="/users" className="flex items-center gap-2 group">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-              <Users className="h-4 w-4 text-primary" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-foreground">
-              Пользователи
-            </span>
-          </Link>
-          <Link
-            href="https://discord.gg/S6QMcETh4d"
-            className="flex items-center gap-2 group"
-            referrerPolicy="no-referrer"
-            target="_blank"
-          >
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-              <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-foreground">
-              Discord
-            </span>
-          </Link>
+          {links.map((link) => (
+            <Link
+              key={link.id}
+              href={link.href}
+              target={link.target}
+              referrerPolicy={link.referrerPolicy}
+              className="flex items-center gap-2 group"
+            >
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                {link.icon}
+              </div>
+              <span className="font-extrabold text-lg tracking-tight text-foreground">
+                {link.title}
+              </span>
+            </Link>
+          ))}
           <CustomNodeSelect
             titleNode={
               <div className="flex items-center gap-2 group cursor-pointer">

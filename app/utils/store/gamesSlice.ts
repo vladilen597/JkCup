@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface IGame {
+  uid: string;
   id: string;
   name: string;
   image: string;

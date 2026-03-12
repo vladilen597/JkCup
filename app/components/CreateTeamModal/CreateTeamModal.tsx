@@ -1,9 +1,8 @@
-import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
+import { useAppSelector } from "@/app/utils/store/hooks";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { AlertCircle, Loader2, Users } from "lucide-react";
+import { AlertCircle, Users } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { db } from "@/app/utils/firebase";
-import { addTournamentTeam } from "@/app/utils/store/tournamentsSlice";
 import { v4 as uuidv4 } from "uuid";
 import CustomButton, {
   BUTTON_TYPES,
@@ -22,7 +21,6 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const dispatch = useAppDispatch();
 
   const handleToggleChecked = () => {
     setTeamData((prevState) => ({
