@@ -49,17 +49,6 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
           usersIds: [currentUser.uid],
         }),
       });
-
-      dispatch(
-        addTournamentTeam({
-          uid,
-          tournamentId,
-          teamName: teamData.name,
-          is_private: teamData.is_private,
-          currentUser: currentUser,
-        }),
-      );
-
       onClose();
     } catch (error) {
       setError("Не удалось создать или вступить в команду");
