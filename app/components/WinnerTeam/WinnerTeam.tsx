@@ -22,7 +22,7 @@ const WinnerTeam = ({ usersIds }: { usersIds: string[] }) => {
   }, []);
 
   return (
-    <ul className="mt-2">
+    <ul className="mt-2 space-y-2">
       {users.map((user) => (
         <li key={user.uid} className="flex items-center gap-2">
           <UserInfoBlock {...user} />
