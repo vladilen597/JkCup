@@ -40,7 +40,7 @@ export interface ITournament {
   createdAt?: string;
   startedAt?: string;
   hidden?: boolean;
-  useBracket?: boolean;
+  is_bracket?: boolean;
   bracket: IBracket;
   rules?: string;
   stream_link?: string;

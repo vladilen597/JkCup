@@ -20,16 +20,17 @@ import CustomButton, {
 } from "../Shared/CustomButton/CustomButton";
 import CustomInput from "../Shared/CustomInput/CustomInput";
 import { useAppSelector } from "@/app/utils/store/hooks";
+import axios from "axios";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [isNotificationAddOpen, setIsNotificationAddOpen] = useState(false);
   const [notificationData, setNotificationData] = useState<{
     title: string;
-    description: string;
+    text: string;
   }>({
     title: "",
-    description: "",
+    text: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
@@ -43,7 +44,11 @@ const Notifications = () => {
     setIsNotificationAddOpen(false);
   };
 
-  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeInput = <
+    T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
+  >(
+    e: React.ChangeEvent<T>,
+  ) => {
     setNotificationData((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
@@ -53,14 +58,7 @@ const Notifications = () => {
   const handleLoadNotifications = async () => {
     setIsLoading(true);
     try {
-      const q = query(
-        collection(db, "notifications"),
-        orderBy("created_at", "desc"),
-      );
-      const snap = getDocs(q);
-      const data = (await snap).docs.map((doc) => ({
-        ...(doc.data() as INotification),
-      }));
+      const { data } = await axios.get("/api/notifications");
       console.log(data);
       setNotifications(data);
     } catch (error) {
@@ -76,15 +74,8 @@ const Notifications = () => {
     e.preventDefault();
     setIsSubmitLoading(true);
     try {
-      const newNotificationRef = doc(collection(db, "notifications"));
-
-      const data = {
-        ...notificationData,
-        id: newNotificationRef.id,
-        created_at: serverTimestamp(),
-      };
-      await setDoc(newNotificationRef, data);
-      handleLoadNotifications();
+      const { data } = await axios.post("/api/notifications", notificationData);
+      setNotifications((prevState) => [data, ...prevState]);
       handleCloseModal();
     } catch (error) {
       console.log(error);
@@ -105,12 +96,6 @@ const Notifications = () => {
 
   if (isLoading) {
     return <Loader2 className="mx-auto animate-spin" />;
-  }
-
-  if (!notifications.length) {
-    return (
-      <p className="block mx-auto text-sm text-neutral-400">Нет уведомлений</p>
-    );
   }
 
   return (
@@ -138,7 +123,8 @@ const Notifications = () => {
             <textarea
               required
               className="mt-1 w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              name="descriotion"
+              name="text"
+              onChange={handleChangeInput}
             ></textarea>
           </label>
           <div className="flex items-center gap-2">
@@ -155,15 +141,21 @@ const Notifications = () => {
           </div>
         </form>
       )}
-      <ul className="mt-2 space-y-2">
-        {notifications?.map((notification) => (
-          <Notification
-            key={notification.id}
-            {...notification}
-            onDeleteClick={handleDeleteNotification}
-          />
-        ))}
-      </ul>
+      {notifications.length ? (
+        <ul className="mt-2 space-y-2">
+          {notifications?.map((notification) => (
+            <Notification
+              key={notification.id}
+              {...notification}
+              onDeleteClick={handleDeleteNotification}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="block mx-auto text-sm text-neutral-400">
+          Нет уведомлений
+        </p>
+      )}
     </section>
   );
 };

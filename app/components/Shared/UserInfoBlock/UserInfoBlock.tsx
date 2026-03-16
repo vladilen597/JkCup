@@ -1,20 +1,20 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
-import { IUser } from "@/app/utils/store/userSlice";
 import Image from "next/image";
 import Discord from "../../Icons/Discord";
 import Steam from "../../Icons/Steam";
 import { MouseEvent } from "react";
+import { IUser } from "@/app/lib/types";
 
 const UserInfoBlock = ({
-  uid,
-  photoUrl,
-  displayName,
+  id,
+  image_url,
+  full_name,
   discord,
-  steamLink,
-  steamDisplayName,
+  steam_link,
+  steam_display_name,
 }: Partial<IUser>) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const isCurrentUser = currentUser.uid === uid;
+  const isCurrentUser = currentUser.id === id;
 
   const handleClickSteamLink = (e: MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation();
@@ -22,25 +22,25 @@ const UserInfoBlock = ({
 
   return (
     <>
-      {photoUrl ? (
+      {image_url ? (
         <Image
           unoptimized
           width={40}
           height={40}
-          src={photoUrl}
-          alt={displayName || ""}
+          src={image_url}
+          alt={full_name || ""}
           className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
         />
       ) : (
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20">
-          {displayName?.charAt(0).toUpperCase()}
+          {full_name?.charAt(0).toUpperCase()}
         </div>
       )}
 
       <div className="flex-1 min-w-0">
         <div>
           <p className="font-semibold text-foreground truncate leading-5 text-sm">
-            {displayName}
+            {full_name}
             {isCurrentUser && (
               <span className="ml-2 text-xs leading-0 text-orange-400">Вы</span>
             )}
@@ -51,7 +51,7 @@ const UserInfoBlock = ({
                 <Discord className="w-4 h-4" /> {discord}
               </p>
             )}
-            {!!steamLink && !!steamDisplayName && (
+            {!!steam_link && !!steam_display_name && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
                 <Steam className="w-4 h-4" />{" "}
                 <a
@@ -59,9 +59,9 @@ const UserInfoBlock = ({
                   className="underline"
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={steamLink}
+                  href={steam_link}
                 >
-                  {steamDisplayName}
+                  {steam_display_name}
                 </a>
               </p>
             )}

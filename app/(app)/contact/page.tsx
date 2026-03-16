@@ -10,6 +10,7 @@ import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
 import Link from "next/link";
 import FeedbackList from "@/app/components/FeedbackList/FeedbackList";
+import axios from "axios";
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +28,8 @@ const page = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const newFeedbackRef = doc(collection(db, "feedback"));
-      await setDoc(newFeedbackRef, {
-        id: newFeedbackRef.id,
+      await axios.post("/api/feedback", {
         text,
-        creator: currentUser || null,
-        created_at: serverTimestamp(),
       });
       setIsFeedbackSent(true);
     } catch (error) {
@@ -84,7 +81,7 @@ const page = () => {
           transition={{ duration: 0.5, delay: 0.25 }}
           onSubmit={handleSendForm}
         >
-          <label htmlFor="">
+          <label>
             <span>Введите ваше обращение</span>
             <textarea
               className="mt-1 p-2 w-full border border-border rounded-lg bg-muted min-h-100 outline-0 focus:outline-none focus:ring-2 focus:ring-primary text-lg"

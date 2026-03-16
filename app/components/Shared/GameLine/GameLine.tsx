@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 
 const GameLine = ({
-  image,
+  image_url,
   name,
   onDeleteClick,
 }: IGame & { onDeleteClick: () => void }) => {
@@ -15,7 +15,7 @@ const GameLine = ({
       <div className="flex items-center gap-4">
         <Image
           className="rounded h-10 w-10 object-cover"
-          src={image}
+          src={image_url}
           width={40}
           height={40}
           alt="Game image"

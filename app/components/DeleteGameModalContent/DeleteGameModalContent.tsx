@@ -7,6 +7,7 @@ import CustomButton, {
 import { db } from "@/app/utils/firebase";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import axios from "axios";
 
 interface IDeleteUserModalContentProps {
   gameId: string;
@@ -24,8 +25,11 @@ const DeleteGameModalContent = ({
     setIsLoading(true);
 
     try {
-      const gameDoc = doc(db, "games", gameId);
-      await deleteDoc(gameDoc);
+      await axios.delete("/api/games", {
+        params: {
+          id: gameId,
+        },
+      });
       dispatch(deleteGame(gameId));
       onClose();
     } catch (error) {

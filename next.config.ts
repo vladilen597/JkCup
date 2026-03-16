@@ -10,6 +10,18 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "uwcyphkniyycdsbztfpy.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**", // для публичных ссылок
+      },
+      {
+        protocol: "https",
+        hostname: "uwcyphkniyycdsbztfpy.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/sign/**", // для подписанных (временных) ссылок
+      },
     ],
   },
   async redirects() {

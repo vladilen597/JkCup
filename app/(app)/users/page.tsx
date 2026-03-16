@@ -6,7 +6,6 @@ import SearchInput from "@/app/components/Shared/SearchInput/SearchInput";
 import UserLine from "@/app/components/UserList/UserLine/UserLine";
 import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 import { useState, useEffect, ChangeEvent } from "react";
-import { IUser } from "@/app/utils/store/userSlice";
 import Title from "@/app/components/Title/Title";
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
@@ -15,6 +14,7 @@ import axios from "axios";
 import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
+import { IUser } from "@/app/lib/types";
 
 const roles = [
   {
@@ -64,7 +64,7 @@ const UsersPage = () => {
     setLoading(true);
     try {
       const { data } = await axios.get("/api/users");
-      setUsers(data.users || []);
+      setUsers(data || []);
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Ошибка загрузки пользователей");
@@ -84,7 +84,7 @@ const UsersPage = () => {
       });
       setUsers((prevState) =>
         prevState.map((user) => {
-          if (user.uid === id) {
+          if (user.id === id) {
             return {
               ...user,
               status: "active",
@@ -109,7 +109,7 @@ const UsersPage = () => {
       });
       setUsers((prevState) =>
         prevState.map((user) => {
-          if (user.uid === id) {
+          if (user.id === id) {
             return {
               ...user,
               status: "blocked",
@@ -137,7 +137,7 @@ const UsersPage = () => {
 
   const filteredUsers = users.filter(
     (user) =>
-      (user.displayName + user.steamDisplayName)
+      (user.full_name + user.steam_display_name)
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) &&
       (selectedRole.value === "any" || selectedRole.value === user.role),
@@ -206,12 +206,12 @@ const UsersPage = () => {
           ) : (
             filteredUsers.map((user, i) => (
               <UserLine
-                key={user.uid}
+                key={user.id}
                 {...user}
                 index={i}
                 showRoles
-                onDeleteClick={() => setUserId(user.uid)}
-                onBlockClick={() => handleBlockClick(user.uid, user.status)}
+                onDeleteClick={() => setUserId(user.id)}
+                onBlockClick={() => handleBlockClick(user.id, user.status)}
               />
             ))
           )}

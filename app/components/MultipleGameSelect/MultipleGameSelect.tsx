@@ -2,10 +2,10 @@ import { ChevronDown, X } from "lucide-react";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { IGame, setGames } from "@/app/utils/store/gamesSlice";
+import { setGames } from "@/app/utils/store/gamesSlice";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import { IGame } from "@/app/lib/types";
+import axios from "axios";
 
 interface IMultipleGameSelectProps {
   value: IGame[];
@@ -58,6 +58,8 @@ const MultipleGameSelect = ({
   const { games } = useAppSelector((state) => state.games);
   const dispatch = useAppDispatch();
 
+  console.log(games);
+
   const handleToggleIsOpen = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     e.preventDefault();
@@ -66,11 +68,7 @@ const MultipleGameSelect = ({
 
   const handleLoadGames = async () => {
     try {
-      const q = query(collection(db, "games"));
-      const snap = getDocs(q);
-      const data = (await snap).docs.map((doc) => ({
-        ...(doc.data() as IGame),
-      }));
+      const { data } = await axios.get("/api/games");
       dispatch(setGames(data));
     } catch (err: any) {
       console.error(err);
@@ -84,7 +82,7 @@ const MultipleGameSelect = ({
   const borderClass = error
     ? "border-red-500 focus:border-red-500"
     : "border-border";
-  console.log(games);
+
   return (
     <motion.div
       ref={containerRef}
@@ -97,16 +95,16 @@ const MultipleGameSelect = ({
     >
       <motion.div className="flex items-center p-1.5 justify-between text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          {value.length ? (
+          {value?.length ? (
             value?.map((game) => (
               <div
                 key={game.id}
                 className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
               >
-                {game?.image && (
+                {game?.image_url && (
                   <Image
                     className="rounded object-cover h-4 w-4"
-                    src={game.image}
+                    src={game.image_url}
                     width={16}
                     height={16}
                     alt="Game image"
@@ -176,7 +174,7 @@ const MultipleGameSelect = ({
                   >
                     <Image
                       className="rounded h-4 w-4 object-cover"
-                      src={game.image}
+                      src={game.image_url}
                       width={16}
                       height={16}
                       alt={game.name}

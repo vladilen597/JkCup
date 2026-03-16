@@ -7,7 +7,7 @@ interface ICustomInputProps {
   value: string;
   className?: string;
   icon?: ReactNode;
-  type?: "text" | "numeric";
+  type?: "text" | "numeric" | "email";
   required?: boolean;
   disabled?: boolean;
   description?: ReactNode;

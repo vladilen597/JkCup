@@ -21,7 +21,6 @@ import {
   ITeam,
 } from "@/app/utils/store/tournamentsSlice";
 import UserInfoBlock from "../Shared/UserInfoBlock/UserInfoBlock";
-import { IUser } from "@/app/utils/store/userSlice";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { doc, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
@@ -31,6 +30,7 @@ import ChangeInfoInput from "./ChangeInfoInput/ChangeInfoInput";
 import { cn } from "@/lib/utils";
 import Discord from "../Icons/Discord";
 import Steam from "../Icons/Steam";
+import { IUser } from "@/app/lib/types";
 
 interface BracketProps {
   tournament: ITournament;
@@ -71,7 +71,7 @@ const DroppableSlot = ({
   const { isOver, setNodeRef } = useDroppable({ id, disabled: !isAdmin });
 
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const isCurrentUser = currentUser.uid === participant?.uid;
+  const isCurrentUser = currentUser.id === participant?.id;
 
   return (
     <div
@@ -116,7 +116,7 @@ const DroppableSlot = ({
                       <Discord className="w-4 h-4" /> {participant.discord}
                     </p>
                   )}
-                  {!!participant.steamLink &&
+                  {!!participant.steam_link &&
                     !!participant.steamDisplayName && (
                       <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
                         <Steam className="w-4 h-4" />{" "}
@@ -352,10 +352,10 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
               ...(m.participants || []),
               {
                 uid: participant.uid,
-                displayName: participant.displayName,
+                full_name: participant.full_name,
                 discord: participant.discord,
-                steamLink: participant.steamLink,
-                steamDisplayName: participant.steamDisplayName,
+                steam_link: participant.steam_link,
+                steam_display_name: participant.steam_display_name,
               },
             ],
           };
@@ -555,7 +555,7 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                 </h3>
                 <div className="mt-2 space-y-2">
                   {activeBlock.users?.map((user: IUser) => (
-                    <div key={user.uid} className="flex items-center gap-2">
+                    <div key={user.id} className="flex items-center gap-2">
                       <UserInfoBlock {...user} />
                     </div>
                   ))}

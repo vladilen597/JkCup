@@ -1,31 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { IGame } from "./gamesSlice";
-
-export interface IUser {
-  uid: string;
-  displayName: string;
-  photoUrl: string;
-  email: string;
-  discord: string;
-  createdAt?: string;
-  lastSignIn?: string;
-  steamLink?: string;
-  steamDisplayName?: string;
-  role: "guest" | "user" | "admin" | "superadmin";
-  games?: IGame[];
-  status?: "blocked" | "active";
-}
+import { IUser } from "@/app/lib/types";
 
 const initialState: { user: IUser } = {
   user: {
-    uid: "",
-    displayName: "Anonymous",
-    photoUrl: "",
+    id: "",
+    full_name: "Anonymous",
+    image_url: "",
     email: "",
     discord: "",
-    role: "user",
-    steamLink: "",
-    steamDisplayName: "",
+    role: "guest",
+    steam_link: "",
+    steam_display_name: "",
     games: [],
   },
 };

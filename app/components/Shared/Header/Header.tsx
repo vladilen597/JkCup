@@ -16,7 +16,7 @@ import {
   FileQuestionMark,
   NotebookPen,
 } from "lucide-react";
-import { IUser, setUser } from "@/app/utils/store/userSlice";
+import { setUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
 import { ReactNode, useEffect, useState } from "react";
@@ -24,13 +24,16 @@ import Link from "next/link";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import CustomButton from "../CustomButton/CustomButton";
-import Google from "../../Icons/Google";
 import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
 import CustomDrawer from "../CustomDrawer/CustomDrawer";
 import Notifications from "../../Notifications/Notifications";
 import Image from "next/image";
 import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import { cn } from "@/lib/utils";
+import axios from "axios";
+import CustomModal from "../CustomModal/CustomModal";
+import AuthModalContent from "../../AuthModalContent/AuthModalContent";
+import { IUser } from "@/app/lib/types";
 
 const linkIconClassname = "h-4 w-4 text-primary";
 
@@ -160,8 +163,8 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user } = useAppSelector((state) => state.user);
-  const { signIn } = useGoogleSignIn();
   const dispatch = useAppDispatch();
 
   const handleCloseProfileDropdown = () => {
@@ -184,12 +187,20 @@ const Header = () => {
     setIsNavigationDrawerOpen(true);
   };
 
+  const handleOpenAuthModal = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const handleCloseAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
   const handleLogOut = () => {
     dispatch(
       setUser({
-        uid: "",
-        displayName: "Anonymous",
-        photoUrl: "",
+        id: "",
+        full_name: "Anonymous",
+        image_url: "",
         email: "",
         role: "guest",
         discord: "",
@@ -198,14 +209,10 @@ const Header = () => {
     setIsProfileOpen(false);
   };
 
-  const handleGoogleSignIn = () => {
-    signIn();
-  };
-
   useEffect(() => {
-    if (!user.uid) return;
+    if (!user.id) return;
 
-    const userRef = doc(db, "users", user.uid);
+    const userRef = doc(db, "users", user.id);
 
     const unsubscribe = onSnapshot(
       userRef,
@@ -221,7 +228,7 @@ const Header = () => {
     );
 
     return () => unsubscribe();
-  }, [user.uid, dispatch]);
+  }, [user.id, dispatch]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
@@ -300,7 +307,7 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {user.uid ? (
+          {user.id ? (
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen((p) => !p)}
@@ -308,7 +315,7 @@ const Header = () => {
               >
                 <div>
                   <span className="block text-sm font-medium text-foreground">
-                    {user.displayName}
+                    {user.full_name}
                   </span>
                   <span
                     className={cn(
@@ -319,14 +326,20 @@ const Header = () => {
                     {roles[user.role]}
                   </span>
                 </div>
-                <Image
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 rounded-full ring-2 ring-primary/30"
-                  src={user.photoUrl}
-                  alt={user.displayName}
-                  referrerPolicy="no-referrer"
-                />
+                {user.image_url ? (
+                  <Image
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 rounded-full ring-2 ring-primary/30 object-cover"
+                    src={user.image_url}
+                    alt={user.full_name}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center text-neon h-8 w-8 rounded-full ring-2 ring-primary/30">
+                    {user.full_name?.[0]}
+                  </div>
+                )}
                 <ChevronDown
                   className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`}
                 />
@@ -335,7 +348,7 @@ const Header = () => {
               <AnimatePresence>
                 {isProfileOpen && (
                   <ProfileDropdown
-                    userId={user.uid}
+                    userId={user.id}
                     handleClickLogout={handleLogOut}
                     onClose={handleCloseProfileDropdown}
                   />
@@ -343,11 +356,7 @@ const Header = () => {
               </AnimatePresence>
             </div>
           ) : (
-            <CustomButton
-              label="Войти"
-              icon={<Google />}
-              onClick={handleGoogleSignIn}
-            />
+            <CustomButton label="Войти" onClick={handleOpenAuthModal} />
           )}
           <button
             className="cursor-pointer group"
@@ -364,6 +373,15 @@ const Header = () => {
             <Notifications />
           </CustomDrawer>
         )}
+      </AnimatePresence>
+      <AnimatePresence>
+        <CustomModal
+          contentClassName="max-w-150"
+          isOpen={isAuthModalOpen}
+          onClose={handleCloseAuthModal}
+        >
+          <AuthModalContent onClose={handleCloseAuthModal} />
+        </CustomModal>
       </AnimatePresence>
     </header>
   );

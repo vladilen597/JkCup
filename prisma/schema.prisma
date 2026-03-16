@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id                 String   @id @db.Uuid
+  email              String   @unique
+  full_name          String?
+  discord            String?
+  image_url          String?
+  steam_link         String?   
+  steam_display_name String?   
+  role               String   @default("guest")
+  status             String   @default("active")
+  created_at         DateTime @default(now()) @map("created_at")
+
+  games            Game[]     @relation("UserGames")
+  feedbacks        Feedback[]
+
+  @@map("profiles") 
+}
+
+model Tournament {
+  id    String @id @default(cuid())
+  title String
+  
+  @@map("tournaments")
+}
+
+model Game {
+  id        String @id @default(cuid())
+  image_url String
+  name      String
+  
+  profiles  Profile[] @relation("UserGames")
+  
+  @@map("games") 
+}
+
+model Feedback {
+  id        String @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  title     String
+  text      String
+  creator_id String   @db.Uuid 
+  creator   Profile @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@map("feedbacks") 
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  text        String
+  type        String   @default("info") 
+  is_active    Boolean  @default(true)   
+  priority    Int      @default(0)  
+  created_at   DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}

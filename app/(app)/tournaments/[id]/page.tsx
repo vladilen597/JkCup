@@ -108,7 +108,7 @@ const TournamentPage = () => {
   };
 
   const handleJoinLeave = async () => {
-    if (!currentUser?.uid) {
+    if (!currentUser?.id) {
       setErrorMsg("Войдите в аккаунт");
       return;
     }
@@ -123,18 +123,18 @@ const TournamentPage = () => {
     try {
       if (isJoined) {
         await updateDoc(tournamentRef, {
-          usersIds: arrayRemove(currentUser.uid),
+          usersIds: arrayRemove(currentUser.id),
         });
 
         dispatch(
           removeParticipant({
             tournamentId: tournament.id,
-            userId: currentUser.uid,
+            userId: currentUser.id,
           }),
         );
       } else {
         await updateDoc(tournamentRef, {
-          usersIds: arrayUnion(currentUser.uid),
+          usersIds: arrayUnion(currentUser.id),
         });
         dispatch(
           addParticipant({
@@ -263,9 +263,9 @@ const TournamentPage = () => {
       ? tournament.teams.length === tournament.max_teams
       : tournament.usersIds.length === tournament.max_players;
 
-  const isCurrentUserJudge = tournament.judgesIds.includes(currentUser.uid);
+  const isCurrentUserJudge = tournament.judgesIds.includes(currentUser.id);
   const isUserHasTeam = tournament.teams?.some((team) =>
-    team.usersIds?.includes(currentUser.uid),
+    team.usersIds?.includes(currentUser.id),
   );
 
   const isUserCanCreateTeam =
@@ -274,8 +274,8 @@ const TournamentPage = () => {
 
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
-  const isJoined = tournament?.usersIds?.includes(currentUser?.uid) ?? false;
-  console.log(tournament.stream_link);
+  const isJoined = tournament?.usersIds?.includes(currentUser?.id) ?? false;
+
   return (
     <main className="w-full px-4 py-8">
       <TournamentHero
@@ -429,7 +429,7 @@ const TournamentPage = () => {
                   canCreateTeam={isUserCanCreateTeam}
                   isJoinedSingleTournament={
                     !isTeamMode
-                      ? tournament.usersIds.includes(currentUser.uid)
+                      ? tournament.usersIds.includes(currentUser.id)
                       : undefined
                   }
                 />

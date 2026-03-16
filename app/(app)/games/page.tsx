@@ -7,13 +7,12 @@ import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 import GameLine from "@/app/components/Shared/GameLine/GameLine";
-import { collection, getDocs, query } from "firebase/firestore";
-import { IGame, setGames } from "@/app/utils/store/gamesSlice";
+import { setGames } from "@/app/utils/store/gamesSlice";
 import Title from "@/app/components/Title/Title";
 import { Gamepad2, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
-import { db } from "@/app/utils/firebase";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const GamesPage = () => {
   const [loading, setLoading] = useState(false);
@@ -43,12 +42,7 @@ const GamesPage = () => {
   const handleLoadGames = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, "games"));
-      const snap = getDocs(q);
-      const data = (await snap).docs.map((doc) => ({
-        ...(doc.data() as IGame),
-        uid: doc.id,
-      }));
+      const { data } = await axios.get("/api/games");
       dispatch(setGames(data));
     } catch (err: any) {
       console.error(err);

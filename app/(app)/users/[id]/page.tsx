@@ -3,8 +3,8 @@
 import Discord from "@/app/components/Icons/Discord";
 import { db } from "@/app/utils/firebase";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { IUser, setUser } from "@/app/utils/store/userSlice";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { setUser } from "@/app/utils/store/userSlice";
+import { doc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
@@ -14,7 +14,9 @@ import Steam from "@/app/components/Icons/Steam";
 import Link from "next/link";
 import CustomInput from "@/app/components/Shared/CustomInput/CustomInput";
 import MultipleGameSelect from "@/app/components/MultipleGameSelect/MultipleGameSelect";
-import { IGame } from "@/app/utils/store/gamesSlice";
+import axios from "axios";
+import { IGame, IUser } from "@/app/lib/types";
+import { toast } from "react-toastify";
 
 export const roles = {
   user: "Участник",
@@ -34,25 +36,23 @@ const steamLinkRegex = /steamcommunity\.com\/(?:id|profiles)\/([a-zA-Z0-9_-]+)/;
 
 const page = () => {
   const [userInfo, setUserInfo] = useState<IUser>({
-    uid: "",
-    displayName: "",
+    id: "",
+    full_name: "",
     discord: "",
-    photoUrl: "",
+    image_url: "",
     email: "",
-    role: "user",
-    steamLink: "",
-    steamDisplayName: "",
+    role: "guest",
+    steam_link: "",
+    steam_display_name: "",
     games: [],
   });
-  const [imageFile, setImageFile] = useState<string | ArrayBuffer | null>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [steamLinkError, setSteamLinkError] = useState("");
   const { user: currentUser } = useAppSelector((state) => state.user);
   const params = useParams();
-  const isCurrentUser = params.id === currentUser.uid;
+  const isCurrentUser = params.id === currentUser.id;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
-
-  const userDocRef = doc(db, "users", params.id as string);
 
   const handleUpdateSteamAccount = (event: ChangeEvent<HTMLInputElement>) => {
     if (
@@ -67,7 +67,7 @@ const page = () => {
     }
     setUserInfo((prevState) => ({
       ...prevState,
-      steamLink: event.target.value,
+      steam_link: event.target.value,
     }));
   };
 
@@ -81,80 +81,73 @@ const page = () => {
   const handleRemoveGame = (id: string) => {
     setUserInfo((prevState) => ({
       ...prevState,
-      games: prevState.games.filter((game) => game.id !== id),
+      games: (prevState?.games || []).filter((game) => game.id !== id),
     }));
   };
+
+  console.log(userInfo);
 
   const handleAddGame = (value: IGame) => {
     setUserInfo((prevState) => ({
       ...prevState,
-      games: [...prevState.games, value],
+      games: [...(prevState?.games || []), value],
     }));
   };
 
   const handleLoadUser = async () => {
-    const data = (await getDoc(userDocRef)).data();
-    if (data) {
-      setUserInfo(data as IUser);
+    try {
+      const response = await axios.get<IUser>("/api/users/currentUser");
+
+      const data = response.data;
+
+      if (data) {
+        setUserInfo(data);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          "Ошибка загрузки профиля:",
+          error.response?.data || error.message,
+        );
+      }
     }
   };
 
   const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      if (file.size > 1048487) {
-        alert("Файл слишком большой");
-        return;
-      }
-      const reader = new FileReader();
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-      reader.readAsDataURL(file);
-
-      reader.onload = (event) => {
-        const img = new window.Image();
-        img.src = event.target?.result as string;
-
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 200;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
-
-          setImageFile(compressedBase64);
-        };
-      };
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Файл слишком большой");
+      return;
     }
+
+    setImageFile(file);
   };
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    const steamDisplayNameString = userInfo.steamLink
-      ? userInfo.steamLink.replace(/\/$/, "").split("/").pop()
-      : "";
+
     try {
-      await updateDoc(userDocRef, {
-        discord: userInfo.discord,
-        displayName: userInfo.displayName,
-        steamLink: userInfo.steamLink,
-        games: userInfo.games,
-        steamDisplayName: steamDisplayNameString,
-        ...(imageFile ? { photoUrl: imageFile } : {}),
+      const formData = new FormData();
+      formData.append("id", userInfo.id);
+      formData.append("full_name", userInfo.full_name);
+      formData.append("discord", userInfo.discord || "");
+      formData.append("steam_link", userInfo.steam_link || "");
+      const gameIds = userInfo.games?.map((game) => game.id) || [];
+      formData.append("gameIds", JSON.stringify(gameIds));
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+      const { data } = await axios.post("/api/users/user/update", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      dispatch(
-        setUser({
-          ...userInfo,
-          ...(imageFile ? { photoUrl: imageFile as string } : {}),
-          steamDisplayName: steamDisplayNameString,
-        }),
-      );
-    } catch (error) {
+
+      dispatch(setUser(data.user));
+      toast.success("Профиль успешно обновлен");
+    } catch (error: any) {
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -162,14 +155,13 @@ const page = () => {
   };
 
   useEffect(() => {
+    handleLoadUser();
     if (isCurrentUser) {
       setUserInfo(currentUser);
-    } else {
-      handleLoadUser();
     }
-  }, [isCurrentUser, currentUser]);
+  }, []);
 
-  if (!userInfo.uid) {
+  if (!userInfo.id) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2">
         <motion.div
@@ -215,21 +207,21 @@ const page = () => {
               <Image
                 width={128}
                 height={128}
-                className="w-24 h-24 md:w-32 md:h-32"
-                src={imageFile as string}
+                className="w-24 h-24 md:w-32 md:h-32 object-cover"
+                src={URL.createObjectURL(imageFile)}
                 alt="Profile picture"
               />
-            ) : userInfo.photoUrl ? (
+            ) : userInfo.image_url ? (
               <Image
                 width={128}
                 height={128}
                 className="w-24 h-24 md:w-32 md:h-32 object-cover"
-                src={userInfo.photoUrl}
+                src={userInfo.image_url}
                 alt="Profile picture"
               />
             ) : (
               <div className="w-32 h-32 bg-primary/10 flex items-center justify-center text-primary text-2xl">
-                {userInfo.displayName[0] || "U"}
+                {userInfo.full_name?.[0] || "U"}
               </div>
             )}
           </motion.div>
@@ -241,7 +233,7 @@ const page = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-3xl md:text-4xl font-black tracking-tight"
             >
-              {userInfo.displayName}
+              {userInfo.full_name}
             </motion.h1>
 
             {(currentUser.role === "admin" ||
@@ -291,8 +283,8 @@ const page = () => {
         >
           <CustomInput
             label="Имя пользователя на сайте"
-            name="displayName"
-            value={userInfo.displayName}
+            name="full_name"
+            value={userInfo.full_name}
             onChange={handleUpdateInput}
             disabled={!currentUser}
             placeholder="JohnDoe"
@@ -319,8 +311,8 @@ const page = () => {
 
           <CustomInput
             label="Ссылка на профиль Steam"
-            name="steamLink"
-            value={userInfo.steamLink}
+            name="steam_link"
+            value={userInfo.steam_link}
             onChange={handleUpdateSteamAccount}
             placeholder={
               isCurrentUser
@@ -336,6 +328,7 @@ const page = () => {
                     <Link
                       href="https://steamcommunity.com/my/profile"
                       className="underline"
+                      target="_blank"
                     >
                       здесь
                     </Link>
@@ -370,13 +363,13 @@ const page = () => {
                 {userInfo?.games?.length ? (
                   userInfo?.games.map((game) => (
                     <div
-                      key={game.uid}
+                      key={game.id}
                       className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
                     >
-                      {game?.image && (
+                      {game?.image_url && (
                         <Image
                           className="rounded object-cover h-4 w-4"
-                          src={game.image}
+                          src={game.image_url}
                           width={16}
                           height={16}
                           alt="Game image"

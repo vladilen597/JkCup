@@ -9,8 +9,9 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
 import { Lock, X } from "lucide-react";
-import { IUser } from "@/app/utils/store/userSlice";
 import { useRouter } from "next/navigation";
+import { IUser } from "@/app/lib/types";
+import axios from "axios";
 
 const roleSelectOptions = [
   {
@@ -39,16 +40,16 @@ interface UserLineProps extends IUser {
 }
 
 const UserLine: React.FC<UserLineProps> = ({
-  uid,
-  displayName,
-  photoUrl,
+  id,
+  full_name,
+  image_url,
   index = 0,
   discord,
   role,
   showRoles,
   hideDelete,
-  steamDisplayName,
-  steamLink,
+  steam_display_name,
+  steam_link,
   status,
   onDeleteClick,
   onBlockClick,
@@ -67,7 +68,7 @@ const UserLine: React.FC<UserLineProps> = ({
   const isSuperAdmin = currentUser.role === "superadmin";
 
   const handleClickLine = () => {
-    router.push("/users/" + uid);
+    router.push("/users/" + id);
   };
 
   const handleUpdateRole = async (value: {
@@ -75,14 +76,16 @@ const UserLine: React.FC<UserLineProps> = ({
     value: string;
     label: string;
   }) => {
+    const oldRole = userRole;
     setUserRole(value);
     try {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, {
-        role: value.value,
+      await axios.post("/api/users/user/update/role", {
+        userId: id,
+        newRole: value.value,
       });
     } catch (error) {
       console.log(error);
+      setUserRole(oldRole);
     }
   };
 
@@ -106,19 +109,17 @@ const UserLine: React.FC<UserLineProps> = ({
         }`}
       >
         <UserInfoBlock
-          uid={uid}
+          id={id}
           discord={discord}
-          displayName={displayName}
-          photoUrl={photoUrl || ""}
-          steamDisplayName={steamDisplayName}
-          steamLink={steamLink}
+          full_name={full_name}
+          image_url={image_url || ""}
+          steam_display_name={steam_display_name}
+          steam_link={steam_link}
         />
 
         {showRoles && (
           <>
-            {isSuperAdmin &&
-            currentUser.uid !== uid &&
-            role !== "superadmin" ? (
+            {isSuperAdmin && currentUser.id !== id && role !== "superadmin" ? (
               <RoleSelect
                 value={userRole}
                 onChange={handleUpdateRole}
@@ -157,7 +158,7 @@ const UserLine: React.FC<UserLineProps> = ({
         {!hideDelete &&
           currentUser.role === "superadmin" &&
           role !== "superadmin" &&
-          currentUser.uid !== uid &&
+          currentUser.id !== id &&
           onDeleteClick && (
             <button
               className="cursor-pointer hover:bg-background/60 rounded-full p-1 transition-colors"

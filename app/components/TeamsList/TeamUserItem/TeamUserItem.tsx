@@ -1,8 +1,8 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { DoorOpen, Loader2 } from "lucide-react";
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
-import { IUser } from "@/app/utils/store/userSlice";
 import { useRouter } from "next/navigation";
+import { IUser } from "@/app/lib/types";
 
 interface ITeamUserItemProps extends IUser {
   isLoading: boolean;
@@ -13,25 +13,25 @@ interface ITeamUserItemProps extends IUser {
 }
 
 const TeamUserItem = ({
-  uid,
-  photoUrl,
-  displayName,
+  id,
+  image_url,
+  full_name,
   discord,
   isLoading,
   isMyTeam,
   isCurrentUserCreator,
-  steamDisplayName,
-  steamLink,
+  steam_display_name,
+  steam_link,
   canLeave,
   onLeaveClick,
 }: ITeamUserItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
 
-  const isCurrentUser = currentUser.uid === uid;
+  const isCurrentUser = currentUser.id === id;
 
   const handleClickLine = () => {
-    router.push("/users/" + uid);
+    router.push("/users/" + id);
   };
 
   return (
@@ -40,14 +40,14 @@ const TeamUserItem = ({
         className="rounded-lg w-full cursor-pointer"
         onClick={handleClickLine}
       >
-        <div key={uid} className="flex items-center gap-3 text-sm">
+        <div key={id} className="flex items-center gap-3 text-sm">
           <UserInfoBlock
-            uid={uid}
-            photoUrl={photoUrl}
+            id={id}
+            image_url={image_url}
             discord={discord}
-            displayName={displayName}
-            steamDisplayName={steamDisplayName}
-            steamLink={steamLink}
+            full_name={full_name}
+            steam_display_name={steam_display_name}
+            steam_link={steam_link}
           />
         </div>
       </div>

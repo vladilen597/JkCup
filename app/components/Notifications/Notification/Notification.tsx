@@ -1,6 +1,7 @@
 import { INotification } from "@/app/lib/types";
 import { db } from "@/app/utils/firebase";
 import { useAppSelector } from "@/app/utils/store/hooks";
+import axios from "axios";
 import { format } from "date-fns";
 import { deleteDoc, doc, where } from "firebase/firestore";
 import { X } from "lucide-react";
@@ -8,7 +9,7 @@ import { X } from "lucide-react";
 const Notification = ({
   id,
   title,
-  description,
+  text,
   created_at,
   onDeleteClick,
 }: INotification & { onDeleteClick: (id: string) => void }) => {
@@ -16,8 +17,11 @@ const Notification = ({
 
   const handleDeleteNotification = async () => {
     try {
-      const docRef = doc(db, "notifications", id);
-      await deleteDoc(docRef);
+      await axios.delete("/api/notifications", {
+        params: {
+          id,
+        },
+      });
       onDeleteClick(id);
     } catch (error) {
       console.log(error);
@@ -36,9 +40,9 @@ const Notification = ({
         </button>
       )}
       <h3 className="text-lg">{title}</h3>
-      <p className="mt-2 text-sm text-neutral-300">{description}</p>
+      <p className="mt-2 text-sm text-neutral-300">{text}</p>
       <span className="block text-right mt-2 text-xs text-neutral-500">
-        {format(created_at.toDate(), "dd.MM.yyyy HH:mm")}
+        {format(created_at, "dd.MM.yyyy HH:mm")}
       </span>
     </li>
   );

@@ -1,10 +1,10 @@
-import { FirestoreTimestamp } from "@/app/lib/types";
-import { IUser } from "@/app/utils/store/userSlice";
+import { FirestoreTimestamp, IUser } from "@/app/lib/types";
 import FeedbackItem from "./FeedbackItem/FeedbackItem";
 import { useEffect, useState } from "react";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import { Loader2 } from "lucide-react";
+import axios from "axios";
 
 export interface IFeedback {
   id: string;
@@ -20,11 +20,7 @@ const FeedbackList = () => {
   const handleLoadFeedbacks = async () => {
     setIsLoading(true);
     try {
-      const q = query(collection(db, "feedback"));
-      const snap = getDocs(q);
-      const data = (await snap).docs.map((doc) => ({
-        ...(doc.data() as IFeedback),
-      }));
+      const { data } = await axios.get("/api/feedback");
       setFeedbacks(data);
     } catch (error) {
       console.log(error);
