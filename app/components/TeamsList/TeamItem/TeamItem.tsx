@@ -1,13 +1,7 @@
-import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
+import { useAppSelector } from "@/app/utils/store/hooks";
 import JoinTeamButton from "../JoinTeamButton/JoinTeamButton";
-import TeamUserItem from "../TeamUserItem/TeamUserItem";
 import { doc, updateDoc } from "firebase/firestore";
-import {
-  addTeamParticipant,
-  ITeam,
-  removeTeam,
-  removeTeamParticipant,
-} from "@/app/utils/store/tournamentsSlice";
+import { ITeam } from "@/app/utils/store/tournamentsSlice";
 import { Lock, Trash2 } from "lucide-react";
 import { db } from "@/app/utils/firebase";
 import { useParams } from "next/navigation";
@@ -45,7 +39,6 @@ const TeamItem = ({
   const [isLoading, setIsLoading] = useState(false);
   const { id: tournamentId }: { id: string } = useParams();
   const [isAddTeammateModalOpen, setIsAddTeammateModalOpen] = useState(false);
-  const dispatch = useAppDispatch();
 
   const handleOpenAddTeammateModal = () => {
     setIsAddTeammateModalOpen(true);
@@ -68,8 +61,6 @@ const TeamItem = ({
         await updateDoc(tournamentRef, {
           teams: teams.filter((team) => team.uid !== teamId),
         });
-
-        dispatch(removeTeam({ tournamentId, teamId }));
       }
     } catch (error) {
       console.log(error);
@@ -92,8 +83,6 @@ const TeamItem = ({
           return team;
         }
       });
-
-      dispatch(removeTeamParticipant({ tournamentId, updatedTeams }));
 
       await updateDoc(tournamentRef, {
         teams: updatedTeams,
@@ -119,14 +108,6 @@ const TeamItem = ({
           return team;
         }),
       });
-
-      dispatch(
-        addTeamParticipant({
-          tournamentId,
-          teamId: uid,
-          userUid: currentUser.uid,
-        }),
-      );
     } catch (error) {
       console.log(error);
     } finally {

@@ -1,6 +1,4 @@
-import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { addJudge } from "@/app/utils/store/tournamentsSlice";
 import Discord from "@/app/components/Icons/Discord";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useParams } from "next/navigation";
@@ -16,10 +14,8 @@ interface IJudgeAddItemProps {
 }
 
 const JudgeAddItem = ({ user, index, onClose }: IJudgeAddItemProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useAppDispatch();
 
   const handleAddUser = async (user: IUser) => {
     setIsLoading(true);
@@ -30,7 +26,6 @@ const JudgeAddItem = ({ user, index, onClose }: IJudgeAddItemProps) => {
         judgesIds: arrayUnion(user.uid),
       });
 
-      dispatch(addJudge({ tournamentId, userId: user.uid }));
       onClose();
     } catch (error) {
       console.log(error);

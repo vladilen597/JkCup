@@ -39,10 +39,6 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
           return team;
         }),
       });
-
-      dispatch(
-        addTeamParticipant({ tournamentId, teamId: teamId, userUid: user.uid }),
-      );
       onClose();
     } catch (error) {
       console.log(error);

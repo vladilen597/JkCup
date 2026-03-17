@@ -2,8 +2,6 @@ import JudgeAddItem from "./JudgeAddItem/JudgeAddItem";
 import { IUser } from "@/app/utils/store/userSlice";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
-import Skeleton from "react-loading-skeleton";
 import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 
 interface IJudgeAddListProps {

@@ -41,6 +41,8 @@ const AddJudgeBlock = ({
     setIsAddJudgeModalOpen(false);
   };
 
+  console.log(judgesIds);
+
   return (
     <>
       <section>
