@@ -1,36 +1,165 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  collection,
-  getDocs,
-  query,
-  addDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export const GET = async () => {
   try {
-    const tournamentsQuery = query(collection(db, "tournaments"));
+    const tournaments = await prisma.tournament.findMany({
+      include: {
+        game: true,
+        creator: true,
+        winner_user: true,
+        winner_team: true,
 
-    const tournamentsSnap = await getDocs(tournamentsQuery);
+        judges: {
+          include: {
+            profile: true,
+          },
+        },
 
-    const enrichedTournaments = await Promise.all(
-      tournamentsSnap.docs.map(async (tournamentDoc) => {
-        const tournamentData = {
-          id: tournamentDoc.id,
-          ...tournamentDoc.data(),
-        };
+        registrations: {
+          include: {
+            profile: true,
+          },
+        },
 
-        return tournamentData;
-      }),
-    );
+        teams: {
+          include: {
+            creator: true,
+            members: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
 
-    return NextResponse.json(enrichedTournaments);
+    return NextResponse.json(tournaments);
   } catch (error: any) {
-    console.error("Error fetching tournaments with participants:", error);
+    console.error("Error fetching tournaments with all relations:", error);
     return NextResponse.json(
       { error: "Failed to load tournaments", details: error.message },
       { status: 500 },
     );
   }
-}
+};
+
+export const POST = async (req: Request) => {
+  try {
+    const body = await req.json();
+
+    const tournament = await prisma.tournament.create({
+      data: {
+        name: body.name,
+        type: body.type,
+        max_players: body.max_players,
+        max_teams: body.max_teams,
+        players_per_team: body.players_per_team,
+        description: body.description,
+        is_bracket: body.is_bracket,
+        bracket: body.bracket,
+        rules: body.rules,
+        stream_link: body.stream_link,
+        hidden: body.hidden,
+        duration: body.duration,
+        start_date: body.start_date,
+
+        creator: {
+          connect: { id: body.creator_id },
+        },
+        ...(body.game_id && {
+          game: { connect: { id: body.game_id } },
+        }),
+      },
+      include: {
+        creator: true,
+        game: true,
+      },
+    });
+
+    return NextResponse.json(tournament);
+  } catch (error: any) {
+    console.error("Error creating tournament:", error);
+    return NextResponse.json(
+      { error: "Failed to create tournament", details: error.message },
+      { status: 500 },
+    );
+  }
+};
+
+export const PUT = async (req: Request) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id)
+      return NextResponse.json({ error: "No ID provided" }, { status: 400 });
+
+    const body = await req.json();
+
+    const {
+      id: _id,
+      game,
+      game_id,
+      creator,
+      creator_id,
+      registrations,
+      teams,
+      judges,
+      winner_user,
+      winner_user_id,
+      winner_team,
+      winner_team_id,
+      created_at,
+      ...updateData
+    } = body;
+
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        ...updateData,
+        game: game_id ? { connect: { id: game_id } } : { disconnect: true },
+
+        winner_user: winner_user_id
+          ? { connect: { id: winner_user_id } }
+          : undefined,
+        winner_team: winner_team_id
+          ? { connect: { id: winner_team_id } }
+          : undefined,
+
+        start_date: body.start_date ? new Date(body.start_date) : null,
+        started_at: body.started_at ? new Date(body.started_at) : null,
+      },
+      include: {
+        game: true,
+        creator: true,
+        winner_user: true,
+        winner_team: {
+          include: {
+            members: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        registrations: { include: { profile: true } },
+        teams: {
+          include: {
+            members: { include: { profile: true } },
+          },
+        },
+        judges: { include: { profile: true } },
+      },
+    });
+
+    return NextResponse.json(updatedTournament);
+  } catch (error: any) {
+    console.error("PRISMA UPDATE ERROR:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+};

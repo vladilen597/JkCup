@@ -1,14 +1,14 @@
 "use client";
 
 import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
-import { IUser } from "@/app/utils/store/userSlice";
 import { useEffect, useState } from "react";
 import UserLine from "./UserLine/UserLine";
 import { Users } from "lucide-react";
+import { ITournamentRegistration, IUser } from "@/app/lib/types";
 
 interface UserListProps {
   showRoles?: boolean;
-  usersIds: string[];
+  registrations: ITournamentRegistration[];
   emptyMessage?: string;
   hideDelete?: boolean;
   handleClickDelete?: (userId: any) => void;
@@ -16,29 +16,12 @@ interface UserListProps {
 
 const UserList = ({
   showRoles,
-  usersIds,
+  registrations,
   emptyMessage = "Пока нет участников",
   hideDelete,
   handleClickDelete,
 }: UserListProps) => {
-  const [users, setUsers] = useState<IUser[]>([]);
-
-  const handleLoadUsersArray = async () => {
-    try {
-      const users: IUser[] = await handleGetUsersByIds(usersIds);
-      setUsers(users);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (usersIds.length) {
-      handleLoadUsersArray();
-    }
-  }, [usersIds]);
-
-  if (usersIds.length === 0) {
+  if (registrations?.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Users className="h-10 w-10 mb-3 opacity-30" />
@@ -49,16 +32,16 @@ const UserList = ({
 
   return (
     <ul className="flex flex-col gap-2">
-      {users.map((user, i) => (
+      {registrations?.map((registration, i) => (
         <UserLine
-          key={user.uid}
-          {...user}
+          key={registration.profile.id}
+          {...registration.profile}
           index={i}
           showRoles={showRoles}
           hideDelete={hideDelete}
           onDeleteClick={() => {
             if (handleClickDelete) {
-              handleClickDelete(user.uid);
+              handleClickDelete(registration.id);
             } else undefined;
           }}
         />

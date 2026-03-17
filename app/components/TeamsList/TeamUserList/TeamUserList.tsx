@@ -1,51 +1,31 @@
-import { useEffect, useState } from "react";
 import TeamUserItem from "../TeamUserItem/TeamUserItem";
-import { IUser } from "@/app/utils/store/userSlice";
-import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
-import { useAppSelector } from "@/app/utils/store/hooks";
-import { Loader2 } from "lucide-react";
+import { ITeamMember } from "@/app/lib/types";
 
 const TeamUserList = ({
-  usersIds,
+  members,
   isCurrentUserCreator,
   isLoading,
   canLeave,
+  isMyTeam,
   onLeaveClick,
 }: {
-  usersIds: string[];
+  members: ITeamMember[];
   isCurrentUserCreator: boolean;
   isLoading: boolean;
   canLeave: boolean;
+  isMyTeam: boolean;
   onLeaveClick: (userId: string) => void;
 }) => {
-  const [users, setUsers] = useState<IUser[]>([]);
-  const { user: currentUser } = useAppSelector((state) => state.user);
-
-  const isMyTeam = usersIds.includes(currentUser.uid);
-
-  const handleLoadUsers = async () => {
-    try {
-      const users = await handleGetUsersByIds(usersIds);
-      setUsers(users);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    handleLoadUsers();
-  }, [usersIds]);
-
   return (
     <ul className="space-y-2">
-      {users.map((user) => (
+      {members.map((user) => (
         <TeamUserItem
-          key={user.uid}
-          {...user}
+          key={user.id}
+          {...user.profile}
           isMyTeam={isMyTeam}
           isLoading={isLoading}
           isCurrentUserCreator={isCurrentUserCreator}
-          onLeaveClick={() => onLeaveClick(user.uid)}
+          onLeaveClick={() => onLeaveClick(user.id)}
           canLeave={canLeave}
         />
       ))}

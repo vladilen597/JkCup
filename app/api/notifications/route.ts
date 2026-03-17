@@ -10,7 +10,6 @@ export const GET = async () => {
         created_at: "desc",
       },
     });
-    console.log(notifications);
     return NextResponse.json(notifications);
   } catch (error) {
     console.log(error);
@@ -22,31 +21,8 @@ export const GET = async () => {
 };
 
 export const POST = async (req: NextRequest) => {
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
-          } catch {}
-        },
-      },
-    },
-  );
-
   try {
     const { title, text } = await req.json();
-
-    console.log(title, text);
 
     const notification = await prisma.notification.create({
       data: {

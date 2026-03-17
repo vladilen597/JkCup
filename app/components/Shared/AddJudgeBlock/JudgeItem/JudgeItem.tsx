@@ -1,16 +1,15 @@
 "use client";
 
-import React, { MouseEvent, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import Link from "next/link";
 import { Loader2, X } from "lucide-react";
-import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { useParams, useRouter } from "next/navigation";
-import { db } from "@/app/utils/firebase";
-import { IUser } from "@/app/utils/store/userSlice";
 import { removeJudge } from "@/app/utils/store/tournamentsSlice";
 import UserInfoBlock from "../../UserInfoBlock/UserInfoBlock";
+import { IUser } from "@/app/lib/types";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
   user,
@@ -18,30 +17,37 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
 }) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
-  const { uid, role } = user;
+  const { id, role } = user;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const handleRemoveJudge = async (e: MouseEvent<HTMLButtonElement>) => {
+  const handleRemoveJudge = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
+
     setIsLoading(true);
+
     try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      await updateDoc(tournamentRef, {
-        judgesIds: arrayRemove(user.uid),
+      await axios.delete(`/api/tournaments/${tournamentId}/judges`, {
+        data: { userId: user.id },
       });
-      dispatch(removeJudge({ tournamentId, userId: uid }));
-    } catch (error) {
-      console.log(error);
+
+      dispatch(removeJudge({ tournamentId: tournamentId, judgeId: user.id }));
+
+      toast.success("Судья успешно удален с турнира");
+    } catch (error: any) {
+      console.error(
+        "Ошибка при удалении судьи:",
+        error.response?.data || error.message,
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClickLine = () => {
-    router.push("/users/" + uid);
+    router.push("/users/" + id);
   };
 
   return (
@@ -62,7 +68,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
         </div>
         {(currentUser.role === "superadmin" ||
           currentUser.role === "admin") && (
-          <>
+          <div className="flex items-center justify-center w-10">
             {isLoading ? (
               <Loader2 className="animate-spin" />
             ) : (
@@ -73,7 +79,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
                 <X className="text-neutral-500 group-hover:text-white transition-colors" />
               </button>
             )}
-          </>
+          </div>
         )}
       </motion.li>
     </div>

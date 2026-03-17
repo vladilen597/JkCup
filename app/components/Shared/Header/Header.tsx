@@ -204,31 +204,33 @@ const Header = () => {
         email: "",
         role: "guest",
         discord: "",
+        who_invited: "",
+        judged_tournaments: [],
       }),
     );
     setIsProfileOpen(false);
   };
 
+  const handleLoadUser = async () => {
+    try {
+      const { data } = await axios.get<IUser>("/api/users/" + user.id);
+
+      if (data) {
+        dispatch(setUser(data));
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          "Ошибка загрузки профиля:",
+          error.response?.data || error.message,
+        );
+      }
+    }
+  };
+
   useEffect(() => {
-    if (!user.id) return;
-
-    const userRef = doc(db, "users", user.id);
-
-    const unsubscribe = onSnapshot(
-      userRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          const userData = docSnap.data() as IUser;
-          dispatch(setUser(userData));
-        }
-      },
-      (error) => {
-        console.error("Ошибка при получении данных пользователя:", error);
-      },
-    );
-
-    return () => unsubscribe();
-  }, [user.id, dispatch]);
+    handleLoadUser();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
@@ -314,7 +316,7 @@ const Header = () => {
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 <div>
-                  <span className="block text-sm font-medium text-foreground">
+                  <span className="block text-sm text-right font-medium text-foreground">
                     {user.full_name}
                   </span>
                   <span

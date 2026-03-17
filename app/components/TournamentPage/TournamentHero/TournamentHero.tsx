@@ -1,7 +1,4 @@
-import {
-  ITournament,
-  updateTournamentStatus,
-} from "@/app/utils/store/tournamentsSlice";
+import { updateTournamentStatus } from "@/app/utils/store/tournamentsSlice";
 import CustomButton from "../../Shared/CustomButton/CustomButton";
 import { Album, Archive, Edit, Gamepad2, Trash2, Trophy } from "lucide-react";
 import { motion } from "motion/react";
@@ -17,12 +14,14 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Tag from "../../Shared/Tag/Tag";
 import Title from "../../Title/Title";
 import TournamentDurationDisplay from "../../Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
 import Badge from "../../Shared/Badge/Badge";
+import { ITournament } from "@/app/lib/types";
+import axios from "axios";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -38,48 +37,44 @@ const TournamentHero = ({
   handleClickEdit,
 }: ITournamentHeroProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
-  const isTeamMode = tournament.type.value === "team";
-  const dispatch = useAppDispatch();
+  const isTeamMode = tournament.type === "team";
+  const { id }: { id: string } = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
-  const handleCloseRegistration = async () => {
-    try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "about_to_start",
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "about_to_start",
-          }),
-        );
+  const handleChangeStatus = async (
+    status: "open" | "about_to_start" | "in_progress" | "finished" | "closed",
+  ) => {
+    let payload = { status: "open" };
+    switch (status) {
+      case "about_to_start": {
+        payload.status = "about_to_start";
+        break;
       }
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
+      case "in_progress": {
+        payload.status = "in_progress";
+        break;
+      }
+      case "finished": {
+        payload.status = "finished";
+        break;
+      }
+      case "closed": {
+        payload.status = "closed";
+        break;
+      }
     }
-  };
-
-  const handleStartTournament = async () => {
     try {
-      if (tournament) {
-        const tournamentRef = doc(db, "tournaments", tournament.id);
-        updateDoc(tournamentRef, {
-          status: "in_progress",
-          startedAt: new Date().toString(),
-        });
-        dispatch(
-          updateTournamentStatus({
-            tournamentId: tournament.id,
-            status: "in_progress",
-            startedAt: new Date().toString(),
-          }),
-        );
-      }
+      const { data } = await axios.put(
+        `/api/tournaments/${tournament.id}/status`,
+        payload,
+      );
+      dispatch(
+        updateTournamentStatus({ tournamentId: id, status: payload.status }),
+      );
     } catch (err) {
       console.error("Failed to load tournaments:", err);
     }
@@ -120,22 +115,22 @@ const TournamentHero = ({
                       width={32}
                       height={32}
                       className="w-6 h-6 rounded-full"
-                      src={tournament?.creator?.photoUrl || ""}
+                      src={tournament?.creator?.image_url || ""}
                       alt="User photo"
                     />
                     <div>
                       <span className="text-xs font-bold">
-                        {tournament?.creator?.displayName}
+                        {tournament?.creator?.full_name}
                       </span>
                     </div>
                   </div>
                 </div>
               )}
-              {tournament?.createdAt && (
+              {tournament?.created_at && (
                 <div className="">
                   <span className="text-sm">Время создания</span>
                   <div className="mt-1 flex gap-2 items-center">
-                    {format(tournament?.createdAt, "dd.MM.yyyy HH:mm")}
+                    {format(tournament?.created_at, "dd.MM.yyyy HH:mm")}
                   </div>
                 </div>
               )}
@@ -148,14 +143,14 @@ const TournamentHero = ({
               <CustomButton
                 icon={<Album className="h-4 w-4" />}
                 label="Закрыть регистрацию"
-                onClick={handleCloseRegistration}
+                onClick={() => handleChangeStatus("about_to_start")}
               />
             )}
             {tournament.status === "about_to_start" && (
               <CustomButton
                 icon={<Trophy className="h-4 w-4" />}
                 label="Начать турнир"
-                onClick={handleStartTournament}
+                onClick={() => handleChangeStatus("in_progress")}
               />
             )}
             {tournament.status === "in_progress" && (
@@ -214,10 +209,10 @@ const TournamentHero = ({
         <Title title={tournament.name} className="mt-2" />
 
         <div className="mt-2 flex items-center gap-2">
-          {tournament.game?.image ? (
+          {tournament.game?.image_url ? (
             <Image
-              className="object-cover rounded"
-              src={tournament.game?.image}
+              className="object-cover rounded h-8 w-8"
+              src={tournament.game?.image_url}
               width={32}
               height={32}
               alt="Game image"
@@ -230,7 +225,7 @@ const TournamentHero = ({
 
         <TournamentDurationDisplay
           duration={tournament.duration}
-          startedAt={tournament.startedAt}
+          startedAt={tournament.started_at}
           status={tournament.status}
         />
 

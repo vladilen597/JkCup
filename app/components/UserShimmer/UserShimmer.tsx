@@ -1,9 +1,7 @@
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-type Props = {};
-
-const UserShimmer = (props: Props) => {
+const UserShimmer = ({ amount = 10 }: { amount?: number }) => {
   return (
     <Skeleton
       baseColor="#1a1c23"
@@ -12,7 +10,7 @@ const UserShimmer = (props: Props) => {
       borderRadius={12}
       width={"100%"}
       height={66}
-      count={10}
+      count={amount}
     ></Skeleton>
   );
 };

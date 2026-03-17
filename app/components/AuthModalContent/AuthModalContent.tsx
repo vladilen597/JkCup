@@ -1,15 +1,16 @@
-import axios from "axios";
-import { ChangeEvent, SubmitEvent, useState } from "react";
-import CustomInput from "../Shared/CustomInput/CustomInput";
 import CustomButton from "../Shared/CustomButton/CustomButton";
+import CustomInput from "../Shared/CustomInput/CustomInput";
+import ErrorBlock from "../Shared/ErrorBlock/ErrorBlock";
 import { useAppDispatch } from "@/app/utils/store/hooks";
 import { setUser } from "@/app/utils/store/userSlice";
-import ErrorBlock from "../Shared/ErrorBlock/ErrorBlock";
+import { ChangeEvent, useState } from "react";
+import axios from "axios";
 
 const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [whoInvited, setWhoInvited] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +34,10 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
     setDisplayName(event.target.value);
   };
 
+  const handleChangeWhoInvited = (event: ChangeEvent<HTMLInputElement>) => {
+    setWhoInvited(event.target.value);
+  };
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     setError("");
     setIsLoading(true);
@@ -42,6 +47,7 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
         email,
         password,
         displayName,
+        who_invited: whoInvited,
       });
       handleSwitchContent();
     } catch (error: any) {
@@ -92,6 +98,12 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
           label="Никнейм"
           value={displayName}
           onChange={handleChangeDisplayName}
+          required
+        />
+        <CustomInput
+          label="Никнейм пригласившего вас пользователя"
+          value={whoInvited}
+          onChange={handleChangeWhoInvited}
           required
         />
         <CustomButton

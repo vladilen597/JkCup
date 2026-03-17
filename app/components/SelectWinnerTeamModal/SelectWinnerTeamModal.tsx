@@ -1,14 +1,15 @@
 import SelectTeamList from "./SelectTeamList/SelectTeamList";
-import { ITeam, selectWinnerTeam } from "@/app/utils/store/tournamentsSlice";
+import { selectWinnerTeam } from "@/app/utils/store/tournamentsSlice";
 import { Trophy } from "lucide-react";
 import { useState } from "react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { useParams } from "next/navigation";
 import { useAppDispatch } from "@/app/utils/store/hooks";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { ITeam } from "@/app/lib/types";
 
 interface ISelectWinnerTeamModalProps {
   teams: ITeam[];
@@ -20,49 +21,69 @@ const SelectWinnerTeamModal = ({
   onClose,
 }: ISelectWinnerTeamModalProps) => {
   const [selectedTeam, setSelectedTeam] = useState<ITeam | null>(null);
-  const { id: tournamentId }: { id: string } = useParams();
+  const { id: tournamentId } = useParams<{ id: string }>();
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
   const handleSubmitTeamWinner = async () => {
+    if (!selectedTeam || !tournamentId) return;
+
+    setIsLoading(true);
     try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      await updateDoc(tournamentRef, {
-        winner_team: selectedTeam,
-        status: "finished",
-      });
-      if (selectedTeam) {
-        dispatch(
-          selectWinnerTeam({ tournamentId: tournamentId, team: selectedTeam }),
-        );
-      }
+      await axios.put(
+        `/api/tournaments`,
+        {
+          status: "finished",
+          winner_team_id: selectedTeam.id,
+        },
+        {
+          params: { id: tournamentId },
+        },
+      );
+
+      dispatch(
+        selectWinnerTeam({
+          tournamentId: tournamentId,
+          team: selectedTeam,
+        }),
+      );
+
+      toast.success(`Команда ${selectedTeam.name} — победитель!`);
       onClose();
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error("Winner selection error:", error);
+      toast.error(
+        error.response?.data?.error || "Не удалось выбрать победителя",
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
       <h3 className="text-xl font-bold text-white flex items-center gap-2">
-        <Trophy className="h-5 w-5" />
-        Выбрать победителя
+        <Trophy className="h-5 w-5 text-amber-400" />
+        Выбрать команду-победителя
       </h3>
-      <section className="mt-4">
+      <section className="mt-4 max-h-[400px] overflow-y-auto">
         <SelectTeamList
           teams={teams}
           selectedTeam={selectedTeam}
           onTeamClick={setSelectedTeam}
         />
       </section>
-      <div className="flex items-center gap-2 justify-end mt-2 ">
+      <div className="flex items-center gap-2 justify-end mt-4">
         <CustomButton
           label="Отмена"
           buttonType={BUTTON_TYPES.CANCEL}
           onClick={onClose}
         />
         <CustomButton
+          disabled={!selectedTeam || isLoading}
           buttonType={selectedTeam ? BUTTON_TYPES.DEFAULT : BUTTON_TYPES.CANCEL}
           label="Выбрать победителя"
+          isLoading={isLoading}
           onClick={handleSubmitTeamWinner}
         />
       </div>

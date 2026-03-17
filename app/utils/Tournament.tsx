@@ -4,31 +4,21 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { statuses } from "../(app)/tournaments/[id]/page";
 import CleanHtml from "../components/Shared/CleanHtml/CleanHtml";
-import { ITag } from "../lib/types";
-import { cn } from "@/lib/utils";
+import { IGame, ITag, ITournament } from "../lib/types";
 import Tag from "../components/Shared/Tag/Tag";
-import { IGame } from "./store/gamesSlice";
 import Image from "next/image";
 import { useAppSelector } from "./store/hooks";
 
-interface ITournamentProps {
+interface ITournamentProps extends ITournament {
   id: string;
   name: string;
   isTeam: boolean;
   fillPercent: number;
-  max_players: number;
-  players_per_team: number;
   index: number;
-  game: IGame | null;
   currentPlayers: number;
   isFull: boolean;
-  description: string;
-  start_date: string;
-  status: string;
   tags: ITag[];
   maxPlayers: number;
-  hidden?: boolean;
-  rewards: { id: string; value: string }[];
 }
 
 const trophyIndexes = {
@@ -97,10 +87,10 @@ const Tournament = ({
                 ))}
               </div>
               <div className="flex gap-2 items-center text-sm text-neutral-300 line-clamp-1">
-                {game?.image ? (
+                {game?.image_url ? (
                   <Image
-                    className="rounded"
-                    src={game?.image}
+                    className="rounded h-4 w-4 object-cover"
+                    src={game?.image_url}
                     width={16}
                     height={16}
                     alt="Game image"
@@ -110,8 +100,8 @@ const Tournament = ({
                 )}
                 <span className="font-bold">{game?.name}</span>
               </div>
-              {currentUser.games.some(
-                (userGame) => userGame.id === game.id,
+              {currentUser.games?.some(
+                (userGame) => userGame.id === game?.id,
               ) && (
                 <span className="text-xs text-primary">
                   Турнир по одной из ваших игр

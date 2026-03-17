@@ -1,63 +1,11 @@
+import {
+  ITeam,
+  ITeamMember,
+  ITournament,
+  ITournamentJudge,
+  IUser,
+} from "@/app/lib/types";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { IUser } from "./userSlice";
-import { ISelectOption } from "@/app/components/Shared/CustomSelect/CustomSelect";
-import { ITag } from "@/app/lib/types";
-import { IGame } from "./gamesSlice";
-
-export interface IBracket {
-  rounds: {
-    id: string;
-    matches: {
-      id: string;
-      users: IUser[];
-      info: string;
-    }[];
-  }[];
-  currentRound: number;
-  participants: IUser[];
-}
-
-export interface ITournament {
-  id: string;
-  game: IGame | null;
-  max_players: number;
-  name: string;
-  usersIds: string[];
-  type: ISelectOption;
-  max_teams: number;
-  players_per_team: number;
-  description: string;
-  start_date: string;
-  status: string;
-  teams: ITeam[];
-  tags: ITag[];
-  duration: number;
-  judgesIds: string[];
-  winner_team: ITeam | null;
-  winner_user: IUser | null;
-  rewards: { id: string; value: string }[];
-  creator?: IUser;
-  createdAt?: string;
-  startedAt?: string;
-  hidden?: boolean;
-  is_bracket?: boolean;
-  bracket: IBracket;
-  rules?: string;
-  stream_link?: string;
-}
-
-export interface IRound {
-  id: string;
-  matches: any[];
-}
-
-export interface ITeam {
-  uid: string;
-  creator_uid: string;
-  name?: string;
-  usersIds: string[];
-  is_private: boolean;
-}
 
 const initialState: { tournaments: ITournament[] } = {
   tournaments: [],
@@ -69,6 +17,9 @@ const tournamentsSlice = createSlice({
   reducers: {
     setTournaments: (state, action: PayloadAction<ITournament[]>) => {
       state.tournaments = action.payload;
+    },
+    addTournament: (state, action: PayloadAction<ITournament>) => {
+      state.tournaments.unshift(action.payload);
     },
     updateTournament: (state, action: PayloadAction<ITournament>) => {
       state.tournaments = state.tournaments.map((tournament) => {
@@ -105,52 +56,50 @@ const tournamentsSlice = createSlice({
       if (tournament) {
         tournament.status = action.payload.status;
         if (action.payload.startedAt) {
-          tournament.startedAt = action.payload.startedAt;
+          tournament.started_at = action.payload.startedAt;
         }
       }
     },
     addTournamentTeam: (
       state,
       action: PayloadAction<{
-        uid: string;
         tournamentId: string;
-        teamName: string;
-        currentUser: IUser;
-        is_private: boolean;
+        team: ITeam;
       }>,
     ) => {
-      const { uid, tournamentId, teamName, is_private, currentUser } =
-        action.payload;
+      const { tournamentId, team } = action.payload;
+
       const tournament = state.tournaments.find((t) => t.id === tournamentId);
+
       if (tournament) {
-        tournament.teams.push({
-          uid,
-          name: teamName,
-          is_private,
-          creator_uid: currentUser.uid,
-          usersIds: [currentUser.uid],
-        });
+        if (!tournament.teams) tournament.teams = [];
+        tournament.teams.push(team);
       }
     },
-    addJudge: (
+
+    setJudges: (
       state,
-      action: PayloadAction<{ tournamentId: string; userId: string }>,
+      action: PayloadAction<{
+        tournamentId: string;
+        judges: ITournamentJudge[];
+      }>,
     ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
-      tournament?.judgesIds.push(action.payload.userId);
+      const { tournamentId, judges } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+
+      if (tournament) {
+        tournament.judges = judges;
+      }
     },
     removeJudge: (
       state,
-      action: PayloadAction<{ tournamentId: string; userId: string }>,
+      action: PayloadAction<{ tournamentId: string; judgeId: string }>,
     ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
+      const { tournamentId, judgeId } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
-        tournament.judgesIds = tournament.judgesIds.filter(
-          (judgeId) => judgeId !== action.payload.userId,
+        tournament.judges = tournament.judges.filter(
+          (judge) => judge.profile_id !== judgeId,
         );
       }
     },
@@ -182,13 +131,11 @@ const tournamentsSlice = createSlice({
       state,
       action: PayloadAction<{ tournamentId: string; teamId: string }>,
     ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
-
+      const { tournamentId, teamId } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
         tournament.teams = tournament.teams.filter(
-          (team) => team.uid !== action.payload.teamId,
+          (team) => team.id !== teamId,
         );
       }
     },
@@ -205,35 +152,35 @@ const tournamentsSlice = createSlice({
         );
       }
     },
-    removeTeamParticipant: (
-      state,
-      action: PayloadAction<{ tournamentId: string; updatedTeams: ITeam[] }>,
-    ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
-
-      if (tournament) {
-        tournament.teams = action.payload.updatedTeams;
-      }
-    },
     addTeamParticipant: (
       state,
       action: PayloadAction<{
         tournamentId: string;
         teamId: string;
-        userUid: string;
+        member: ITeamMember;
       }>,
     ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
+      const { tournamentId, teamId, member } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+      const team = tournament?.teams.find((t) => t.id === teamId);
+      if (team) {
+        team.members.push(member);
+      }
+    },
 
-      if (tournament) {
-        const team = tournament.teams.find(
-          (team) => team.uid === action.payload.teamId,
-        );
-        team?.usersIds.push(action.payload.userUid);
+    removeTeamParticipant: (
+      state,
+      action: PayloadAction<{
+        tournamentId: string;
+        teamId: string;
+        userId: string;
+      }>,
+    ) => {
+      const { tournamentId, teamId, userId } = action.payload;
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
+      const team = tournament?.teams.find((t) => t.id === teamId);
+      if (team) {
+        team.members = team.members.filter((m) => m.profile_id !== userId);
       }
     },
     addParticipant: (
@@ -399,6 +346,7 @@ const tournamentsSlice = createSlice({
 
 export const {
   setTournaments,
+  addTournament,
   addTournamentTeam,
   addParticipant,
   removeTeam,
@@ -407,7 +355,7 @@ export const {
   updateTournamentStatus,
   removeParticipant,
   removeTeamParticipant,
-  addJudge,
+  setJudges,
   selectWinnerTeam,
   selectWinnerUser,
   removeUserFromSingleTournament,

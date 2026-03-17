@@ -14,54 +14,151 @@ model Profile {
   full_name          String?
   discord            String?
   image_url          String?
-  steam_link         String?   
-  steam_display_name String?   
+  steam_link         String?
+  steam_display_name String?
   role               String   @default("guest")
   status             String   @default("active")
   created_at         DateTime @default(now()) @map("created_at")
+  who_invited        String   @default("none")
 
-  games            Game[]     @relation("UserGames")
-  feedbacks        Feedback[]
+  created_tournaments      Tournament[]             @relation("TournamentCreator")
+  won_tournaments          Tournament[]             @relation("TournamentWinnerUser")
+  judged_tournaments       TournamentJudge[]        @relation("ProfileAsJudge")
+  team_memberships         TeamMember[]             @relation("TeamMembership")
+  tournament_registrations TournamentRegistration[] @relation("UserTournamentRegistrations")
 
-  @@map("profiles") 
+  games           Game[]           @relation("UserGames")
+  feedbacks       Feedback[]
+  tournamentTeams TournamentTeam[]
+
+  @@map("profiles")
 }
 
 model Tournament {
-  id    String @id @default(cuid())
-  title String
-  
+  id               String  @id @default(cuid())
+  name             String
+  game_id          String?
+  type             String  @default("single")
+  max_players      Int?
+  max_teams        Int?
+  players_per_team Int     @default(1)
+
+  description String?
+  start_date  DateTime?
+  status      String    @default("open")
+  duration    Int?
+  creator_id  String    @db.Uuid
+  hidden      Boolean   @default(false)
+  is_bracket  Boolean   @default(false)
+  bracket     Json?
+  rules       String?
+  stream_link String?
+  rewards     Json?
+  tags        Json?
+
+  winner_user_id String?   @db.Uuid
+  winner_team_id String?   @unique 
+  started_at     DateTime?
+  created_at     DateTime  @default(now()) @map("created_at")
+
+  game Game? @relation(fields: [game_id], references: [id])
+
+  creator     Profile  @relation("TournamentCreator", fields: [creator_id], references: [id], onDelete: Cascade)
+  winner_user Profile? @relation("TournamentWinnerUser", fields: [winner_user_id], references: [id], onDelete: SetNull)
+
+  winner_team TournamentTeam? @relation("TournamentWinnerTeam", fields: [winner_team_id], references: [id], onDelete: SetNull)
+
+  teams         TournamentTeam[]         @relation("TournamentTeams")
+  registrations TournamentRegistration[] @relation("TournamentRegistrations")
+  judges        TournamentJudge[]        @relation("TournamentJudges")
+
   @@map("tournaments")
+}
+
+model TournamentRegistration {
+  id            String   @id @default(cuid())
+  tournament_id String
+  profile_id    String   @db.Uuid
+  registered_at DateTime @default(now())
+
+  tournament Tournament @relation("TournamentRegistrations", fields: [tournament_id], references: [id], onDelete: Cascade)
+  profile    Profile    @relation("UserTournamentRegistrations", fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([tournament_id, profile_id])
+  @@map("tournament_registrations")
+}
+
+model TournamentTeam {
+  id            String  @id @default(cuid())
+  tournament_id String
+  creator_id    String  @db.Uuid
+  name          String?
+  is_private    Boolean @default(false)
+
+  tournament Tournament   @relation("TournamentTeams", fields: [tournament_id], references: [id], onDelete: Cascade)
+  creator    Profile      @relation(fields: [creator_id], references: [id], onDelete: SetNull)
+  members    TeamMember[] @relation("TournamentTeamMembers")
+
+  won_tournament Tournament? @relation("TournamentWinnerTeam")
+
+  @@map("tournament_teams")
+}
+
+model TeamMember {
+  id         String   @id @default(cuid())
+  team_id    String
+  profile_id String   @db.Uuid
+  joined_at  DateTime @default(now())
+
+  team    TournamentTeam @relation("TournamentTeamMembers", fields: [team_id], references: [id], onDelete: Cascade)
+  profile Profile        @relation("TeamMembership", fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([team_id, profile_id])
+  @@map("team_members")
+}
+
+model TournamentJudge {
+  tournament_id String
+  profile_id    String @db.Uuid
+
+  tournament Tournament @relation("TournamentJudges", fields: [tournament_id], references: [id], onDelete: Cascade)
+  profile    Profile    @relation("ProfileAsJudge", fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@id([tournament_id, profile_id])
+  @@map("tournament_judges")
 }
 
 model Game {
   id        String @id @default(cuid())
   image_url String
   name      String
-  
-  profiles  Profile[] @relation("UserGames")
-  
-  @@map("games") 
+
+  profiles    Profile[]    @relation("UserGames")
+  tournaments Tournament[]
+
+  @@map("games")
 }
 
 model Feedback {
-  id        String @id @default(cuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  title     String
-  text      String
-  creator_id String   @db.Uuid 
-  creator   Profile @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  created_at DateTime @default(now()) @map("created_at")
+  title      String
+  text       String
+  creator_id String   @db.Uuid
 
-  @@map("feedbacks") 
+  creator Profile @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@map("feedbacks")
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  title       String
-  text        String
-  type        String   @default("info") 
-  is_active    Boolean  @default(true)   
-  priority    Int      @default(0)  
-  created_at   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  title      String
+  text       String
+  type       String   @default("info")
+  is_active  Boolean  @default(true)
+  priority   Int      @default(0)
+  created_at DateTime @default(now()) @map("created_at")
 
   @@map("notifications")
 }

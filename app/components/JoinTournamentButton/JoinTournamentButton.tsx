@@ -1,11 +1,12 @@
-import { useAppSelector } from "@/app/utils/store/hooks";
-import { Loader2, Users } from "lucide-react";
 import CustomButton from "../Shared/CustomButton/CustomButton";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import { Users } from "lucide-react";
 
 interface IJoinTournamentButtonProps {
   isTeamMode: boolean;
   isLoading: boolean;
   isFull: boolean;
+  canJoinSingleTournament: boolean;
   isJoinedSingleTournament: boolean | undefined;
   canCreateTeam: boolean;
   handleOpenCreateTeamModal: () => void;
@@ -16,6 +17,7 @@ const JoinTournamentButton = ({
   isTeamMode,
   isLoading,
   isFull,
+  canJoinSingleTournament,
   isJoinedSingleTournament,
   canCreateTeam,
   handleOpenCreateTeamModal,
@@ -23,7 +25,7 @@ const JoinTournamentButton = ({
 }: IJoinTournamentButtonProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
 
-  if (!currentUser?.uid) {
+  if (!currentUser?.id) {
     return (
       <button
         disabled
@@ -46,13 +48,13 @@ const JoinTournamentButton = ({
     );
   }
 
-  if (!isTeamMode && !isFull) {
+  if (!isTeamMode && !isFull && canJoinSingleTournament) {
     return (
       <CustomButton
         label={isJoinedSingleTournament ? "Покинуть" : "Вступить"}
         className={
           isJoinedSingleTournament
-            ? "bg-red-600 hover:bg-red-700 text-white"
+            ? "bg-red-600/20 hover:bg-red-600/40 text-white border border-red-600!"
             : "bg-primary hover:bg-primary/90 text-primary-foreground"
         }
         isLoading={isLoading}

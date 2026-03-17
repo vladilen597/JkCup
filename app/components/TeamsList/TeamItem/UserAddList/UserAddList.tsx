@@ -1,7 +1,7 @@
-import { IUser } from "@/app/utils/store/userSlice";
 import UserAddItem from "./UserAddItem/UserAddItem";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { IUser } from "@/app/lib/types";
 
 interface IUserAddListProps {
   teamId: string;
@@ -20,9 +20,8 @@ const UserAddList = ({
     try {
       const { data } = await axios.get("/api/users");
 
-      const filteredUsers = data.users.filter(
-        (user: IUser) =>
-          !occupiedUserIds.has(user.uid) && user.role !== "guest",
+      const filteredUsers = data.filter(
+        (user: IUser) => !occupiedUserIds.has(user.id) && user.role !== "guest",
       );
       setUsers(filteredUsers);
     } catch (err: any) {
@@ -44,7 +43,7 @@ const UserAddList = ({
         {users.map((user, index) => {
           return (
             <UserAddItem
-              key={user.uid}
+              key={user.id}
               user={user}
               index={index}
               teamId={teamId}

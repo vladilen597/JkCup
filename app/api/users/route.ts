@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const GET = async () => {
   try {
     const users = await prisma.profile.findMany();
-    console.log(users);
+
     return NextResponse.json(users);
   } catch (error) {
     console.log(error);

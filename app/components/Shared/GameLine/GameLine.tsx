@@ -1,4 +1,4 @@
-import { IGame } from "@/app/utils/store/gamesSlice";
+import { IGame } from "@/app/lib/types";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -24,11 +24,11 @@ const GameLine = ({
       </div>
       {currentUser.role === "superadmin" && (
         <button
-          className="text-neutral-500"
+          className="rounded-full p-1 hover:bg-background/60 hover:text-white! group transition-colors cursor-pointer"
           type="button"
           onClick={onDeleteClick}
         >
-          <X />
+          <X className="text-neutral-500 group-hover:text-white transition-colors" />
         </button>
       )}
     </div>

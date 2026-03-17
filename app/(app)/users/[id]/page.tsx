@@ -45,6 +45,8 @@ const page = () => {
     steam_link: "",
     steam_display_name: "",
     games: [],
+    who_invited: "",
+    judged_tournaments: [],
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [steamLinkError, setSteamLinkError] = useState("");
@@ -85,8 +87,6 @@ const page = () => {
     }));
   };
 
-  console.log(userInfo);
-
   const handleAddGame = (value: IGame) => {
     setUserInfo((prevState) => ({
       ...prevState,
@@ -96,9 +96,7 @@ const page = () => {
 
   const handleLoadUser = async () => {
     try {
-      const response = await axios.get<IUser>("/api/users/currentUser");
-
-      const data = response.data;
+      const { data } = await axios.get<IUser>("/api/users/" + params.id);
 
       if (data) {
         setUserInfo(data);
@@ -156,9 +154,6 @@ const page = () => {
 
   useEffect(() => {
     handleLoadUser();
-    if (isCurrentUser) {
-      setUserInfo(currentUser);
-    }
   }, []);
 
   if (!userInfo.id) {
@@ -275,12 +270,7 @@ const page = () => {
         className="mt-8 grid grid-cols-1 md:grid-cols-2 w-full gap-4"
         onSubmit={handleSubmit}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="space-y-4 w-full"
-        >
+        <div className="space-y-4 w-full">
           <CustomInput
             label="Имя пользователя на сайте"
             name="full_name"
@@ -342,12 +332,8 @@ const page = () => {
               )
             }
           />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
+        </div>
+        <div className="space-y-4">
           <div>
             <span className="text-sm font-medium mb-1 block">
               Предпочитаемые игры
@@ -386,7 +372,17 @@ const page = () => {
               </div>
             )}
           </div>
-        </motion.div>
+          {(currentUser.role === "superadmin" ||
+            currentUser.role === "admin") && (
+            <CustomInput
+              label="Приглашен"
+              value={
+                userInfo.who_invited === "none" ? "Никем" : userInfo.who_invited
+              }
+              disabled
+            />
+          )}
+        </div>
 
         {isCurrentUser && (
           <motion.button

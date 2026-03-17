@@ -58,8 +58,6 @@ const MultipleGameSelect = ({
   const { games } = useAppSelector((state) => state.games);
   const dispatch = useAppDispatch();
 
-  console.log(games);
-
   const handleToggleIsOpen = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     e.preventDefault();
@@ -126,7 +124,7 @@ const MultipleGameSelect = ({
               </div>
             ))
           ) : (
-            <div className="flex items-center p-1">Выберите игры</div>
+            <div className="flex items-center p-1.75">Выберите игры</div>
           )}
         </div>
         <motion.div

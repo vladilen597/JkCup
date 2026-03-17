@@ -1,11 +1,10 @@
-import { ITeam } from "@/app/utils/store/tournamentsSlice";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import TeamItem from "./TeamItem/TeamItem";
-import { IUser } from "@/app/utils/store/userSlice";
+import { ITeam, ITournamentJudge } from "@/app/lib/types";
 
 interface TeamListProps {
   teams: ITeam[];
-  judgesIds: string[];
+  judges: ITournamentJudge[];
   tournamentId: string;
   maxPlayersPerTeam: number;
   isLoading?: boolean;
@@ -15,17 +14,24 @@ interface TeamListProps {
 
 const TeamList = ({
   teams = [],
-  judgesIds,
+  judges = [],
   tournament_status,
   maxPlayersPerTeam,
 }: TeamListProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
 
-  const occupiedUserIds = new Set(teams.flatMap((team) => team.usersIds));
-  const isUserJudge = judgesIds.includes(currentUser.uid);
-  const isUserGuest = currentUser.role === "guest";
+  const occupiedUserIds = new Set([
+    ...teams.flatMap((team) => team.members?.map((m) => m.profile_id) || []),
+    ...judges.map((judge) => judge.profile_id),
+  ]);
 
-  const isUserHasTeam = occupiedUserIds.has(currentUser?.uid || "");
+  const isUserJudge = judges.some(
+    (judge) => judge.profile_id === currentUser?.id,
+  );
+
+  const isUserGuest = currentUser?.role === "guest";
+  const isUserHasTeam = occupiedUserIds.has(currentUser?.id || "");
+
   const isCurrentUserCanJoin = !isUserHasTeam && !isUserJudge && !isUserGuest;
 
   if (teams.length === 0) {
@@ -37,12 +43,11 @@ const TeamList = ({
   return (
     <ul className="grid lg:grid-cols-2 grid-cols-1 gap-2">
       {teams.map((team) => {
-        const usersIds = team.usersIds;
-        const filled = usersIds.length;
+        const filled = team.members?.length || 0;
 
         return (
           <TeamItem
-            key={team.uid}
+            key={team.id}
             {...team}
             teams={teams}
             filled={filled}

@@ -1,31 +1,14 @@
-import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
-import { IUser } from "@/app/utils/store/userSlice";
-import React, { useEffect, useState } from "react";
 import UserInfoBlock from "../Shared/UserInfoBlock/UserInfoBlock";
+import { ITeamMember } from "@/app/lib/types";
 
-type Props = {};
-
-const WinnerTeam = ({ usersIds }: { usersIds: string[] }) => {
-  const [users, setUsers] = useState<IUser[]>([]);
-
-  const handleLoadUsers = async () => {
-    try {
-      const users = await handleGetUsersByIds(usersIds);
-      setUsers(users);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    handleLoadUsers();
-  }, []);
+const WinnerTeam = ({ members }: { members: ITeamMember[] }) => {
+  if (!members || members.length === 0) return null;
 
   return (
     <ul className="mt-2 space-y-2">
-      {users.map((user) => (
-        <li key={user.uid} className="flex items-center gap-2">
-          <UserInfoBlock {...user} />
+      {members.map((member) => (
+        <li key={member.profile.id} className="flex items-center gap-2">
+          <UserInfoBlock {...member.profile} />
         </li>
       ))}
     </ul>

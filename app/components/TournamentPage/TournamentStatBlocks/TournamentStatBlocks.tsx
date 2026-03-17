@@ -1,10 +1,10 @@
-import { ITournament } from "@/app/utils/store/tournamentsSlice";
 import { Calendar, Hash, Trophy, User, Users } from "lucide-react";
 import { statuses } from "@/app/(app)/tournaments/[id]/page";
 import StatCard from "../../Shared/StatCard/StatCard";
 import { motion } from "motion/react";
 import { format } from "date-fns";
 import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
+import { ITournament } from "@/app/lib/types";
 
 interface ITournamentStatBlocksProps {
   tournament: ITournament;
@@ -17,15 +17,15 @@ const trophyIndexes = {
 };
 
 const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
-  const isTeamMode = tournament.type.value === "team";
+  const isTeamMode = tournament.type === "team";
 
   const filledSlots = isTeamMode
     ? tournament.teams?.length || 0
-    : tournament.usersIds?.length || 0;
+    : tournament.registrations?.length || 0;
 
   return (
     <section>
-      {!!tournament.rewards.length && (
+      {!!tournament.rewards?.length && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

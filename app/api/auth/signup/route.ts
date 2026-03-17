@@ -25,7 +25,7 @@ export const POST = async (req: NextRequest) => {
   );
 
   try {
-    const { email, password, displayName } = await req.json();
+    const { email, password, displayName, who_invited } = await req.json();
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -33,6 +33,7 @@ export const POST = async (req: NextRequest) => {
       options: {
         data: {
           full_name: displayName,
+          who_invited: who_invited,
         },
       },
     });

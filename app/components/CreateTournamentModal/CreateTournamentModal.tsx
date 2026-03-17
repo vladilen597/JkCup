@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { SubmitEvent } from "react";
+import { ChangeEvent, SubmitEvent, useState } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
@@ -20,6 +20,14 @@ import CustomButton, {
 import DateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import DurationPicker from "../Shared/DurationPicker/DurationPicker";
 import { v4 as uuidv4 } from "uuid";
+import dynamic from "next/dynamic";
+import { ITag, ITournament } from "@/app/lib/types";
+import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
+import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
+import GameSelect from "../Shared/GameSelect/GameSelect";
+import axios from "axios";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import { toast } from "react-toastify";
 
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
@@ -27,33 +35,9 @@ export const selectTypeOptions = [
 ];
 
 interface ICreateTournamentModalProps {
-  formData: {
-    name: string;
-    game: null;
-    type: ISelectOption;
-    description: string;
-    max_players: number;
-    max_teams: number;
-    players_per_team: number;
-    start_date: string;
-    tags: ITag[];
-    duration: number;
-    rewards: { id: string; value: string }[];
-    useBracket?: boolean;
-    hidden?: boolean;
-  };
-  handleChange: (value: any) => void;
-  handleChangeTournamentType: (value: ISelectOption) => void;
-  handleAddReward: () => void;
   onClose: () => void;
-  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
+  onSubmit: (tournaments: ITournament) => void;
 }
-
-import dynamic from "next/dynamic";
-import { ITag } from "@/app/lib/types";
-import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
-import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
-import GameSelect from "../Shared/GameSelect/GameSelect";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -64,15 +48,51 @@ const Tiptap = dynamic(
 );
 
 const CreateTournamentModal = ({
-  formData,
-  handleChange,
-  handleChangeTournamentType,
   onClose,
-  handleAddReward,
   onSubmit,
 }: ICreateTournamentModalProps) => {
+  const [formData, setFormData] = useState<any>({
+    name: "",
+    game: null,
+    type: {
+      id: 2,
+      value: "single",
+      label: "Одиночный",
+    },
+    description: "",
+    max_players: 6,
+    max_teams: 6,
+    players_per_team: 2,
+    start_date: "",
+    tags: [],
+    rewards: [],
+    status: "open",
+    duration: 0,
+    useBracket: false,
+    hidden: false,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { user: currentUser } = useAppSelector((state) => state.user);
+
+  const canCreateTournament =
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
+
+  const handleAddReward = () => {
+    setFormData((prevState: any) => ({
+      ...prevState,
+      rewards: [...formData.rewards, { id: uuidv4(), value: "" }],
+    }));
+  };
+
+  const handleUpdateTournamentType = (value: ISelectOption) => {
+    setFormData((prevState: any) => ({
+      ...prevState,
+      type: value,
+    }));
+  };
+
   const handleTagChange = (id: string, newValue: string) => {
-    handleChange((prev: any) => ({
+    setFormData((prev: any) => ({
       ...prev,
       tags: prev.tags?.map((tag: ITag) =>
         tag.id === id ? { ...tag, value: newValue } : tag,
@@ -81,7 +101,7 @@ const CreateTournamentModal = ({
   };
 
   const removeTag = (id: string) => {
-    handleChange((prevState: any) => ({
+    setFormData((prevState: any) => ({
       ...prevState,
       tags: prevState.tags?.filter((tag: any) => tag.id !== id),
     }));
@@ -91,7 +111,7 @@ const CreateTournamentModal = ({
     const randomColor =
       TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
 
-    handleChange((prev: any) => ({
+    setFormData((prev: any) => ({
       ...prev,
       tags: [
         ...prev.tags,
@@ -106,7 +126,7 @@ const CreateTournamentModal = ({
   };
 
   const updateTagColor = (id: string, bgColor: string, textColor: string) => {
-    handleChange((prev: any) => ({
+    setFormData((prev: any) => ({
       ...prev,
       tags: prev.tags?.map((tag: ITag) =>
         tag.id === id ? { ...tag, bgColor, textColor } : tag,
@@ -119,11 +139,66 @@ const CreateTournamentModal = ({
       ? formData.max_teams > formData.rewards.length
       : formData.max_players > formData.rewards.length;
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading(true);
+    e.preventDefault();
+    if (!canCreateTournament) return;
+
+    try {
+      const isBracket = formData.type.value === "bracket";
+
+      const tournamentData = {
+        ...formData,
+        type: formData.type.value,
+        game_id: formData.game.id,
+        max_players: Number(formData.max_players),
+        max_teams: Number(formData.max_teams),
+        players_per_team: Number(formData.players_per_team),
+        is_bracket: isBracket,
+        rules: "",
+        stream_link: "",
+        creator_id: currentUser.id,
+        bracket: isBracket
+          ? {
+              currentRound: 0,
+              rounds: [
+                {
+                  id: "round-0",
+                  matches: [
+                    {
+                      id: `match-${uuidv4()}`,
+                      player1: null,
+                      player2: null,
+                      winner: null,
+                    },
+                  ],
+                },
+              ],
+            }
+          : null,
+      };
+
+      const { data } = await axios.post(
+        "/api/tournaments",
+        JSON.stringify(tournamentData),
+      );
+
+      onClose();
+      toast.success(`Турнир ${tournamentData.name} успешно создан`);
+      onSubmit(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Ошибка при создании турнира");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <motion.form
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
     >
       <h3 className="text-xl font-bold mb-4">Новый турнир</h3>
 
@@ -136,7 +211,7 @@ const CreateTournamentModal = ({
               type="text"
               value={formData.name}
               onChange={(e) =>
-                handleChange({ ...formData, name: e.target.value })
+                setFormData({ ...formData, name: e.target.value })
               }
               className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               required
@@ -150,7 +225,7 @@ const CreateTournamentModal = ({
             </label>
             <GameSelect
               value={formData.game}
-              onChange={(value) => handleChange({ ...formData, game: value })}
+              onChange={(value) => setFormData({ ...formData, game: value })}
               required
             />
           </div>
@@ -192,7 +267,7 @@ const CreateTournamentModal = ({
           <Tiptap
             value={formData.description}
             onChange={(value) =>
-              handleChange((prevState: any) => ({
+              setFormData((prevState: any) => ({
                 ...prevState,
                 description: value,
               }))
@@ -206,7 +281,7 @@ const CreateTournamentModal = ({
             <CustomSelect
               options={selectTypeOptions}
               value={formData.type}
-              onChange={handleChangeTournamentType}
+              onChange={handleUpdateTournamentType}
             />
           </div>
         </div>
@@ -215,7 +290,7 @@ const CreateTournamentModal = ({
           label="Использовать сетку"
           checked={formData.useBracket}
           onChange={() =>
-            handleChange((prevState) => ({
+            setFormData((prevState) => ({
               ...formData,
               useBracket: !prevState.useBracket,
             }))
@@ -236,7 +311,7 @@ const CreateTournamentModal = ({
                   : formData.max_players
               }
               onChange={(e) => {
-                handleChange({
+                setFormData({
                   ...formData,
                   ...(formData.type.value === "team"
                     ? { max_teams: Number(e.target.value), rewards: [] }
@@ -257,7 +332,7 @@ const CreateTournamentModal = ({
                 type="number"
                 value={formData.players_per_team}
                 onChange={(e) =>
-                  handleChange({
+                  setFormData({
                     ...formData,
                     players_per_team: Number(e.target.value),
                   })
@@ -278,7 +353,7 @@ const CreateTournamentModal = ({
             <DateTimePicker
               value={formData.start_date}
               onChange={(value) =>
-                handleChange({ ...formData, start_date: value })
+                setFormData({ ...formData, start_date: value })
               }
             />
           </div>
@@ -289,7 +364,7 @@ const CreateTournamentModal = ({
             <DurationPicker
               valueMs={formData.duration}
               onChange={(value) => {
-                handleChange((prevState: any) => {
+                setFormData((prevState: any) => {
                   return {
                     ...prevState,
                     duration: value,
@@ -338,7 +413,7 @@ const CreateTournamentModal = ({
                       required
                       value={reward.value}
                       onChange={(e) =>
-                        handleChange((prevState: any) => ({
+                        setFormData((prevState: any) => ({
                           ...prevState,
                           rewards: prevState.rewards.map(
                             (r: { id: string; value: string }, i: number) =>
@@ -353,7 +428,7 @@ const CreateTournamentModal = ({
                       className="absolute right-2.5 cursor-pointer text-muted-foreground hover:text-destructive transition-colors"
                       type="button"
                       onClick={() =>
-                        handleChange((prevState: any) => ({
+                        setFormData((prevState: any) => ({
                           ...prevState,
                           rewards: prevState.rewards.filter(
                             (r: { id: string; value: string }) =>
@@ -375,7 +450,7 @@ const CreateTournamentModal = ({
           label="Скрытый турнир"
           checked={formData.hidden}
           onChange={() =>
-            handleChange((prevState) => ({
+            setFormData((prevState) => ({
               ...prevState,
               hidden: !prevState.hidden,
             }))
@@ -384,7 +459,7 @@ const CreateTournamentModal = ({
       </div>
 
       <div className="mt-6 flex gap-2">
-        <CustomButton type="submit" label="Создать" />
+        <CustomButton type="submit" label="Создать" isLoading={isLoading} />
         <CustomButton
           label="Отмена"
           buttonType={BUTTON_TYPES.CANCEL}

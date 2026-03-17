@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
+import { prisma } from "@/lib/prisma";
 
 export const PUT = async (
   req: NextRequest,
@@ -18,16 +19,23 @@ export const PUT = async (
   }
 };
 
-export async function DELETE(
-  req: NextRequest,
+export const DELETE = async (
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+) => {
   try {
     const { id } = await params;
-    const ref = doc(db, "tournaments", id);
-    await deleteDoc(ref);
+
+    await prisma.tournament.delete({
+      where: { id },
+    });
+
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Delete error:", error);
+    return NextResponse.json(
+      { error: "Не удалось удалить турнир", details: error.message },
+      { status: 500 },
+    );
   }
-}
+};

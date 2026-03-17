@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/app/utils/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { AlertCircle, Users } from "lucide-react";
 import { ChangeEvent, useState } from "react";
@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
+import axios from "axios";
+import { addTournamentTeam } from "@/app/utils/store/tournamentsSlice";
 
 interface ICreateTeamModalProps {
   tournamentId: string;
@@ -20,6 +22,7 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
   });
   const { user: currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
   const [error, setError] = useState("");
 
   const handleToggleChecked = () => {
@@ -31,25 +34,26 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
 
   const handleCreateTeam = async () => {
     setIsLoading(true);
-    setError("");
-
     try {
-      if (!tournamentId) return;
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      const uid = uuidv4();
-
-      await updateDoc(tournamentRef, {
-        teams: arrayUnion({
-          uid,
-          creator_uid: currentUser.uid,
+      const { data: newTeam } = await axios.post(
+        `/api/tournaments/${tournamentId}/teams`,
+        {
           name: teamData.name,
           is_private: teamData.is_private,
-          usersIds: [currentUser.uid],
+          creatorId: currentUser.id,
+        },
+      );
+
+      dispatch(
+        addTournamentTeam({
+          tournamentId,
+          team: newTeam,
         }),
-      });
+      );
+
       onClose();
     } catch (error) {
-      setError("Не удалось создать или вступить в команду");
+      setError("Ошибка создания команды");
     } finally {
       setIsLoading(false);
     }

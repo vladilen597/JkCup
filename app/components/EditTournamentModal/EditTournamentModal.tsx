@@ -13,20 +13,16 @@ import CustomButton, {
 import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import DurationPicker from "../Shared/DurationPicker/DurationPicker";
 import dynamic from "next/dynamic";
-import { ITag } from "@/app/lib/types";
+import { IGame, ITag, ITournament } from "@/app/lib/types";
 import { v4 as uuidv4 } from "uuid";
 import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
 import GameSelect from "../Shared/GameSelect/GameSelect";
-import { IGame } from "@/app/utils/store/gamesSlice";
 import CustomInput from "../Shared/CustomInput/CustomInput";
 import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
-import {
-  ITournament,
-  updateTournament,
-} from "@/app/utils/store/tournamentsSlice";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import { updateTournament } from "@/app/utils/store/tournamentsSlice";
 import { useAppDispatch } from "@/app/utils/store/hooks";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -36,22 +32,27 @@ const Tiptap = dynamic(
   },
 );
 
-type FirestoreTournamentData = {
-  [K in keyof ITournament]: ITournament[K] extends object
-    ? ITournament[K] | null
-    : ITournament[K];
-};
-
 interface IEditTournamentModalProps {
   tournament: ITournament;
   onClose: () => void;
 }
 
+type TournamentFormData = Omit<ITournament, "type"> & {
+  type: ISelectOption;
+};
+
 const EditTournamentModal = ({
   tournament,
   onClose,
 }: IEditTournamentModalProps) => {
-  const [tournamentData, setTournamentData] = useState<ITournament>(tournament);
+  const [tournamentData, setTournamentData] = useState<TournamentFormData>({
+    ...tournament,
+    type:
+      typeof tournament.type === "string"
+        ? selectTypeOptions.find((opt) => opt.value === tournament.type) ||
+          selectTypeOptions[0]
+        : tournament.type,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -164,16 +165,28 @@ const EditTournamentModal = ({
 
     setIsLoading(true);
 
-    const tournamentRef = doc(db, "tournaments", tournament.id);
-
     try {
-      await updateDoc(tournamentRef, tournamentData as FirestoreTournamentData);
+      const payload = {
+        ...tournamentData,
+        type: (tournamentData.type as any).value || tournamentData.type,
+        game_id: tournamentData.game?.id || null,
+        max_players: Number(tournamentData.max_players),
+        max_teams: Number(tournamentData.max_teams),
+        players_per_team: Number(tournamentData.players_per_team),
+      };
 
-      dispatch(updateTournament(tournamentData));
+      const { data } = await axios.put(`/api/tournaments`, payload, {
+        params: {
+          id: tournament.id,
+        },
+      });
 
+      toast.success(`Турнир ${tournamentData.name} успешно обновлен`);
+      dispatch(updateTournament(data));
       onClose();
     } catch (error: any) {
-      console.log(error);
+      console.error("Update Error:", error);
+      alert(error.message || "Произошла ошибка при сохранении");
     } finally {
       setIsLoading(false);
     }
@@ -260,7 +273,7 @@ const EditTournamentModal = ({
         <CustomCheckbox
           name="useBracket"
           label="Использовать сетку"
-          checked={tournamentData.useBracket}
+          checked={tournamentData.is_bracket}
           onChange={handleInputChange}
         />
 
@@ -333,13 +346,13 @@ const EditTournamentModal = ({
               Добавить награду
             </button>
           </div>
-          {tournamentData.rewards.length === 0 ? (
+          {tournamentData.rewards?.length === 0 ? (
             <p className="text-sm text-muted-foreground py-2">
               Награды не добавлены
             </p>
           ) : (
             <div className="space-y-2 pr-1">
-              {tournamentData.rewards.map((reward, index) => (
+              {tournamentData.rewards?.map((reward, index) => (
                 <motion.div
                   key={reward.id}
                   initial={{ opacity: 0, y: -10 }}
