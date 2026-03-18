@@ -67,7 +67,6 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
         email,
         password,
       });
-      console.log(data.user);
       dispatch(setUser(data.user));
       onClose();
     } catch (error: any) {

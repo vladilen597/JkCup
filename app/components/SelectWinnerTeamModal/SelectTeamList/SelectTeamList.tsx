@@ -15,8 +15,6 @@ const SelectTeamList = ({
   selectedTeam,
   onTeamClick,
 }: TeamListProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
-
   if (teams.length === 0) {
     return <p className="text-center text-muted-foreground py-8">Команд нет</p>;
   }
@@ -29,7 +27,7 @@ const SelectTeamList = ({
             key={team.id}
             className={cn(
               "border rounded-lg p-4 cursor-pointer",
-              selectedTeam?.id === team.id && "outline-2 outline-neon",
+              selectedTeam?.id === team.id && "border-neon!",
             )}
             onClick={() => onTeamClick(team)}
           >
@@ -39,7 +37,7 @@ const SelectTeamList = ({
               </h3>
             </div>
 
-            <SelectTeamUserList usersIds={team.usersIds} />
+            <SelectTeamUserList members={team.members} />
           </li>
         );
       })}

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const GET = async () => {
@@ -51,6 +51,7 @@ export const GET = async () => {
 export const POST = async (req: Request) => {
   try {
     const body = await req.json();
+    console.log(body.tags);
 
     const tournament = await prisma.tournament.create({
       data: {
@@ -67,6 +68,7 @@ export const POST = async (req: Request) => {
         hidden: body.hidden,
         duration: body.duration,
         start_date: body.start_date,
+        tags: body.tags || [],
 
         creator: {
           connect: { id: body.creator_id },
@@ -96,9 +98,6 @@ export const PUT = async (req: Request) => {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    if (!id)
-      return NextResponse.json({ error: "No ID provided" }, { status: 400 });
-
     const body = await req.json();
 
     const {
@@ -110,6 +109,7 @@ export const PUT = async (req: Request) => {
       registrations,
       teams,
       judges,
+      rounds,
       winner_user,
       winner_user_id,
       winner_team,
@@ -119,9 +119,13 @@ export const PUT = async (req: Request) => {
     } = body;
 
     const updatedTournament = await prisma.tournament.update({
-      where: { id },
+      where: { id: id as string },
       data: {
         ...updateData,
+        bracket: updateData.bracket || undefined,
+        rewards: updateData.rewards || undefined,
+        tags: updateData.tags || undefined,
+
         game: game_id ? { connect: { id: game_id } } : { disconnect: true },
 
         winner_user: winner_user_id
@@ -140,11 +144,7 @@ export const PUT = async (req: Request) => {
         winner_user: true,
         winner_team: {
           include: {
-            members: {
-              include: {
-                profile: true,
-              },
-            },
+            members: { include: { profile: true } },
           },
         },
         registrations: { include: { profile: true } },
@@ -154,6 +154,16 @@ export const PUT = async (req: Request) => {
           },
         },
         judges: { include: { profile: true } },
+        rounds: {
+          orderBy: { number: "asc" },
+          include: {
+            matches: {
+              include: {
+                participants: { include: { profile: true, team: true } },
+              },
+            },
+          },
+        },
       },
     });
 

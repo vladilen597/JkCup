@@ -7,6 +7,7 @@ const TeamUserList = ({
   isLoading,
   canLeave,
   isMyTeam,
+  creator_id,
   onLeaveClick,
 }: {
   members: ITeamMember[];
@@ -14,7 +15,8 @@ const TeamUserList = ({
   isLoading: boolean;
   canLeave: boolean;
   isMyTeam: boolean;
-  onLeaveClick: (userId: string) => void;
+  creator_id: string;
+  onLeaveClick: (teamMemberRecordId: string, profile_id: string) => void;
 }) => {
   return (
     <ul className="space-y-2">
@@ -24,8 +26,9 @@ const TeamUserList = ({
           {...user.profile}
           isMyTeam={isMyTeam}
           isLoading={isLoading}
+          creator_id={creator_id}
           isCurrentUserCreator={isCurrentUserCreator}
-          onLeaveClick={() => onLeaveClick(user.id)}
+          onLeaveClick={() => onLeaveClick(user.id, user.profile_id)}
           canLeave={canLeave}
         />
       ))}

@@ -6,13 +6,14 @@ export const PUT = async (
   { params }: { params: Promise<{ id: string }> },
 ) => {
   try {
-    const { status } = await req.json();
+    const { status, started_at } = await req.json();
     const { id } = await params;
 
     const updatedStatusTournament = await prisma.tournament.update({
       where: { id },
       data: {
         status,
+        started_at,
       },
     });
 

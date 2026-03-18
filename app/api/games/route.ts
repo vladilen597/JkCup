@@ -5,7 +5,6 @@ import { supabase } from "@/app/utils/supabase";
 export const GET = async () => {
   try {
     const games = await prisma.game.findMany();
-    console.log(games);
     return NextResponse.json(games);
   } catch (error) {
     console.log(error);

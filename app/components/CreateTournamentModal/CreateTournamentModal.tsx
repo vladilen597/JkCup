@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ChangeEvent, SubmitEvent, useState } from "react";
+import { useState } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
@@ -11,7 +11,6 @@ import {
   Trophy,
   Gamepad2,
   Tag,
-  GitBranch,
   Calendar,
 } from "lucide-react";
 import CustomButton, {
@@ -68,7 +67,7 @@ const CreateTournamentModal = ({
     rewards: [],
     status: "open",
     duration: 0,
-    useBracket: false,
+    is_bracket: false,
     hidden: false,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +79,7 @@ const CreateTournamentModal = ({
   const handleAddReward = () => {
     setFormData((prevState: any) => ({
       ...prevState,
-      rewards: [...formData.rewards, { id: uuidv4(), value: "" }],
+      rewards: [...(formData.rewards || []), { id: uuidv4(), value: "" }],
     }));
   };
 
@@ -94,7 +93,7 @@ const CreateTournamentModal = ({
   const handleTagChange = (id: string, newValue: string) => {
     setFormData((prev: any) => ({
       ...prev,
-      tags: prev.tags?.map((tag: ITag) =>
+      tags: (prev.tags || []).map((tag: ITag) =>
         tag.id === id ? { ...tag, value: newValue } : tag,
       ),
     }));
@@ -103,7 +102,7 @@ const CreateTournamentModal = ({
   const removeTag = (id: string) => {
     setFormData((prevState: any) => ({
       ...prevState,
-      tags: prevState.tags?.filter((tag: any) => tag.id !== id),
+      tags: (prevState.tags || []).filter((tag: any) => tag.id !== id),
     }));
   };
 
@@ -114,7 +113,7 @@ const CreateTournamentModal = ({
     setFormData((prev: any) => ({
       ...prev,
       tags: [
-        ...prev.tags,
+        ...(prev.tags || []),
         {
           id: uuidv4(),
           value: "",
@@ -128,7 +127,7 @@ const CreateTournamentModal = ({
   const updateTagColor = (id: string, bgColor: string, textColor: string) => {
     setFormData((prev: any) => ({
       ...prev,
-      tags: prev.tags?.map((tag: ITag) =>
+      tags: (prev.tags || []).map((tag: ITag) =>
         tag.id === id ? { ...tag, bgColor, textColor } : tag,
       ),
     }));
@@ -140,55 +139,43 @@ const CreateTournamentModal = ({
       : formData.max_players > formData.rewards.length;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setIsLoading(true);
     e.preventDefault();
     if (!canCreateTournament) return;
 
-    try {
-      const isBracket = formData.type.value === "bracket";
+    setIsLoading(true);
 
-      const tournamentData = {
-        ...formData,
+    try {
+      const payload = {
+        name: formData.name,
         type: formData.type.value,
-        game_id: formData.game.id,
-        max_players: Number(formData.max_players),
-        max_teams: Number(formData.max_teams),
-        players_per_team: Number(formData.players_per_team),
-        is_bracket: isBracket,
+        game_id: formData.game?.id || null,
+        max_players:
+          formData.type.value === "single"
+            ? Number(formData.max_players)
+            : null,
+        max_teams:
+          formData.type.value === "team" ? Number(formData.max_teams) : null,
+        players_per_team: Number(formData.players_per_team) || 1,
+        description: formData.description || "",
+        is_bracket: formData.is_bracket,
+        creator_id: currentUser.id,
+        status: "open",
         rules: "",
         stream_link: "",
-        creator_id: currentUser.id,
-        bracket: isBracket
-          ? {
-              currentRound: 0,
-              rounds: [
-                {
-                  id: "round-0",
-                  matches: [
-                    {
-                      id: `match-${uuidv4()}`,
-                      player1: null,
-                      player2: null,
-                      winner: null,
-                    },
-                  ],
-                },
-              ],
-            }
-          : null,
+        tags: formData.tags,
+        rewards: formData.rewards || [],
       };
 
-      const { data } = await axios.post(
-        "/api/tournaments",
-        JSON.stringify(tournamentData),
-      );
+      const { data } = await axios.post("/api/tournaments", payload);
+
+      toast.success(`Турнир ${payload.name} успешно создан`);
+
+      if (onSubmit) onSubmit(data);
 
       onClose();
-      toast.success(`Турнир ${tournamentData.name} успешно создан`);
-      onSubmit(data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Ошибка при создании турнира");
+    } catch (err: any) {
+      console.error("Create Error:", err.response?.data || err.message);
+      toast.error(err.response?.data?.error || "Ошибка при создании турнира");
     } finally {
       setIsLoading(false);
     }
@@ -287,12 +274,13 @@ const CreateTournamentModal = ({
         </div>
 
         <CustomCheckbox
+          name="is_bracket"
           label="Использовать сетку"
-          checked={formData.useBracket}
+          checked={formData.is_bracket}
           onChange={() =>
             setFormData((prevState) => ({
-              ...formData,
-              useBracket: !prevState.useBracket,
+              ...prevState, // Используем prevState, чтобы не потерять другие поля
+              is_bracket: !prevState.is_bracket,
             }))
           }
         />

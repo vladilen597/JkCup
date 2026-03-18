@@ -7,6 +7,7 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 // import admin from "firebase-admin";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 interface IDeleteUserModalContentProps {
   userId: string;
@@ -21,20 +22,19 @@ const DeleteUserModalContent = ({
 }: IDeleteUserModalContentProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = async (userId: string) => {
     setIsLoading(true);
     try {
-      const data = await axios.delete("/api/users", {
-        params: {
-          userId,
-        },
-      });
-      if (data.status === 200) {
-        onClose();
+      const { status } = await axios.delete(`/api/users/${userId}`);
+
+      if (status === 200) {
+        toast.success("Аккаунт пользователя аннулирован");
         onSubmit();
+        onClose();
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error("Ошибка:", error.response?.data || error.message);
+      toast.error("Не удалось удалить пользователя");
     } finally {
       setIsLoading(false);
     }

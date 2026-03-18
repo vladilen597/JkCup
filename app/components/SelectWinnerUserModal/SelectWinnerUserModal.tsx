@@ -63,7 +63,7 @@ const SelectWinnerUserModal = ({
         Выбрать победителя
       </h3>
 
-      <section className="mt-4 max-h-[400px] overflow-y-auto">
+      <section className="mt-4 max-h-100 overflow-y-auto">
         <SelectUserList
           users={users}
           selectedUser={selectedUser}

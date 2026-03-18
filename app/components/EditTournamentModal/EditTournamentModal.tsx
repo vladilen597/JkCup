@@ -56,42 +56,47 @@ const EditTournamentModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
-  const onTagsChange = (newTags) => {
-    setTournamentData({ ...tournamentData, tags: newTags });
-  };
-
   const handleTagChange = (id: string, newValue: string) => {
-    onTagsChange(
-      tournamentData.tags?.map((tag) =>
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: (prev.tags || []).map((tag: ITag) =>
         tag.id === id ? { ...tag, value: newValue } : tag,
       ),
-    );
+    }));
   };
 
   const removeTag = (id: string) => {
-    onTagsChange(tournamentData.tags?.filter((tag) => tag.id !== id));
-  };
-
-  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
-    onTagsChange(
-      tournamentData.tags?.map((tag) =>
-        tag.id === id ? { ...tag, bgColor, textColor } : tag,
-      ),
-    );
+    setTournamentData((prevState: any) => ({
+      ...prevState,
+      tags: (prevState.tags || []).filter((tag: any) => tag.id !== id),
+    }));
   };
 
   const addNewTag = () => {
     const randomColor =
       TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
-    onTagsChange([
-      ...tournamentData.tags,
-      {
-        id: uuidv4(),
-        value: "",
-        bgColor: randomColor.bg,
-        textColor: randomColor.text,
-      },
-    ]);
+
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: [
+        ...(prev.tags || []),
+        {
+          id: uuidv4(),
+          value: "",
+          bgColor: randomColor.bg,
+          textColor: randomColor.text,
+        },
+      ],
+    }));
+  };
+
+  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: (prev.tags || []).map((tag: ITag) =>
+        tag.id === id ? { ...tag, bgColor, textColor } : tag,
+      ),
+    }));
   };
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +139,7 @@ const EditTournamentModal = ({
   const handleAddReward = () => {
     setTournamentData((prevState) => ({
       ...prevState,
-      rewards: [...prevState.rewards, { id: uuidv4(), value: "" }],
+      rewards: [...(prevState.rewards || []), { id: uuidv4(), value: "" }],
     }));
   };
 
@@ -186,7 +191,7 @@ const EditTournamentModal = ({
       onClose();
     } catch (error: any) {
       console.error("Update Error:", error);
-      alert(error.message || "Произошла ошибка при сохранении");
+      toast.error(error.message || "Произошла ошибка при сохранении");
     } finally {
       setIsLoading(false);
     }
@@ -271,7 +276,7 @@ const EditTournamentModal = ({
         </div>
 
         <CustomCheckbox
-          name="useBracket"
+          name="is_bracket"
           label="Использовать сетку"
           checked={tournamentData.is_bracket}
           onChange={handleInputChange}

@@ -1,19 +1,11 @@
 import { updateTournamentStatus } from "@/app/utils/store/tournamentsSlice";
 import CustomButton from "../../Shared/CustomButton/CustomButton";
-import { Album, Archive, Edit, Gamepad2, Trash2, Trophy } from "lucide-react";
+import { Album, Edit, Gamepad2, Trash2, Trophy } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
 import { statuses } from "@/app/(app)/tournaments/[id]/page";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { useParams, useRouter } from "next/navigation";
 import Tag from "../../Shared/Tag/Tag";
 import Title from "../../Title/Title";
@@ -22,6 +14,8 @@ import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
 import Badge from "../../Shared/Badge/Badge";
 import { ITournament } from "@/app/lib/types";
 import axios from "axios";
+import { useState } from "react";
+import Link from "next/link";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -36,6 +30,7 @@ const TournamentHero = ({
   handleClickDeleteWinner,
   handleClickEdit,
 }: ITournamentHeroProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { user: currentUser } = useAppSelector((state) => state.user);
   const isTeamMode = tournament.type === "team";
   const { id }: { id: string } = useParams();
@@ -45,9 +40,52 @@ const TournamentHero = ({
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
+  const handleCloseRegistration = async () => {
+    setIsLoading(true);
+    try {
+      await axios.put(`/api/tournaments/${tournament.id}/status`, {
+        status: "about_to_start",
+        started_at: null,
+      });
+      dispatch(
+        updateTournamentStatus({ tournamentId: id, status: "about_to_start" }),
+      );
+    } catch (err) {
+      console.error("Failed to load tournaments:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartTournament = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await axios.put(
+        `/api/tournaments/${tournament.id}/status`,
+        {
+          status: "in_progress",
+          started_at: new Date().toISOString(),
+        },
+      );
+
+      dispatch(
+        updateTournamentStatus({
+          tournamentId: id,
+          status: "in_progress",
+          started_at: data.data.started_at,
+        }),
+      );
+    } catch (err) {
+      console.error("Failed to load tournaments:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleChangeStatus = async (
     status: "open" | "about_to_start" | "in_progress" | "finished" | "closed",
   ) => {
+    setIsLoading(true);
     let payload = { status: "open" };
     switch (status) {
       case "about_to_start": {
@@ -77,18 +115,8 @@ const TournamentHero = ({
       );
     } catch (err) {
       console.error("Failed to load tournaments:", err);
-    }
-  };
-
-  const handleArhiveTournament = async () => {
-    try {
-      const tournamentDoc = doc(db, "tournaments", tournament.id);
-      await addDoc(collection(db, "archivedTournaments"), tournament);
-      await deleteDoc(tournamentDoc);
-
-      router.replace("/tournaments");
-    } catch (error) {
-      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,22 +136,25 @@ const TournamentHero = ({
           {canEditTournament && (
             <div className="flex items-center gap-4">
               {tournament.creator && (
-                <div className="">
+                <div>
                   <span className="text-sm">Создатель</span>
-                  <div className="mt-1 flex gap-2 items-center">
-                    <Image
-                      width={32}
-                      height={32}
-                      className="w-6 h-6 rounded-full"
-                      src={tournament?.creator?.image_url || ""}
-                      alt="User photo"
-                    />
-                    <div>
-                      <span className="text-xs font-bold">
+                  <Link
+                    href={`/users/${tournament.creator_id}`}
+                    className="cursor-pointer group"
+                  >
+                    <div className="mt-1 flex gap-2 items-center">
+                      <Image
+                        width={32}
+                        height={32}
+                        className="w-6 h-6 rounded-full"
+                        src={tournament?.creator?.image_url || ""}
+                        alt="User photo"
+                      />
+                      <span className="text-xs font-bold group-hover:underline">
                         {tournament?.creator?.full_name}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               )}
               {tournament?.created_at && (
@@ -143,14 +174,16 @@ const TournamentHero = ({
               <CustomButton
                 icon={<Album className="h-4 w-4" />}
                 label="Закрыть регистрацию"
-                onClick={() => handleChangeStatus("about_to_start")}
+                isLoading={isLoading}
+                onClick={handleCloseRegistration}
               />
             )}
             {tournament.status === "about_to_start" && (
               <CustomButton
                 icon={<Trophy className="h-4 w-4" />}
                 label="Начать турнир"
-                onClick={() => handleChangeStatus("in_progress")}
+                isLoading={isLoading}
+                onClick={handleStartTournament}
               />
             )}
             {tournament.status === "in_progress" && (
@@ -160,13 +193,13 @@ const TournamentHero = ({
                 onClick={handleClickDeleteWinner}
               />
             )}
-            {tournament.status === "finished" && (
+            {/* {tournament.status === "finished" && (
               <CustomButton
                 icon={<Archive className="h-4 w-4" />}
                 label="Архивировать"
                 onClick={handleArhiveTournament}
               />
-            )}
+            )} */}
             {tournament.status !== "finished" && (
               <CustomButton
                 icon={<Edit className="h-4 w-4 text-amber-600" />}

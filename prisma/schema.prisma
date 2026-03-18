@@ -26,6 +26,9 @@ model Profile {
   judged_tournaments       TournamentJudge[]        @relation("ProfileAsJudge")
   team_memberships         TeamMember[]             @relation("TeamMembership")
   tournament_registrations TournamentRegistration[] @relation("UserTournamentRegistrations")
+  
+  // Добавлено: связь с участниками матчей (для одиночных турниров)
+  match_participations     MatchParticipant[]
 
   games           Game[]           @relation("UserGames")
   feedbacks       Feedback[]
@@ -61,16 +64,15 @@ model Tournament {
   started_at     DateTime?
   created_at     DateTime  @default(now()) @map("created_at")
 
-  game Game? @relation(fields: [game_id], references: [id])
-
+  game        Game?    @relation(fields: [game_id], references: [id])
   creator     Profile  @relation("TournamentCreator", fields: [creator_id], references: [id], onDelete: Cascade)
   winner_user Profile? @relation("TournamentWinnerUser", fields: [winner_user_id], references: [id], onDelete: SetNull)
-
   winner_team TournamentTeam? @relation("TournamentWinnerTeam", fields: [winner_team_id], references: [id], onDelete: SetNull)
 
   teams         TournamentTeam[]         @relation("TournamentTeams")
   registrations TournamentRegistration[] @relation("TournamentRegistrations")
   judges        TournamentJudge[]        @relation("TournamentJudges")
+  rounds        Round[]                  @relation("TournamentRounds")
 
   @@map("tournaments")
 }
@@ -98,6 +100,8 @@ model TournamentTeam {
   tournament Tournament   @relation("TournamentTeams", fields: [tournament_id], references: [id], onDelete: Cascade)
   creator    Profile      @relation(fields: [creator_id], references: [id], onDelete: SetNull)
   members    TeamMember[] @relation("TournamentTeamMembers")
+
+  match_participations MatchParticipant[]
 
   won_tournament Tournament? @relation("TournamentWinnerTeam")
 
@@ -161,4 +165,45 @@ model Notification {
   created_at DateTime @default(now()) @map("created_at")
 
   @@map("notifications")
+}
+
+model Round {
+  id            String   @id @default(cuid())
+  tournament_id String
+  number        Int     
+  name          String? 
+  
+  tournament    Tournament @relation("TournamentRounds", fields: [tournament_id], references: [id], onDelete: Cascade)
+  matches       Match[]    @relation("RoundMatches")
+
+  @@map("tournament_rounds")
+}
+
+model Match {
+  id            String   @id @default(cuid())
+  round_id      String
+  status        String   @default("pending") // pending, live, finished
+  next_match_id String?
+  
+  round         Round    @relation("RoundMatches", fields: [round_id], references: [id], onDelete: Cascade)
+  participants  MatchParticipant[] 
+
+  @@map("tournament_matches")
+}
+
+model MatchParticipant {
+  id           String   @id @default(cuid())
+  match_id     String
+  slot         Int      
+  score        Int      @default(0)
+  is_winner    Boolean  @default(false)
+
+  profile_id   String?  @db.Uuid
+  team_id      String?
+
+  match        Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  profile      Profile?        @relation(fields: [profile_id], references: [id])
+  team         TournamentTeam? @relation(fields: [team_id], references: [id])
+
+  @@map("tournament_match_participants")
 }

@@ -1,14 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import JoinTeamButton from "../JoinTeamButton/JoinTeamButton";
-import TeamUserItem from "../TeamUserItem/TeamUserItem";
-import { doc, updateDoc } from "firebase/firestore";
 import {
   addTeamParticipant,
   removeTeam,
   removeTeamParticipant,
 } from "@/app/utils/store/tournamentsSlice";
 import { Lock, Trash2 } from "lucide-react";
-import { db } from "@/app/utils/firebase";
 import { useParams } from "next/navigation";
 import CustomModal from "../../Shared/CustomModal/CustomModal";
 import UserAddList from "./UserAddList/UserAddList";
@@ -40,7 +37,6 @@ const TeamItem = ({
   creator_id,
   canJoin,
   tournament_status,
-  teams,
   occupiedUserIds,
 }: ITeamItemProps) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
@@ -60,7 +56,9 @@ const TeamItem = ({
 
   const isEnoughRole =
     currentUser.role === "admin" || currentUser.role === "superadmin";
-  const isMyTeam = members.some((member) => member.id === currentUser.id);
+  const isMyTeam = members.some(
+    (member) => member.profile_id === currentUser.id,
+  );
 
   const handleDeleteTeam = async (teamId: string) => {
     setIsDeleteLoading(true);
@@ -99,17 +97,20 @@ const TeamItem = ({
     }
   };
 
-  const handleLeaveTeam = async (clickedUserUid: string) => {
+  const handleLeaveTeam = async (
+    teamMemberRecordId: string,
+    profileId: string,
+  ) => {
     try {
-      await axios.delete(`/api/teams/${id}/members`, {
-        data: { userId: clickedUserUid },
+      await axios.delete(`/api/tournaments/${tournamentId}/teams/members`, {
+        data: { teamMemberRecordId },
       });
 
       dispatch(
         removeTeamParticipant({
           tournamentId,
           teamId: id,
-          userId: clickedUserUid,
+          userId: profileId,
         }),
       );
     } catch (error) {
@@ -150,6 +151,7 @@ const TeamItem = ({
             members={members}
             isMyTeam={isMyTeam}
             isLoading={isLoading}
+            creator_id={creator_id}
             isCurrentUserCreator={currentUser.id === creator_id}
             onLeaveClick={handleLeaveTeam}
             canLeave={tournament_status === "open"}

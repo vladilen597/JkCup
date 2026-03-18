@@ -61,11 +61,6 @@ export interface IBracket {
   participants: IUser[];
 }
 
-export interface IRound {
-  id: string;
-  matches: any[];
-}
-
 export interface ITeamMember {
   id: string;
   joined_at: string;
@@ -102,39 +97,64 @@ export interface ITournament {
   name: string;
   game_id: string | null;
   game?: IGame | null;
-
   type: string;
   max_players: number | null;
   max_teams: number | null;
   players_per_team: number;
-
   description: string | null;
   rules: string | null;
   stream_link: string | null;
   status: string;
-
   creator_id: string;
   creator?: IUser;
-
   registrations?: ITournamentRegistration[];
   teams?: ITeam[];
   judges?: ITournamentJudge[];
-
   winner_user_id: string | null;
   winner_user?: IUser | null;
-
   winner_team_id: string | null;
   winner_team?: ITeam | null;
 
-  bracket: IBracket | null;
+  // ВАЖНО: Заменяем bracket: IBracket на rounds
+  rounds?: IRound[];
+
   rewards: { id: string; value: string }[] | null;
   tags: ITag[] | null;
-
   start_date: string | null;
   started_at: string | null;
   created_at: string;
-
   duration: number | null;
   hidden: boolean;
   is_bracket: boolean;
+}
+
+// Дополнительные интерфейсы для сетки
+export interface IRound {
+  id: string;
+  tournament_id: string;
+  number: number;
+  name: string | null;
+  matches: IMatch[]; // Проверь, что тут именно IMatch[]
+}
+
+export interface IMatch {
+  id: string;
+  round_id: string;
+  status: string;
+  next_match_id: string | null;
+  winner_id: string | null;
+  metadata: any | null; // Здесь можно хранить { info: string }
+  participants: IMatchParticipant[];
+}
+
+export interface IMatchParticipant {
+  id: string;
+  match_id: string;
+  slot: number;
+  score: number;
+  is_winner: boolean;
+  profile_id: string | null;
+  team_id: string | null;
+  profile?: IUser; // Данные игрока из Prisma include
+  team?: ITeam; // Данные команды из Prisma include
 }

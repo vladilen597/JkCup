@@ -2,45 +2,13 @@
 
 import UserList from "@/app/components/UserList/UserList";
 import { useAppSelector, useAppDispatch } from "@/app/utils/store/hooks";
-import { format } from "date-fns";
 import { motion } from "motion/react";
-import {
-  Users,
-  Calendar,
-  Hash,
-  Loader2,
-  AlertCircle,
-  User,
-  Edit,
-  Trash2,
-  Trophy,
-  Clock,
-  Album,
-  Archive,
-  TrophyIcon,
-  Crown,
-} from "lucide-react";
+import { Users, Loader2, AlertCircle, Crown, Trophy } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
-import { db } from "@/app/utils/firebase";
+import { useEffect, useState } from "react";
 import {
-  doc,
-  updateDoc,
-  deleteDoc,
-  arrayUnion,
-  getDoc,
-  arrayRemove,
-  addDoc,
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
-import {
-  addParticipant,
-  removeParticipant,
-  removeUserFromSingleTournament,
-  setTournaments,
+  removeTournament,
   updateTournament,
-  updateTournamentStatus,
 } from "@/app/utils/store/tournamentsSlice";
 import TeamList from "@/app/components/TeamsList/TeamsList";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
@@ -176,11 +144,7 @@ const TournamentPage = () => {
   const handleLoadTournament = async () => {
     setIsTournamentLoading(true);
     try {
-      const { data } = await axios.get("/api/tournaments/tournament", {
-        params: {
-          id: tournamentId,
-        },
-      });
+      const { data } = await axios.get(`/api/tournaments/${tournamentId}`);
       handleUpdateTournament(data);
     } catch (error) {
       toast.error("Ошибка загрузки турнира " + tournamentId);
@@ -194,20 +158,6 @@ const TournamentPage = () => {
     handleLoadTournament();
   }, []);
 
-  const handleRemoveUserFromTournament = async (userId: string) => {
-    try {
-      const userRef = doc(db, "users", userId);
-      const user = (await getDoc(userRef)).data();
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      updateDoc(tournamentRef, {
-        usersIds: arrayRemove(user),
-      });
-      dispatch(removeUserFromSingleTournament({ tournamentId, userId }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const handleDelete = async () => {
     if (!canEdit || !tournament?.id) return;
 
@@ -218,6 +168,7 @@ const TournamentPage = () => {
       await axios.delete(`/api/tournaments/${tournament.id}`);
 
       toast.success("Турнир удален");
+      dispatch(removeTournament({ tournamentId: tournament.id }));
       router.replace("/tournaments");
     } catch (err: any) {
       console.error("Delete error:", err.response?.data || err.message);

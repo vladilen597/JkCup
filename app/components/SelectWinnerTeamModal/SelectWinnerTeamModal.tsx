@@ -66,7 +66,7 @@ const SelectWinnerTeamModal = ({
         <Trophy className="h-5 w-5 text-amber-400" />
         Выбрать команду-победителя
       </h3>
-      <section className="mt-4 max-h-[400px] overflow-y-auto">
+      <section className="mt-4 max-h-100 overflow-y-auto">
         <SelectTeamList
           teams={teams}
           selectedTeam={selectedTeam}

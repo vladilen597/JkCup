@@ -59,7 +59,6 @@ const Notifications = () => {
     setIsLoading(true);
     try {
       const { data } = await axios.get("/api/notifications");
-      console.log(data);
       setNotifications(data);
     } catch (error) {
       console.log(error);

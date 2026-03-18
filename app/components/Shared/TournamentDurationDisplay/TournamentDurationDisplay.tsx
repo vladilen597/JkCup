@@ -1,10 +1,10 @@
 import { Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface TournamentDurationDisplayProps {
-  duration?: number;
+  duration?: number; // Длительность в миллисекундах
   status: string;
-  startedAt?: string | Date | any;
+  startedAt?: string | Date | null;
 }
 
 const TournamentDurationDisplay = ({
@@ -12,55 +12,56 @@ const TournamentDurationDisplay = ({
   status,
   startedAt,
 }: TournamentDurationDisplayProps) => {
+  // Утилита форматирования
   const formatDuration = (ms: number) => {
-    if (!ms || ms <= 0) return "00:00:00";
-
-    const totalSeconds = Math.floor(ms / 1000);
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    return `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    return [hours, minutes, seconds]
+      .map((v) => v.toString().padStart(2, "0"))
+      .join(":");
   };
 
-  const calculateRemaining = () => {
+  // Функция расчета остатка
+  const calculateRemaining = useCallback(() => {
     if (!startedAt || !duration) return duration || 0;
 
-    const startTime = new Date(
-      startedAt?.seconds ? startedAt.seconds * 1000 : startedAt,
-    );
-    const elapsedMs = Date.now() - startTime.getTime();
-
-    const remaining = duration - elapsedMs;
-    return Math.max(remaining, 0);
-  };
+    // Prisma присылает дату строкой или объектом Date
+    const startTime = new Date(startedAt).getTime();
+    const elapsedMs = Date.now() - startTime;
+    return Math.max(duration - elapsedMs, 0);
+  }, [startedAt, duration]);
 
   const [remainingMs, setRemainingMs] = useState(calculateRemaining());
 
   useEffect(() => {
-    if (!startedAt || !duration) return;
-
-    const timer = setInterval(() => {
-      setRemainingMs(calculateRemaining());
-    }, 1000);
-
-    if (timer && status === "in_progress") {
-      clearInterval(timer);
+    // Если турнир не идет или нет данных — сбрасываем остаток на базовую длительность
+    if (status !== "in_progress" || !startedAt) {
+      setRemainingMs(duration || 0);
+      return;
     }
 
-    return () => clearInterval(timer);
-  }, [startedAt, duration, status]);
+    // Запускаем интервал только если статус "in_progress"
+    const timer = setInterval(() => {
+      const nextRemaining = calculateRemaining();
+      setRemainingMs(nextRemaining);
 
-  if (!duration && !remainingMs) {
-    return null;
-  }
+      if (nextRemaining <= 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [status, startedAt, duration, calculateRemaining]);
+
+  if (!duration && !startedAt) return null;
 
   return (
-    <div className="px-3 py-1.5 mt-2 flex items-center gap-2 text-sm bg-[#171a21] w-fit rounded-lg border border-neon! text-neon">
+    <div className="px-3 py-1.5 mt-2 flex items-center gap-2 text-sm bg-[#171a21] w-fit rounded-lg border border-neon! text-neon shadow-[0_0_10px_rgba(0,255,255,0.2)]">
       <Clock className="h-4 w-4" />
-      {startedAt ? (
+      {status === "in_progress" && startedAt ? (
         remainingMs > 0 ? (
           <>
             Осталось:{" "}
@@ -69,14 +70,13 @@ const TournamentDurationDisplay = ({
             </span>
           </>
         ) : (
-          <span className="text-red-400">Турнир окончен</span>
+          <span className="text-red-400 font-bold">Турнир окончен</span>
         )
-      ) : status !== "in_progress" ? (
+      ) : (
         <>
+          Длительность:{" "}
           <span className="font-mono">{formatDuration(duration || 0)}</span>
         </>
-      ) : (
-        ""
       )}
     </div>
   );

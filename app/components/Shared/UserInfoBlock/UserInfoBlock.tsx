@@ -4,6 +4,7 @@ import Discord from "../../Icons/Discord";
 import Steam from "../../Icons/Steam";
 import { MouseEvent } from "react";
 import { IUser } from "@/app/lib/types";
+import { cn } from "@/lib/utils";
 
 const UserInfoBlock = ({
   id,
@@ -12,7 +13,8 @@ const UserInfoBlock = ({
   discord,
   steam_link,
   steam_display_name,
-}: Partial<IUser>) => {
+  size = "default",
+}: Partial<IUser> & { size?: "small" | "default" }) => {
   const { user: currentUser } = useAppSelector((state) => state.user);
   const isCurrentUser = currentUser.id === id;
 
@@ -25,21 +27,37 @@ const UserInfoBlock = ({
       {image_url ? (
         <Image
           unoptimized
-          width={40}
-          height={40}
+          width={size === "default" ? 40 : 20}
+          height={size === "default" ? 40 : 20}
           src={image_url}
           alt={full_name || ""}
-          className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+          className={cn(
+            "rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all",
+            size === "default" && "w-10 h-10",
+            size === "small" && "w-7 h-7",
+          )}
         />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20">
+        <div
+          className={cn(
+            "rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-primary/20",
+            size === "default" && "w-10 h-10",
+            size === "small" && "w-7 h-7 text-xs",
+          )}
+        >
           {full_name?.charAt(0).toUpperCase()}
         </div>
       )}
 
       <div className="flex-1 min-w-0">
         <div>
-          <p className="font-semibold text-foreground truncate leading-5 text-sm">
+          <p
+            className={cn(
+              "font-semibold text-foreground truncate leading-5 text-sm",
+              size === "default" && "text-sm",
+              size === "small" && "text-xs",
+            )}
+          >
             {full_name}
             {isCurrentUser && (
               <span className="ml-2 text-xs leading-0 text-orange-400">Вы</span>
@@ -48,12 +66,25 @@ const UserInfoBlock = ({
           <div className="flex items-center gap-2">
             {discord && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                <Discord className="w-4 h-4" /> {discord}
+                <Discord
+                  className={cn(
+                    "w-4 h-4",
+                    size === "default" && "w-4 h-4",
+                    size === "small" && "w-3 h-3",
+                  )}
+                />
+                {discord}
               </p>
             )}
             {!!steam_link && !!steam_display_name && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
-                <Steam className="w-4 h-4" />{" "}
+                <Steam
+                  className={cn(
+                    "w-4 h-4",
+                    size === "default" && "w-4 h-4",
+                    size === "small" && "w-3 h-3",
+                  )}
+                />
                 <a
                   onClick={handleClickSteamLink}
                   className="underline"

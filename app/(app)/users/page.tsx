@@ -15,6 +15,7 @@ import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/utils/firebase";
 import { IUser } from "@/app/lib/types";
+import { toast } from "react-toastify";
 
 const roles = [
   {
@@ -73,62 +74,34 @@ const UsersPage = () => {
     }
   };
 
-  const handleUnlockUser = async (id: string) => {
+  const toggleUserStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "blocked" ? "active" : "blocked";
+
     try {
-      await axios.post("/api/users/enable", {
-        id,
-      });
-      const userRef = doc(db, "users", id);
-      await updateDoc(userRef, {
-        status: "active",
-      });
+      const { data: updatedUser } = await axios.patch(
+        `/api/users/${id}/status`,
+        {
+          status: newStatus,
+        },
+      );
+
       setUsers((prevState) =>
-        prevState.map((user) => {
-          if (user.id === id) {
-            return {
-              ...user,
-              status: "active",
-            };
-          }
-          return user;
-        }),
+        prevState.map((user) => (user.id === id ? updatedUser : user)),
+      );
+
+      toast.success(
+        newStatus === "active"
+          ? "Пользователь разблокирован"
+          : "Пользователь заблокирован",
       );
     } catch (error) {
-      console.log(error);
+      console.error("Ошибка при смене статуса:", error);
+      toast.error("Не удалось изменить статус пользователя");
     }
   };
 
-  const handleBlockUser = async (id: string) => {
-    try {
-      await axios.post("/api/users/disable", {
-        id,
-      });
-      const userRef = doc(db, "users", id);
-      await updateDoc(userRef, {
-        status: "blocked",
-      });
-      setUsers((prevState) =>
-        prevState.map((user) => {
-          if (user.id === id) {
-            return {
-              ...user,
-              status: "blocked",
-            };
-          }
-          return user;
-        }),
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleBlockClick = (id: string, status: "blocked" | "active") => {
-    if (status === "active" || typeof status === "undefined") {
-      handleBlockUser(id);
-    } else {
-      handleUnlockUser(id);
-    }
+  const handleBlockClick = (id: string, status: string) => {
+    toggleUserStatus(id, status);
   };
 
   useEffect(() => {
