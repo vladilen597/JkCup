@@ -12,6 +12,8 @@ const initialState: { user: IUser } = {
     steam_link: "",
     steam_display_name: "",
     games: [],
+    who_invited: "",
+    judged_tournaments: [],
   },
 };
 

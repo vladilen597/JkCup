@@ -5,15 +5,13 @@ import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import React, { useEffect, useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
 import { Lock, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IUser } from "@/app/lib/types";
 import axios from "axios";
 
-const roleSelectOptions = [
+export const roleSelectOptions = [
   {
     id: 1,
     value: "guest",

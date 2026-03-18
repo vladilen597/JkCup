@@ -28,15 +28,14 @@ export const GET = async (
   }
 };
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
-
 export const DELETE = async (
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) => {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
   try {
     const { id } = await params;
 

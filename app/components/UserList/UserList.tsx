@@ -1,10 +1,8 @@
 "use client";
 
-import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
-import { useEffect, useState } from "react";
 import UserLine from "./UserLine/UserLine";
 import { Users } from "lucide-react";
-import { ITournamentRegistration, IUser } from "@/app/lib/types";
+import { ITournamentRegistration } from "@/app/lib/types";
 
 interface UserListProps {
   showRoles?: boolean;

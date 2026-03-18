@@ -155,19 +155,19 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
     }
   };
 
-  const handleSetWinner = async (matchId: string, participantId: string) => {
-    try {
-      const { data } = await axios.patch(
-        `/api/tournaments/${tournament.id}/matches/${matchId}/winner`,
-        {
-          participantId,
-        },
-      );
-      updateLocalBracket(data);
-    } catch (err) {
-      console.error("Failed to set winner:", err);
-    }
-  };
+  // const handleSetWinner = async (matchId: string, participantId: string) => {
+  //   try {
+  //     const { data } = await axios.patch(
+  //       `/api/tournaments/${tournament.id}/matches/${matchId}/winner`,
+  //       {
+  //         participantId,
+  //       },
+  //     );
+  //     updateLocalBracket(data);
+  //   } catch (err) {
+  //     console.error("Failed to set winner:", err);
+  //   }
+  // };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -299,7 +299,8 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                                 isAdmin={isAdmin}
                                 label="Участник 1"
                                 onRemove={handleRemoveParticipantFromMatch}
-                                onWinnerClick={handleSetWinner}
+                                onWinnerClick={() => {}}
+                                // onWinnerClick={handleSetWinner}
                               />
 
                               <ChangeInfoInput
@@ -324,7 +325,8 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
                                 isAdmin={isAdmin}
                                 label="Участник 2"
                                 onRemove={handleRemoveParticipantFromMatch}
-                                onWinnerClick={handleSetWinner}
+                                onWinnerClick={() => {}}
+                                // onWinnerClick={handleSetWinner}
                               />
                             </div>
                           </MatchBox>

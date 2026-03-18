@@ -1,7 +1,5 @@
-import handleGetUsersByIds from "@/app/utils/requests/getUsersByIds";
-import { useEffect, useState } from "react";
 import JudgeLine from "../JudgeItem/JudgeItem";
-import { ITournamentJudge, IUser } from "@/app/lib/types";
+import { ITournamentJudge } from "@/app/lib/types";
 
 const JudgeList = ({ judges }: { judges: ITournamentJudge[] }) => {
   return (

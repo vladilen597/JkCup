@@ -100,13 +100,14 @@ const Tournament = ({
                 )}
                 <span className="font-bold">{game?.name}</span>
               </div>
-              {currentUser.games?.some(
-                (userGame) => userGame.id === game?.id,
-              ) && (
-                <span className="text-xs text-primary">
-                  Турнир по одной из ваших игр
-                </span>
-              )}
+              {currentUser &&
+                currentUser.games?.some(
+                  (userGame) => userGame.id === game?.id,
+                ) && (
+                  <span className="text-xs text-primary">
+                    Турнир по одной из ваших игр
+                  </span>
+                )}
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />
               </div>

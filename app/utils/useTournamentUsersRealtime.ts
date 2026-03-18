@@ -1,38 +1,25 @@
 import { useEffect, useState } from "react";
-import { supabase } from "./supabase";
+import axios from "axios";
 
 export const useTournamentStats = () => {
-  const [count, setCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+  const [teamsCount, setTeamsCount] = useState(0);
+
+  const handleGetTournaments = async () => {
+    try {
+      const { data } = await axios.get<{ users: number; teams: number }>(
+        "/api/tournaments/stats",
+      );
+      setUsersCount(data.users);
+      setTeamsCount(data.teams);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    const fetchInitialCount = async () => {
-      const { count } = await supabase
-        .from("tournament_registrations")
-        .select("*", { count: "exact", head: true });
-      setCount(count || 0);
-    };
-
-    fetchInitialCount();
-
-    const channel = supabase
-      .channel(`stats`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "tournament_registrations",
-        },
-        () => {
-          fetchInitialCount();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    handleGetTournaments();
   }, []);
 
-  return { count };
+  return { usersCount, teamsCount };
 };

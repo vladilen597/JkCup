@@ -5,6 +5,7 @@ import { useAppDispatch } from "@/app/utils/store/hooks";
 import { setUser } from "@/app/utils/store/userSlice";
 import { ChangeEvent, useState } from "react";
 import axios from "axios";
+import CustomPasswordInput from "../Shared/CustomPasswordInput/CustomPasswordInput";
 
 const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
   const [email, setEmail] = useState("");
@@ -87,11 +88,10 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
           onChange={handleChangeEmail}
           required
         />
-        <CustomInput
+        <CustomPasswordInput
           label="Пароль"
           value={password}
           onChange={handleChangePassword}
-          required
         />
         <CustomInput
           label="Никнейм"
@@ -133,7 +133,7 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
         value={email}
         onChange={handleChangeEmail}
       />
-      <CustomInput
+      <CustomPasswordInput
         label="Пароль"
         value={password}
         onChange={handleChangePassword}

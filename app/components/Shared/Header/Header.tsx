@@ -195,20 +195,16 @@ const Header = () => {
     setIsAuthModalOpen(false);
   };
 
-  const handleLogOut = () => {
-    dispatch(
-      setUser({
-        id: "",
-        full_name: "Anonymous",
-        image_url: "",
-        email: "",
-        role: "guest",
-        discord: "",
-        who_invited: "",
-        judged_tournaments: [],
-      }),
-    );
-    setIsProfileOpen(false);
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/auth/signout");
+
+      dispatch(setUser(null));
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Ошибка при выходе:", error);
+    }
   };
 
   const handleLoadUser = async () => {
@@ -229,7 +225,9 @@ const Header = () => {
   };
 
   useEffect(() => {
-    handleLoadUser();
+    if (user) {
+      handleLoadUser();
+    }
   }, []);
 
   return (
@@ -309,7 +307,7 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {user.id ? (
+          {user?.id ? (
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen((p) => !p)}
@@ -351,7 +349,7 @@ const Header = () => {
                 {isProfileOpen && (
                   <ProfileDropdown
                     userId={user.id}
-                    handleClickLogout={handleLogOut}
+                    handleClickLogout={handleLogout}
                     onClose={handleCloseProfileDropdown}
                   />
                 )}

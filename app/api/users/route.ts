@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import admin from "firebase-admin";
+
 import { prisma } from "@/lib/prisma";
 
 export const GET = async () => {
   try {
-    const users = await prisma.profile.findMany();
+    const users = await prisma.profile.findMany({
+      orderBy: {
+        role: "desc",
+      },
+    });
 
     return NextResponse.json(users);
   } catch (error) {

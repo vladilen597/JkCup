@@ -17,6 +17,8 @@ import MultipleGameSelect from "@/app/components/MultipleGameSelect/MultipleGame
 import axios from "axios";
 import { IGame, IUser } from "@/app/lib/types";
 import { toast } from "react-toastify";
+import RoleSelect from "@/app/components/Shared/RoleSelect/RoleSelect";
+import { roleSelectOptions } from "@/app/components/UserList/UserLine/UserLine";
 
 export const roles = {
   user: "Участник",
@@ -54,6 +56,15 @@ const page = () => {
   const params = useParams();
   const isCurrentUser = params.id === currentUser.id;
   const [isLoading, setIsLoading] = useState(false);
+  const [userRole, setUserRole] = useState<{
+    id: number;
+    value: string;
+    label: string;
+  }>({
+    id: 1,
+    value: "guest",
+    label: "Гость",
+  });
   const dispatch = useAppDispatch();
 
   const handleUpdateSteamAccount = (event: ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +111,9 @@ const page = () => {
 
       if (data) {
         setUserInfo(data);
+        setUserRole(
+          roleSelectOptions.find((option) => option.value === data.role),
+        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -108,6 +122,24 @@ const page = () => {
           error.response?.data || error.message,
         );
       }
+    }
+  };
+
+  const handleUpdateRole = async (value: {
+    id: number;
+    value: string;
+    label: string;
+  }) => {
+    const oldRole = userRole;
+    setUserRole(value);
+    try {
+      await axios.post("/api/users/user/update/role", {
+        userId: userInfo.id,
+        newRole: value.value,
+      });
+    } catch (error) {
+      console.log(error);
+      setUserRole(oldRole);
     }
   };
 
@@ -177,7 +209,7 @@ const page = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
+        className="relative  rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
       >
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
@@ -243,14 +275,31 @@ const page = () => {
               </motion.p>
             )}
 
-            <motion.span
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className={`text-sm font-mono ${roleColors[userInfo.role]}`}
-            >
-              {roles[userInfo.role]}
-            </motion.span>
+            {currentUser.role === "superadmin" &&
+            currentUser.id !== userInfo.id ? (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className={`text-sm font-mono`}
+              >
+                <RoleSelect
+                  triggerClassName="justify-start"
+                  value={userRole}
+                  onChange={handleUpdateRole}
+                  options={roleSelectOptions}
+                />
+              </motion.div>
+            ) : (
+              <motion.span
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className={`text-sm font-mono ${roleColors[userInfo.role]}`}
+              >
+                {roles[userInfo.role]}
+              </motion.span>
+            )}
           </div>
         </div>
       </motion.div>

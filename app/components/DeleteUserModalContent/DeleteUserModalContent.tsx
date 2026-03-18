@@ -3,9 +3,6 @@ import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
 import { Trash2 } from "lucide-react";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
-// import admin from "firebase-admin";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -22,7 +19,7 @@ const DeleteUserModalContent = ({
 }: IDeleteUserModalContentProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async () => {
     setIsLoading(true);
     try {
       const { status } = await axios.delete(`/api/users/${userId}`);
