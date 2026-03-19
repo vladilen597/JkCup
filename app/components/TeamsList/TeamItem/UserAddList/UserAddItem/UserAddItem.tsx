@@ -1,13 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import Discord from "@/app/components/Icons/Discord";
 import { useParams } from "next/navigation";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { motion } from "motion/react";
-import { db } from "@/app/utils/firebase";
 import { useState } from "react";
 import { addTeamParticipant } from "@/app/utils/store/tournamentsSlice";
 import { Loader2 } from "lucide-react";
-import { ITeam, IUser } from "@/app/lib/types";
+import { IUser } from "@/app/lib/types";
 import Image from "next/image";
 import axios from "axios";
 import { toast } from "react-toastify";

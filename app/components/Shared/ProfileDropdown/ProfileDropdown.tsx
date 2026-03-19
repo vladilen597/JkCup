@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { DoorClosed, Settings } from "lucide-react";
+import { DoorClosed, Settings, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
@@ -44,8 +44,8 @@ const ProfileDropdown = ({
         onClick={onClose}
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
       >
-        <Settings className="h-4 w-4" />
-        Настройки
+        <User className="h-4 w-4" />
+        Профиль
       </Link>
       <button
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"

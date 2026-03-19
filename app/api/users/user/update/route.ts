@@ -23,13 +23,11 @@ export const POST = async (req: NextRequest) => {
   try {
     const formData = await req.formData();
 
-    // 1. Чистим ID от возможных пробелов и проверяем его
     const rawId = formData.get("id") as string;
     if (!rawId)
       return NextResponse.json({ message: "ID не указан" }, { status: 400 });
     const id = rawId.trim();
 
-    // 2. Проверка авторизации через сессию Supabase
     const {
       data: { user },
       error: authError,
@@ -38,7 +36,6 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ message: "Доступ запрещен" }, { status: 403 });
     }
 
-    // 3. Собираем объект обновления только из тех полей, что пришли
     const updateData: any = {};
 
     if (formData.has("full_name"))
@@ -47,7 +44,6 @@ export const POST = async (req: NextRequest) => {
     if (formData.has("steam_link"))
       updateData.steam_link = formData.get("steam_link");
 
-    // 4. Обработка КАРТИНКИ (только если пришел новый файл)
     const file = formData.get("image") as File | null;
     if (file && file.size > 0) {
       const arrayBuffer = await file.arrayBuffer();
@@ -73,31 +69,30 @@ export const POST = async (req: NextRequest) => {
       updateData.image_url = publicUrl;
     }
 
-    // 5. Обработка ИГР (через Many-to-Many коннект)
     const gameIdsRaw = formData.get("gameIds") as string;
     let gameConnect: any = undefined;
 
+    console.log("gameIdsRaw", gameIdsRaw);
     if (gameIdsRaw) {
       const gameIds: string[] = JSON.parse(gameIdsRaw);
 
-      // Вместо простого set в общем объекте,
-      // мы явно говорим Prisma: "отключи всё старое и подключи это"
       gameConnect = {
         set: gameIds.map((id) => ({ id })),
       };
     }
 
-    // 6. Обновление в БД
     const updatedProfile = await prisma.profile.update({
       where: { id },
       data: {
         ...updateData,
-        games: gameConnect, // Передаем сформированный объект set
+        games: gameConnect,
       },
       include: {
         games: true,
       },
     });
+
+    console.log(updatedProfile);
 
     return NextResponse.json({ user: updatedProfile }, { status: 200 });
   } catch (err: any) {

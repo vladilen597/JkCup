@@ -16,6 +16,7 @@ export const GET = async (
             tournament: true,
           },
         },
+        games: true,
       },
     });
     return NextResponse.json(user);

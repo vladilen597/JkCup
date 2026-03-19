@@ -1,13 +1,11 @@
 "use client";
 
 import Discord from "@/app/components/Icons/Discord";
-import { db } from "@/app/utils/firebase";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { setUser } from "@/app/utils/store/userSlice";
-import { doc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Loader2 } from "lucide-react";
 import Steam from "@/app/components/Icons/Steam";
@@ -19,6 +17,8 @@ import { IGame, IUser } from "@/app/lib/types";
 import { toast } from "react-toastify";
 import RoleSelect from "@/app/components/Shared/RoleSelect/RoleSelect";
 import { roleSelectOptions } from "@/app/components/UserList/UserLine/UserLine";
+import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
+import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 
 export const roles = {
   user: "Участник",
@@ -166,6 +166,7 @@ const page = () => {
       formData.append("discord", userInfo.discord || "");
       formData.append("steam_link", userInfo.steam_link || "");
       const gameIds = userInfo.games?.map((game) => game.id) || [];
+
       formData.append("gameIds", JSON.stringify(gameIds));
 
       if (imageFile) {
@@ -188,21 +189,6 @@ const page = () => {
     handleLoadUser();
   }, []);
 
-  if (!userInfo.id) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          className="text-primary"
-        >
-          <Loader2 className="h-8 w-8" />
-        </motion.div>
-        Загрузка пользователя...
-      </div>
-    );
-  }
-
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
       <motion.div
@@ -214,91 +200,125 @@ const page = () => {
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 ">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative ring-2 ring-primary/30 shadow-xl rounded-full overflow-hidden"
-          >
-            {isCurrentUser && (
-              <div className="absolute flex items-center justify-center w-full h-full z-10 hover:opacity-100 opacity-0 bg-black/50 transition-all">
-                <input
-                  type="file"
-                  className="absolute opacity-0 z-10 w-full h-full cursor-pointer"
-                  onChange={handleChangeImage}
-                />
-                <Camera />
-              </div>
-            )}
-            {imageFile ? (
-              <Image
-                width={128}
-                height={128}
-                className="w-24 h-24 md:w-32 md:h-32 object-cover"
-                src={URL.createObjectURL(imageFile)}
-                alt="Profile picture"
-              />
-            ) : userInfo.image_url ? (
-              <Image
-                width={128}
-                height={128}
-                className="w-24 h-24 md:w-32 md:h-32 object-cover"
-                src={userInfo.image_url}
-                alt="Profile picture"
-              />
-            ) : (
-              <div className="w-32 h-32 bg-primary/10 flex items-center justify-center text-primary text-2xl">
-                {userInfo.full_name?.[0] || "U"}
-              </div>
-            )}
-          </motion.div>
-
-          <div className="space-y-2">
-            <motion.h1
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-3xl md:text-4xl font-black tracking-tight"
+          {!userInfo.id ? (
+            <CustomSkeleton
+              className="rounded-full"
+              width={128}
+              height={128}
+              borderRadius="100%"
+            />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative ring-2 ring-primary/30 shadow-xl rounded-full overflow-hidden"
             >
-              {userInfo.full_name}
-            </motion.h1>
+              <>
+                {isCurrentUser && (
+                  <div className="absolute flex items-center justify-center w-full h-full z-10 hover:opacity-100 opacity-0 bg-black/50 transition-all">
+                    <input
+                      type="file"
+                      className="absolute opacity-0 z-10 w-full h-full cursor-pointer"
+                      onChange={handleChangeImage}
+                    />
+                    <Camera />
+                  </div>
+                )}
+                {imageFile ? (
+                  <Image
+                    width={128}
+                    height={128}
+                    className="w-24 h-24 md:w-32 md:h-32 object-cover"
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Profile picture"
+                  />
+                ) : userInfo.image_url ? (
+                  <Image
+                    width={128}
+                    height={128}
+                    className="w-24 h-24 md:w-32 md:h-32 object-cover"
+                    src={userInfo.image_url}
+                    alt="Profile picture"
+                  />
+                ) : (
+                  <div className="w-32 h-32 bg-primary/10 flex items-center justify-center text-primary text-2xl">
+                    {userInfo.full_name?.[0] || "U"}
+                  </div>
+                )}
+              </>
+            </motion.div>
+          )}
+
+          <div className="relative space-y-2">
+            {!userInfo.id ? (
+              <CustomSkeleton
+                baseColor="#1a1c23"
+                highlightColor="#363d49"
+                count={1}
+                width={300}
+                height={40}
+              ></CustomSkeleton>
+            ) : (
+              <motion.h1
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-3xl md:text-4xl font-black tracking-tight"
+              >
+                {userInfo.full_name}
+              </motion.h1>
+            )}
 
             {(currentUser.role === "admin" ||
               currentUser.role === "superadmin") && (
-              <motion.p
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-muted-foreground"
-              >
-                {userInfo.email}
-              </motion.p>
+              <>
+                {!userInfo.id ? (
+                  <CustomSkeleton width={300} height={24} />
+                ) : (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-muted-foreground"
+                  >
+                    {userInfo.email}
+                  </motion.p>
+                )}
+              </>
             )}
 
-            {currentUser.role === "superadmin" &&
-            currentUser.id !== userInfo.id ? (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className={`text-sm font-mono`}
-              >
-                <RoleSelect
-                  triggerClassName="justify-start"
-                  value={userRole}
-                  onChange={handleUpdateRole}
-                  options={roleSelectOptions}
-                />
-              </motion.div>
+            {!userInfo.id ? (
+              <CustomSkeleton width={300} height={32} />
             ) : (
-              <motion.span
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className={`text-sm font-mono ${roleColors[userInfo.role]}`}
-              >
-                {roles[userInfo.role]}
-              </motion.span>
+              <>
+                {currentUser.role === "superadmin" &&
+                currentUser.id !== userInfo.id ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className={`text-sm font-mono`}
+                  >
+                    <RoleSelect
+                      containerClassName="w-fit"
+                      triggerClassName="justify-start"
+                      value={userRole}
+                      onChange={handleUpdateRole}
+                      options={roleSelectOptions}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.span
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className={`text-sm font-mono ${roleColors[userInfo.role]}`}
+                  >
+                    {roles[userInfo.role]}
+                  </motion.span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -326,6 +346,7 @@ const page = () => {
             value={userInfo.full_name}
             onChange={handleUpdateInput}
             disabled={!currentUser}
+            isLoading={!userInfo.id}
             placeholder="JohnDoe"
           />
 
@@ -335,6 +356,7 @@ const page = () => {
             value={userInfo.discord}
             onChange={handleUpdateInput}
             disabled={!currentUser}
+            isLoading={!userInfo.id}
             icon={<Discord className="h-4 w-4" />}
             description={
               isCurrentUser ? (
@@ -353,6 +375,7 @@ const page = () => {
             name="steam_link"
             value={userInfo.steam_link}
             onChange={handleUpdateSteamAccount}
+            isLoading={!userInfo.id}
             placeholder={
               isCurrentUser
                 ? "https://steamcommunity.com/id/username123"
@@ -384,47 +407,56 @@ const page = () => {
         </div>
         <div className="space-y-4">
           <div>
-            <span className="text-sm font-medium mb-1 block">
+            <span className="text-sm font-medium block">
               Предпочитаемые игры
             </span>
             {isCurrentUser ? (
               <MultipleGameSelect
+                containerClassName="mt-1!"
                 value={userInfo.games}
+                isLoading={!userInfo.id}
                 onChange={handleAddGame}
                 handleDelete={handleRemoveGame}
               />
             ) : (
-              <div className="flex items-center flex-wrap gap-2 p-1 border relative bg-muted rounded-lg">
-                {userInfo?.games?.length ? (
-                  userInfo?.games.map((game) => (
-                    <div
-                      key={game.id}
-                      className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
-                    >
-                      {game?.image_url && (
-                        <Image
-                          className="rounded object-cover h-4 w-4"
-                          src={game.image_url}
-                          width={16}
-                          height={16}
-                          alt="Game image"
-                        />
-                      )}
-                      <span className="text-sm">{game?.name}</span>
-                    </div>
-                  ))
+              <>
+                {!userInfo.id ? (
+                  <CustomSkeleton height={46} />
                 ) : (
-                  <div className="p-1.5 text-white/40">
-                    Нет предпочитаемых игр
+                  <div className="mt-1 flex items-center flex-wrap gap-2 p-1 border relative bg-muted rounded-lg">
+                    {userInfo?.games?.length ? (
+                      userInfo?.games.map((game) => (
+                        <div
+                          key={game.id}
+                          className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
+                        >
+                          {game?.image_url && (
+                            <Image
+                              className="rounded object-cover h-4 w-4"
+                              src={game.image_url}
+                              width={16}
+                              height={16}
+                              alt="Game image"
+                            />
+                          )}
+                          <span className="text-sm">{game?.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-1.5 text-white/40">
+                        Нет предпочитаемых игр
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
           {(currentUser.role === "superadmin" ||
             currentUser.role === "admin") && (
             <CustomInput
               label="Приглашен"
+              isLoading={!userInfo.id}
               value={
                 userInfo.who_invited === "none" ? "Никем" : userInfo.who_invited
               }

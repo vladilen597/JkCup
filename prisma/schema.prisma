@@ -26,13 +26,13 @@ model Profile {
   judged_tournaments       TournamentJudge[]        @relation("ProfileAsJudge")
   team_memberships         TeamMember[]             @relation("TeamMembership")
   tournament_registrations TournamentRegistration[] @relation("UserTournamentRegistrations")
-  
-  // Добавлено: связь с участниками матчей (для одиночных турниров)
-  match_participations     MatchParticipant[]
+
+  match_participations MatchParticipant[]
 
   games           Game[]           @relation("UserGames")
   feedbacks       Feedback[]
   tournamentTeams TournamentTeam[]
+  global_vote     GlobalVote?
 
   @@map("profiles")
 }
@@ -60,13 +60,13 @@ model Tournament {
   tags        Json?
 
   winner_user_id String?   @db.Uuid
-  winner_team_id String?   @unique 
+  winner_team_id String?   @unique
   started_at     DateTime?
   created_at     DateTime  @default(now()) @map("created_at")
 
-  game        Game?    @relation(fields: [game_id], references: [id])
-  creator     Profile  @relation("TournamentCreator", fields: [creator_id], references: [id], onDelete: Cascade)
-  winner_user Profile? @relation("TournamentWinnerUser", fields: [winner_user_id], references: [id], onDelete: SetNull)
+  game        Game?           @relation(fields: [game_id], references: [id])
+  creator     Profile         @relation("TournamentCreator", fields: [creator_id], references: [id], onDelete: Cascade)
+  winner_user Profile?        @relation("TournamentWinnerUser", fields: [winner_user_id], references: [id], onDelete: SetNull)
   winner_team TournamentTeam? @relation("TournamentWinnerTeam", fields: [winner_team_id], references: [id], onDelete: SetNull)
 
   teams         TournamentTeam[]         @relation("TournamentTeams")
@@ -133,12 +133,15 @@ model TournamentJudge {
 }
 
 model Game {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   image_url String
   name      String
 
-  profiles    Profile[]    @relation("UserGames")
-  tournaments Tournament[]
+  profiles     Profile[]    @relation("UserGames")
+  tournaments  Tournament[]
+  
+  global_votes GlobalVote[]
+  poll_options PollOption[] 
 
   @@map("games")
 }
@@ -168,42 +171,81 @@ model Notification {
 }
 
 model Round {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   tournament_id String
-  number        Int     
-  name          String? 
-  
-  tournament    Tournament @relation("TournamentRounds", fields: [tournament_id], references: [id], onDelete: Cascade)
-  matches       Match[]    @relation("RoundMatches")
+  number        Int
+  name          String?
+
+  tournament Tournament @relation("TournamentRounds", fields: [tournament_id], references: [id], onDelete: Cascade)
+  matches    Match[]    @relation("RoundMatches")
 
   @@map("tournament_rounds")
 }
 
 model Match {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   round_id      String
-  status        String   @default("pending") // pending, live, finished
+  status        String  @default("pending") // pending, live, finished
   next_match_id String?
-  
-  round         Round    @relation("RoundMatches", fields: [round_id], references: [id], onDelete: Cascade)
-  participants  MatchParticipant[] 
+
+  round        Round              @relation("RoundMatches", fields: [round_id], references: [id], onDelete: Cascade)
+  participants MatchParticipant[]
 
   @@map("tournament_matches")
 }
 
 model MatchParticipant {
-  id           String   @id @default(cuid())
-  match_id     String
-  slot         Int      
-  score        Int      @default(0)
-  is_winner    Boolean  @default(false)
+  id        String  @id @default(cuid())
+  match_id  String
+  slot      Int
+  score     Int     @default(0)
+  is_winner Boolean @default(false)
 
-  profile_id   String?  @db.Uuid
-  team_id      String?
+  profile_id String? @db.Uuid
+  team_id    String?
 
-  match        Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  profile      Profile?        @relation(fields: [profile_id], references: [id])
-  team         TournamentTeam? @relation(fields: [team_id], references: [id])
+  match   Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  profile Profile?        @relation(fields: [profile_id], references: [id])
+  team    TournamentTeam? @relation(fields: [team_id], references: [id])
 
   @@map("tournament_match_participants")
 }
+
+model GlobalPoll {
+  id         String   @id @default(cuid())
+  title      String
+  is_active  Boolean  @default(true)
+  ends_at    DateTime
+  created_at DateTime @default(now())
+
+  options    PollOption[]
+  votes      GlobalVote[]
+
+  @@map("global_polls")
+}
+
+model PollOption {
+  id      String @id @default(cuid())
+  poll_id String
+  game_id String
+
+  poll    GlobalPoll @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  game    Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
+  @@map("poll_options")
+}
+
+model GlobalVote {
+  poll_id    String
+  profile_id String   @db.Uuid @unique
+  game_id    String
+  updated_at DateTime @updatedAt
+
+  poll    GlobalPoll @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  profile Profile    @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  game    Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
+  @@id([poll_id, profile_id])
+  @@map("global_votes")
+}
+

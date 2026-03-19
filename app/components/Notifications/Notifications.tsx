@@ -1,18 +1,6 @@
-import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
+import { SubmitEvent, useEffect, useState } from "react";
 import Notification from "./Notification/Notification";
 import { INotification } from "@/app/lib/types";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { Loader2, Plus } from "lucide-react";
 import CustomButton, {
   BUTTON_STYLES,

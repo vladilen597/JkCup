@@ -6,6 +6,8 @@ import { setGames } from "@/app/utils/store/gamesSlice";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { IGame } from "@/app/lib/types";
 import axios from "axios";
+import CustomSkeleton from "../Shared/CustomSkeleton/CustomSkeleton";
+import { cn } from "@/lib/utils";
 
 interface IMultipleGameSelectProps {
   value: IGame[];
@@ -13,7 +15,7 @@ interface IMultipleGameSelectProps {
   triggerClassName?: string;
   onChange: (value: IGame) => void;
   handleDelete: (gameId: string) => void;
-  required?: boolean;
+  isLoading?: boolean;
   error?: boolean;
 }
 
@@ -50,7 +52,7 @@ const MultipleGameSelect = ({
   containerClassName,
   onChange,
   handleDelete,
-  required = false,
+  isLoading,
   error = false,
 }: IMultipleGameSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +83,10 @@ const MultipleGameSelect = ({
     ? "border-red-500 focus:border-red-500"
     : "border-border";
 
+  if (isLoading) {
+    return <CustomSkeleton height={46} />;
+  }
+
   return (
     <motion.div
       ref={containerRef}
@@ -88,7 +94,11 @@ const MultipleGameSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block border relative bg-muted rounded-lg ${borderClass} ${containerClassName}`}
+      className={cn(
+        "block border relative bg-muted rounded-lg",
+        containerClassName,
+        borderClass,
+      )}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center p-1.5 justify-between text-sm">

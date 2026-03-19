@@ -1,9 +1,7 @@
 import { INotification } from "@/app/lib/types";
-import { db } from "@/app/utils/firebase";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import axios from "axios";
 import { format } from "date-fns";
-import { deleteDoc, doc, where } from "firebase/firestore";
 import { X } from "lucide-react";
 
 const Notification = ({

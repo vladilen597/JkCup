@@ -1,9 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { AlertCircle, Users } from "lucide-react";
 import { ChangeEvent, useState } from "react";
-import { db } from "@/app/utils/firebase";
-import { v4 as uuidv4 } from "uuid";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";

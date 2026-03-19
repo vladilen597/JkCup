@@ -1,8 +1,6 @@
 import { FirestoreTimestamp, IUser } from "@/app/lib/types";
 import FeedbackItem from "./FeedbackItem/FeedbackItem";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 

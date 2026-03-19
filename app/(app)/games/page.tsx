@@ -13,6 +13,7 @@ import { Gamepad2, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
 
 const GamesPage = () => {
   const [loading, setLoading] = useState(false);
@@ -99,9 +100,9 @@ const GamesPage = () => {
           )}
         </div>
 
-        <ul className="mt-6 flex flex-col gap-2">
+        <ul className="mt-6 grid grid-cols-4 gap-2">
           {loading ? (
-            <UserShimmer />
+            <CustomSkeleton count={4} />
           ) : (
             games.map((game) => (
               <GameLine

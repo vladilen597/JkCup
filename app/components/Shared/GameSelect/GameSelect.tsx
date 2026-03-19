@@ -4,8 +4,6 @@ import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { setGames } from "@/app/utils/store/gamesSlice";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { IGame } from "@/app/lib/types";
 import axios from "axios";
 

@@ -1,10 +1,8 @@
 import { deleteGame } from "@/app/utils/store/gamesSlice";
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { deleteDoc, doc } from "firebase/firestore";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
-import { db } from "@/app/utils/firebase";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";

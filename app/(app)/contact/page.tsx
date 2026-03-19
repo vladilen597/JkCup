@@ -1,12 +1,10 @@
 "use client";
 
 import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import Title from "@/app/components/Title/Title";
 import { SubmitEvent, useState } from "react";
 import { ChevronDown, NotebookPen } from "lucide-react";
-import { db } from "@/app/utils/firebase";
 import { motion } from "motion/react";
 import Link from "next/link";
 import FeedbackList from "@/app/components/FeedbackList/FeedbackList";

@@ -4,10 +4,11 @@ import { ReactNode } from "react";
 import Header from "../components/Shared/Header/Header";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import CustomButton from "../components/Shared/CustomButton/CustomButton";
-import { useAppDispatch } from "../utils/store/hooks";
+import { useAppDispatch, useAppSelector } from "../utils/store/hooks";
 import { setTournaments } from "../utils/store/tournamentsSlice";
 import { Slide, ToastContainer } from "react-toastify";
 import { Check, Info, X } from "lucide-react";
+import PollWidget from "../components/PollWidget/PollWidget";
 
 type Props = {
   children: ReactNode;
@@ -68,10 +69,13 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
 };
 
 const Layout = ({ children }: Props) => {
+  const { user } = useAppSelector((state) => state.user);
+
   return (
     <div className="font-inter">
       <Header />
       <ErrorBoundary errorComponent={ErrorComponent}>{children}</ErrorBoundary>
+      <PollWidget currentUser={user} />
       <ToastContainer
         position="top-center"
         transition={Slide}

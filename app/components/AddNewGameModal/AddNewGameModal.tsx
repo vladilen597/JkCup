@@ -1,15 +1,11 @@
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { AlertCircle, Camera, Gamepad2 } from "lucide-react";
-import { ChangeEvent, SubmitEvent, useState } from "react";
-import { db } from "@/app/utils/firebase";
-import { motion } from "motion/react";
+import { Camera, Gamepad2 } from "lucide-react";
+import { ChangeEvent, useState } from "react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
 import Image from "next/image";
 import { addGame } from "@/app/utils/store/gamesSlice";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import ErrorBlock from "../Shared/ErrorBlock/ErrorBlock";
 

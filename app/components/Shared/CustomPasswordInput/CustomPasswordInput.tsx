@@ -11,6 +11,7 @@ interface ICustomPasswordInputProps {
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  autoComplete?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -24,6 +25,7 @@ const CustomPasswordInput = memo(
     required = false,
     disabled = false,
     placeholder,
+    autoComplete = "off",
     onChange,
   }: ICustomPasswordInputProps) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
@@ -50,6 +52,7 @@ const CustomPasswordInput = memo(
             required={required}
             disabled={disabled}
             placeholder={placeholder}
+            autoComplete={autoComplete}
           />
           <button
             type="button"

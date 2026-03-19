@@ -12,8 +12,6 @@ import { Users } from "lucide-react";
 import CountUp from "react-countup";
 import axios from "axios";
 import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
 import { IUser } from "@/app/lib/types";
 import { toast } from "react-toastify";
 
