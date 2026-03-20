@@ -18,7 +18,7 @@ interface IUserAddItemProps {
 }
 
 const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -80,9 +80,9 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
           <p className="font-semibold text-foreground truncate leading-5 text-sm">
             {user.full_name}
           </p>
-          {user.discord && (
+          {user.discord_full_name && (
             <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-              <Discord className="w-4 h-4" /> {user.discord}
+              <Discord className="w-4 h-4" /> {user.discord_full_name}
             </p>
           )}
         </div>

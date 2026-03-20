@@ -14,13 +14,19 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "uwcyphkniyycdsbztfpy.supabase.co",
         port: "",
-        pathname: "/storage/v1/object/public/**", // для публичных ссылок
+        pathname: "/storage/v1/object/public/**",
       },
       {
         protocol: "https",
         hostname: "uwcyphkniyycdsbztfpy.supabase.co",
         port: "",
-        pathname: "/storage/v1/object/sign/**", // для подписанных (временных) ссылок
+        pathname: "/storage/v1/object/sign/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
@@ -29,6 +35,11 @@ const nextConfig: NextConfig = {
       {
         source: "/",
         destination: "/tournaments",
+        permanent: true,
+      },
+      {
+        source: "/users/:id",
+        destination: "/users/:id/profile",
         permanent: true,
       },
     ];

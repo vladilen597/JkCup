@@ -20,7 +20,7 @@ const TeamUserItem = ({
   id,
   image_url,
   full_name,
-  discord,
+  discord_full_name,
   isLoading,
   isMyTeam,
   isCurrentUserCreator,
@@ -30,7 +30,7 @@ const TeamUserItem = ({
   creator_id,
   onLeaveClick,
 }: ITeamUserItemProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
 
   const isCurrentUser = currentUser.id === id;
@@ -49,7 +49,7 @@ const TeamUserItem = ({
           <UserInfoBlock
             id={id}
             image_url={image_url}
-            discord={discord}
+            discord_full_name={discord_full_name}
             full_name={full_name}
             steam_display_name={steam_display_name}
             steam_link={steam_link}

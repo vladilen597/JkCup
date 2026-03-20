@@ -15,7 +15,7 @@ const PlayersSelectBlock = ({
   teams,
   registrations,
 }: IPlayersSelectBlockProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const isAdmin =
     currentUser.role === "admin" || currentUser.role === "superadmin";

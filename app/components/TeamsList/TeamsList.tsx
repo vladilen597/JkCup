@@ -18,7 +18,7 @@ const TeamList = ({
   tournament_status,
   maxPlayersPerTeam,
 }: TeamListProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const occupiedUserIds = new Set([
     ...teams.flatMap((team) => team.members?.map((m) => m.profile_id) || []),

@@ -1,7 +1,7 @@
 "use client";
 
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
-import { roleColors, roles } from "@/app/(app)/users/[id]/page";
+import { roleColors, roles } from "@/app/(app)/users/[id]/layout";
 import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import React, { useEffect, useState } from "react";
@@ -42,7 +42,8 @@ const UserLine: React.FC<UserLineProps> = ({
   full_name,
   image_url,
   index = 0,
-  discord,
+  discord_id,
+  discord_full_name,
   role,
   showRoles,
   hideDelete,
@@ -61,7 +62,7 @@ const UserLine: React.FC<UserLineProps> = ({
     value: "guest",
     label: "Гость",
   });
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
   const isSuperAdmin = currentUser.role === "superadmin";
 
@@ -108,7 +109,8 @@ const UserLine: React.FC<UserLineProps> = ({
       >
         <UserInfoBlock
           id={id}
-          discord={discord}
+          discord_full_name={discord_full_name}
+          discord_id={discord_id}
           full_name={full_name}
           image_url={image_url || ""}
           steam_display_name={steam_display_name}

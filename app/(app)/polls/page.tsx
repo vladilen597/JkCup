@@ -15,7 +15,7 @@ const PollsPage = () => {
   const [allGames, setAllGames] = useState<any[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { user: currentUser } = useAppSelector((user) => user.user);
+  const { currentUser } = useAppSelector((user) => user.user);
 
   const canCreatePoll = currentUser.role === "superadmin";
 

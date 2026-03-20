@@ -22,7 +22,7 @@ const Notifications = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const handleOpenModal = () => {
     setIsNotificationAddOpen(true);

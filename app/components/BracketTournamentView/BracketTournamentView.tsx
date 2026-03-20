@@ -56,7 +56,7 @@ const MatchBox = ({ match, isAdmin, onRemoveMatch, children }: any) => {
 const BracketTournamentView = ({ tournament }: BracketProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [activeBlock, setActiveBlock] = useState<any>(null);
 
   const isAdmin = useMemo(

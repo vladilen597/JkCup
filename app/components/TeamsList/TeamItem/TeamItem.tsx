@@ -39,7 +39,7 @@ const TeamItem = ({
   tournament_status,
   occupiedUserIds,
 }: ITeamItemProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const { id: tournamentId }: { id: string } = useParams();

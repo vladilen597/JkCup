@@ -1,13 +1,15 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { IUser } from "@/app/lib/types";
 
-const initialState: { user: IUser } = {
-  user: {
+const initialState: {
+  currentUser: IUser;
+  userInfo: IUser & { imageFile?: null | File };
+} = {
+  currentUser: {
     id: "",
     full_name: "Anonymous",
     image_url: "",
     email: "",
-    discord: "",
     role: "guest",
     steam_link: "",
     steam_display_name: "",
@@ -15,17 +17,43 @@ const initialState: { user: IUser } = {
     who_invited: "",
     judged_tournaments: [],
   },
+  userInfo: {
+    id: "",
+    full_name: "Anonymous",
+    image_url: "",
+    email: "",
+    role: "guest",
+    steam_link: "",
+    steam_display_name: "",
+    games: [],
+    who_invited: "",
+    judged_tournaments: [],
+    imageFile: null,
+  },
 };
 
-const userSlice = createSlice({
-  name: "user",
+const currentUserSlice = createSlice({
+  name: "currentUser",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<IUser>) => {
-      state.user = action.payload;
+    setCurrentUser: (state, action: PayloadAction<IUser>) => {
+      state.currentUser = action.payload;
+    },
+    setUserInfo: (state, action: PayloadAction<IUser>) => {
+      state.userInfo = action.payload;
+    },
+    updateUserInfo: (
+      state,
+      action: PayloadAction<{ name: string; value: any }>,
+    ) => {
+      state.userInfo[action.payload.name] = action.payload.value;
+    },
+    clearUserInfo: (state) => {
+      state.userInfo = initialState.userInfo;
     },
   },
 });
 
-export const { setUser } = userSlice.actions;
-export default userSlice.reducer;
+export const { setCurrentUser, setUserInfo, updateUserInfo, clearUserInfo } =
+  currentUserSlice.actions;
+export default currentUserSlice.reducer;

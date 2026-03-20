@@ -44,7 +44,7 @@ const Tournament = ({
   tags,
   description,
 }: ITournamentProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   return (
     <motion.li

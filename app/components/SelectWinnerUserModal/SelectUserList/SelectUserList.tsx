@@ -16,7 +16,7 @@ const SelectUserList = ({
   selectedUser,
   onUserClick,
 }: ISelectUserListProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   if (users.length === 0) {
     return (
@@ -59,9 +59,9 @@ const SelectUserList = ({
                     <span className="ml-2 text-xs text-orange-400">Вы</span>
                   )}
                 </div>
-                {user.discord && (
+                {user.discord_full_name && (
                   <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                    <Discord className="w-4 h-4" /> {user.discord}
+                    <Discord className="w-4 h-4" /> {user.discord_full_name}
                   </p>
                 )}
               </div>

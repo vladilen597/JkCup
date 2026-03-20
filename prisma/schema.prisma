@@ -12,7 +12,6 @@ model Profile {
   id                 String   @id @db.Uuid
   email              String   @unique
   full_name          String?
-  discord            String?
   image_url          String?
   steam_link         String?
   steam_display_name String?
@@ -20,6 +19,11 @@ model Profile {
   status             String   @default("active")
   created_at         DateTime @default(now()) @map("created_at")
   who_invited        String   @default("none")
+
+  discord_global_name String? 
+  discord_full_name   String?
+  discord_id          String?  @unique 
+  discord_avatar      String? 
 
   created_tournaments      Tournament[]             @relation("TournamentCreator")
   won_tournaments          Tournament[]             @relation("TournamentWinnerUser")

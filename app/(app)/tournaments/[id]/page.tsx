@@ -30,6 +30,7 @@ import Link from "next/link";
 import { ITournament } from "@/app/lib/types";
 import axios from "axios";
 import { toast } from "react-toastify";
+import WinnerBlock from "@/app/components/WinnerBlock/WinnerBlock";
 
 export const statuses = {
   open: "Открыт",
@@ -42,7 +43,7 @@ export const statuses = {
 const TournamentPage = () => {
   const params = useParams();
   const dispatch = useAppDispatch();
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isTournamentLoading, setIsTournamentLoading] = useState(true);
   const tournamentId = params.id as string;
   const { tournaments } = useAppSelector((state) => state.tournaments);
@@ -238,37 +239,10 @@ const TournamentPage = () => {
       />
 
       {tournament.status === "finished" && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15 }}
-          className="max-w-5xl mx-auto flex items-center justify-between border-2 p-4 border-amber-300! rounded-lg overflow-hidden bg-linear-120 from-40% from-black to-amber-300"
-        >
-          <div>
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <Trophy className="w-8 h-8 text-amber-300" />
-              {isTeamMode ? "Команда победителей" : "Победитель"}
-            </h3>
-
-            {isTeamMode ? (
-              <div className="mt-8">
-                <span className="text-xl font-bold flex items-center gap-2">
-                  {tournament.winner_team?.name}
-                </span>
-                <WinnerTeam members={tournament.winner_team?.members || []} />
-              </div>
-            ) : (
-              <div className="mt-8">
-                {tournament.winner_user && (
-                  <div className="flex items-center gap-2">
-                    <UserInfoBlock {...tournament.winner_user} />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <Crown className="text-black" width={120} height={120} />
-        </motion.div>
+        <WinnerBlock
+          winner_team={tournament.winner_team}
+          winner_user={tournament.winner_user}
+        />
       )}
 
       <TournamentStatBlocks tournament={tournament} />

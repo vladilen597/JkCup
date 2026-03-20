@@ -69,13 +69,13 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
 };
 
 const Layout = ({ children }: Props) => {
-  const { user } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   return (
     <div className="font-inter">
       <Header />
       <ErrorBoundary errorComponent={ErrorComponent}>{children}</ErrorBoundary>
-      <PollWidget currentUser={user} />
+      <PollWidget currentUser={currentUser} />
       <ToastContainer
         position="top-center"
         transition={Slide}

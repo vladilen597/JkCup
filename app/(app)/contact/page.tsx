@@ -16,7 +16,7 @@ const page = () => {
   const [isFeedbacksExpanded, setIsFeedbacksExpanded] = useState(false);
   const [text, setText] = useState("");
 
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const handleToggleExpanded = () => {
     setIsFeedbacksExpanded((prevState) => !prevState);

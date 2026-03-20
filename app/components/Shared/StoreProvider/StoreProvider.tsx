@@ -1,6 +1,6 @@
 "use client";
 import { store } from "@/app/utils/store/store";
-import { setUser } from "@/app/utils/store/userSlice";
+import { setCurrentUser } from "@/app/utils/store/userSlice";
 import { useRef } from "react";
 import { Provider } from "react-redux";
 
@@ -15,9 +15,9 @@ export const StoreProvider = ({
 
   if (!initialized.current) {
     if (initialUser) {
-      store.dispatch(setUser(initialUser));
+      store.dispatch(setCurrentUser(initialUser));
     } else {
-      store.dispatch(setUser(null));
+      store.dispatch(setCurrentUser(null));
     }
     initialized.current = true;
   }

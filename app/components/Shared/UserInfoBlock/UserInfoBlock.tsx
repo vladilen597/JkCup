@@ -10,17 +10,24 @@ const UserInfoBlock = ({
   id,
   image_url,
   full_name,
-  discord,
+  discord_id,
+  discord_full_name,
   steam_link,
   steam_display_name,
   size = "default",
 }: Partial<IUser> & { size?: "small" | "default" }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const isCurrentUser = currentUser.id === id;
 
   const handleClickSteamLink = (e: MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation();
   };
+
+  const handleClickDiscordLink = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+  };
+
+  console.log(discord_id);
 
   return (
     <>
@@ -64,8 +71,12 @@ const UserInfoBlock = ({
             )}
           </p>
           <div className="flex items-center gap-2">
-            {discord && (
-              <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
+            {discord_full_name && (
+              <a
+                href={`discord://-/users/${discord_id}`}
+                className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 underline hover:text-white transition-colors"
+                onClick={handleClickDiscordLink}
+              >
                 <Discord
                   className={cn(
                     "w-4 h-4",
@@ -73,8 +84,8 @@ const UserInfoBlock = ({
                     size === "small" && "w-3 h-3",
                   )}
                 />
-                {discord}
-              </p>
+                {discord_full_name}
+              </a>
             )}
             {!!steam_link && !!steam_display_name && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">

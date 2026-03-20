@@ -17,7 +17,7 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
     name: "",
     is_private: true,
   });
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
   const [error, setError] = useState("");

@@ -15,7 +15,7 @@ import {
   NotebookPen,
   Vote,
 } from "lucide-react";
-import { setUser } from "@/app/utils/store/userSlice";
+import { setCurrentUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
 import { ReactNode, useEffect, useState } from "react";
@@ -25,7 +25,7 @@ import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
 import CustomDrawer from "../CustomDrawer/CustomDrawer";
 import Notifications from "../../Notifications/Notifications";
 import Image from "next/image";
-import { roleColors, roles } from "@/app/(app)/users/[id]/page";
+import { roleColors, roles } from "@/app/(app)/users/[id]/layout";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import CustomModal from "../CustomModal/CustomModal";
@@ -180,7 +180,7 @@ const Header = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   const handleCloseProfileDropdown = () => {
@@ -215,7 +215,7 @@ const Header = () => {
     try {
       await axios.post("/api/auth/signout");
 
-      dispatch(setUser(null));
+      dispatch(setCurrentUser(null));
 
       window.location.href = "/";
     } catch (error) {
@@ -225,10 +225,10 @@ const Header = () => {
 
   const handleLoadUser = async () => {
     try {
-      const { data } = await axios.get<IUser>("/api/users/" + user.id);
+      const { data } = await axios.get<IUser>("/api/users/" + currentUser.id);
 
       if (data) {
-        dispatch(setUser(data));
+        dispatch(setCurrentUser(data));
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -241,7 +241,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (currentUser) {
       handleLoadUser();
     }
   }, []);
@@ -323,7 +323,7 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {user?.id ? (
+          {currentUser?.id ? (
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen((p) => !p)}
@@ -331,29 +331,29 @@ const Header = () => {
               >
                 <div>
                   <span className="block text-sm text-right font-medium text-foreground">
-                    {user.full_name}
+                    {currentUser.full_name}
                   </span>
                   <span
                     className={cn(
                       "block text-[9px] text-right",
-                      roleColors[user?.role],
+                      roleColors[currentUser?.role],
                     )}
                   >
-                    {roles[user.role]}
+                    {roles[currentUser.role]}
                   </span>
                 </div>
-                {user.image_url ? (
+                {currentUser.image_url ? (
                   <Image
                     width={32}
                     height={32}
                     className="h-8 w-8 rounded-full ring-2 ring-primary/30 object-cover"
-                    src={user.image_url}
-                    alt={user.full_name}
+                    src={currentUser.image_url}
+                    alt={currentUser.full_name}
                     referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="flex items-center justify-center text-neon h-8 w-8 rounded-full ring-2 ring-primary/30">
-                    {user.full_name?.[0]}
+                    {currentUser.full_name?.[0]}
                   </div>
                 )}
                 <ChevronDown
@@ -364,7 +364,7 @@ const Header = () => {
               <AnimatePresence>
                 {isProfileOpen && (
                   <ProfileDropdown
-                    userId={user.id}
+                    userId={currentUser.id}
                     handleClickLogout={handleLogout}
                     onClose={handleCloseProfileDropdown}
                   />

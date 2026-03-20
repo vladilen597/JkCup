@@ -20,14 +20,14 @@ import axios from "axios";
 
 const page = () => {
   const { tournaments } = useAppSelector((state) => state.tournaments);
-  const { user } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   const [isCreateTournamentModalOpen, setIsCreateTournamentModalOpen] =
     useState(false);
 
   const canCreateTournament =
-    user?.role === "admin" || user?.role === "superadmin";
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
   const handleLoadTournaments = async () => {
     try {
@@ -53,7 +53,7 @@ const page = () => {
   const filteredTournaments = tournaments?.filter((tournament: ITournament) => {
     if (!tournament.hidden) return true;
 
-    return user.role !== "user";
+    return currentUser.role !== "user";
   });
 
   return (

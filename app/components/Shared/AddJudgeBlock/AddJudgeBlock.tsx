@@ -27,7 +27,7 @@ const AddJudgeBlock = ({
   teams: ITeam[];
   registrations: ITournamentRegistration[];
 }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isAddJudgeModalOpen, setIsAddJudgeModalOpen] = useState(false);
 
   const occupiedUserIds = new Set<string>();

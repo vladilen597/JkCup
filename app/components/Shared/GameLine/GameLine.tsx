@@ -8,7 +8,7 @@ const GameLine = ({
   name,
   onDeleteClick,
 }: IGame & { onDeleteClick: () => void }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   return (
     <div className="group relative aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition-all hover:border-zinc-700">

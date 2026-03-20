@@ -71,7 +71,7 @@ const CreateTournamentModal = ({
     hidden: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const canCreateTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";

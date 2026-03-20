@@ -31,7 +31,7 @@ const TournamentHero = ({
   handleClickEdit,
 }: ITournamentHeroProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const isTeamMode = tournament.type === "team";
   const { id }: { id: string } = useParams();
   const router = useRouter();

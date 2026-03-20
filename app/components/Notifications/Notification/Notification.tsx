@@ -11,7 +11,7 @@ const Notification = ({
   created_at,
   onDeleteClick,
 }: INotification & { onDeleteClick: (id: string) => void }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const handleDeleteNotification = async () => {
     try {

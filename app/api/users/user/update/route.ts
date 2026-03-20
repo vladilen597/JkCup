@@ -40,9 +40,10 @@ export const POST = async (req: NextRequest) => {
 
     if (formData.has("full_name"))
       updateData.full_name = formData.get("full_name");
-    if (formData.has("discord")) updateData.discord = formData.get("discord");
     if (formData.has("steam_link"))
       updateData.steam_link = formData.get("steam_link");
+    if (formData.has("steam_display_name"))
+      updateData.steam_display_name = formData.get("steam_display_name");
 
     const file = formData.get("image") as File | null;
     if (file && file.size > 0) {

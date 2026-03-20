@@ -23,7 +23,7 @@ const JoinTournamentButton = ({
   handleOpenCreateTeamModal,
   handleJoinLeave,
 }: IJoinTournamentButtonProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   if (!currentUser?.id) {
     return (

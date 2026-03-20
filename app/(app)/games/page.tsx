@@ -21,7 +21,7 @@ const GamesPage = () => {
   const [gameId, setGameId] = useState("");
   const dispatch = useAppDispatch();
   const { games } = useAppSelector((state) => state.games);
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleCloseModal = () => {

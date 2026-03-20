@@ -2,7 +2,7 @@ import CustomButton from "../Shared/CustomButton/CustomButton";
 import CustomInput from "../Shared/CustomInput/CustomInput";
 import ErrorBlock from "../Shared/ErrorBlock/ErrorBlock";
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { setUser } from "@/app/utils/store/userSlice";
+import { setCurrentUser } from "@/app/utils/store/userSlice";
 import { ChangeEvent, useState } from "react";
 import axios from "axios";
 import CustomPasswordInput from "../Shared/CustomPasswordInput/CustomPasswordInput";
@@ -58,7 +58,7 @@ const AuthModalContent = ({ onClose }: { onClose: () => void }) => {
     setIsLoading(true);
     try {
       const { data } = await axios.post("/api/auth/signin", formData);
-      dispatch(setUser(data.user));
+      dispatch(setCurrentUser(data.user));
       onClose();
     } catch (error: any) {
       setError(error.response?.data?.message || "Ошибка входа");

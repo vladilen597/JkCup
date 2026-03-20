@@ -29,7 +29,6 @@ export interface IUser {
   full_name: string;
   image_url: string;
   email: string;
-  discord: string;
   created_at?: string;
   last_sign_in?: string;
   steam_link?: string;
@@ -38,6 +37,11 @@ export interface IUser {
   role: "guest" | "user" | "admin" | "superadmin";
   games?: IGame[];
   status?: "blocked" | "active";
+
+  discord_full_name?: string;
+  discord_global_name?: string;
+  discord_id?: string;
+  discord_avatar?: string;
 
   judged_tournaments: IJudgedTournament[];
 }

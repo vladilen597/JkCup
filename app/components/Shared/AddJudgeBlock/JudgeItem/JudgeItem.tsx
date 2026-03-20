@@ -15,7 +15,7 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
   user,
   index,
 }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
   const { id, role } = user;
   const [isLoading, setIsLoading] = useState(false);
