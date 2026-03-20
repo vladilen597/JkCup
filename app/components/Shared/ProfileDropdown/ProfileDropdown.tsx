@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { DoorClosed, Settings, User } from "lucide-react";
+import { DoorClosed, LinkIcon, Settings, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
@@ -40,12 +40,20 @@ const ProfileDropdown = ({
       className="absolute top-full bg-primary-foreground right-0 mt-2 w-48 p-1.5 rounded-xl glass-panel neon-border z-50"
     >
       <Link
-        href={"/users/" + userId}
+        href={`/users/${userId}/profile`}
         onClick={onClose}
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
       >
         <User className="h-4 w-4" />
         Профиль
+      </Link>
+      <Link
+        href={`/users/${userId}/integrations`}
+        onClick={onClose}
+        className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
+      >
+        <LinkIcon className="h-4 w-4" />
+        Интеграции
       </Link>
       <button
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"

@@ -8,7 +8,7 @@ const ConnectDiscord = ({ user_id }: { user_id: string }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/users/${user_id}/discord`,
+        redirectTo: `${window.location.origin}/users/${user_id}/integrations`,
         scopes: "identify guilds",
       },
     });
@@ -18,7 +18,7 @@ const ConnectDiscord = ({ user_id }: { user_id: string }) => {
 
   return (
     <CustomButton
-      className="bg-[#7289DA] text-white hover:bg-[#7289DA]/80"
+      className="bg-[#6266ec] text-white hover:bg-[#6266ec]/80"
       label="Подключить"
       icon={<Discord fill="white" />}
       onClick={linkDiscord}

@@ -12,8 +12,8 @@ const UserInfoBlock = ({
   full_name,
   discord_id,
   discord_full_name,
-  steam_link,
-  steam_display_name,
+  steam_name,
+  steam_profile_url,
   size = "default",
 }: Partial<IUser> & { size?: "small" | "default" }) => {
   const { currentUser } = useAppSelector((state) => state.user);
@@ -87,7 +87,7 @@ const UserInfoBlock = ({
                 {discord_full_name}
               </a>
             )}
-            {!!steam_link && !!steam_display_name && (
+            {!!steam_name && !!steam_profile_url && (
               <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
                 <Steam
                   className={cn(
@@ -101,9 +101,9 @@ const UserInfoBlock = ({
                   className="underline"
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={steam_link}
+                  href={steam_profile_url}
                 >
-                  {steam_display_name}
+                  {steam_name}
                 </a>
               </p>
             )}

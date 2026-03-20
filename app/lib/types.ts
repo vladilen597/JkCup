@@ -31,8 +31,6 @@ export interface IUser {
   email: string;
   created_at?: string;
   last_sign_in?: string;
-  steam_link?: string;
-  steam_display_name?: string;
   who_invited: string;
   role: "guest" | "user" | "admin" | "superadmin";
   games?: IGame[];
@@ -42,6 +40,11 @@ export interface IUser {
   discord_global_name?: string;
   discord_id?: string;
   discord_avatar?: string;
+
+  steam_id?: string;
+  steam_name?: string;
+  steam_avatar?: string;
+  steam_profile_url?: string;
 
   judged_tournaments: IJudgedTournament[];
 }

@@ -13,8 +13,6 @@ model Profile {
   email              String   @unique
   full_name          String?
   image_url          String?
-  steam_link         String?
-  steam_display_name String?
   role               String   @default("guest")
   status             String   @default("active")
   created_at         DateTime @default(now()) @map("created_at")
@@ -24,6 +22,11 @@ model Profile {
   discord_full_name   String?
   discord_id          String?  @unique 
   discord_avatar      String? 
+
+  steam_id          String?  @unique 
+  steam_name        String? 
+  steam_avatar      String? 
+  steam_profile_url String?
 
   created_tournaments      Tournament[]             @relation("TournamentCreator")
   won_tournaments          Tournament[]             @relation("TournamentWinnerUser")

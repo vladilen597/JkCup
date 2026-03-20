@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
+import Skeleton from "react-loading-skeleton";
 
 const GamesPage = () => {
   const [loading, setLoading] = useState(false);
@@ -100,19 +101,24 @@ const GamesPage = () => {
           )}
         </div>
 
-        <ul className="mt-6 grid grid-cols-4 gap-2">
-          {loading ? (
-            <CustomSkeleton count={4} />
-          ) : (
-            games.map((game) => (
+        {loading ? (
+          <ul className="mt-6 grid grid-cols-4 gap-2">
+            <CustomSkeleton height={134} />
+            <CustomSkeleton height={134} />
+            <CustomSkeleton height={134} />
+            <CustomSkeleton height={134} />
+          </ul>
+        ) : (
+          <ul className="mt-6 grid grid-cols-4 gap-2">
+            {games.map((game) => (
               <GameLine
                 key={game.id}
                 {...game}
                 onDeleteClick={() => handleOpenDeleteModal(game.id)}
               />
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
       </motion.section>
 
       <CustomModal

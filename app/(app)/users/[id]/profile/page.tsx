@@ -75,16 +75,11 @@ const page = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    const steamDisplayNameString = userInfo.steam_link
-      ? userInfo.steam_link.replace(/\/$/, "").split("/").pop()
-      : "";
 
     try {
       const formData = new FormData();
       formData.append("id", userInfo.id);
       formData.append("full_name", userInfo.full_name);
-      formData.append("steam_link", userInfo.steam_link || "");
-      formData.append("steam_display_name", steamDisplayNameString || "");
       formData.append("image", userInfo.imageFile || "");
       const gameIds = userInfo.games?.map((game) => game.id) || [];
 
@@ -132,7 +127,7 @@ const page = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-2xl font-bold"
       >
-        Информация о пользователе
+        Профиль сайта
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 10 }}
@@ -147,7 +142,7 @@ const page = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-8 grid grid-cols-1 md:grid-cols-2 w-full gap-4"
+        className="mt-8 flex flex-col w-full md:w-[50%] gap-4"
         onSubmit={handleSubmit}
       >
         <div className="space-y-4 w-full">
@@ -159,41 +154,6 @@ const page = () => {
             disabled={!currentUser}
             isLoading={!userInfo.id}
             placeholder="JohnDoe"
-          />
-
-          <CustomInput
-            label="Ссылка на профиль Steam"
-            name="steam_link"
-            value={userInfo.steam_link}
-            onChange={handleUpdateSteamAccount}
-            isLoading={!userInfo.id}
-            placeholder={
-              isCurrentUser
-                ? "https://steamcommunity.com/id/username123"
-                : "Не указана"
-            }
-            icon={<Steam className="h-4 w-4 text-white" />}
-            description={
-              isCurrentUser ? (
-                <>
-                  <span className="block text-xs leading-5 text-neutral-400 mt-1">
-                    Найти ссылку на свой Steam-аккаунт можно{" "}
-                    <Link
-                      href="https://steamcommunity.com/my/profile"
-                      className="underline"
-                      target="_blank"
-                    >
-                      здесь
-                    </Link>
-                  </span>
-                  <span className="block text-xs leading-5 text-red-400 mt-1">
-                    {steamLinkError}
-                  </span>
-                </>
-              ) : (
-                ""
-              )
-            }
           />
         </div>
         <div className="space-y-4">

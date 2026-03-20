@@ -47,8 +47,8 @@ const UserLine: React.FC<UserLineProps> = ({
   role,
   showRoles,
   hideDelete,
-  steam_display_name,
-  steam_link,
+  steam_name,
+  steam_profile_url,
   status,
   onDeleteClick,
   onBlockClick,
@@ -113,8 +113,8 @@ const UserLine: React.FC<UserLineProps> = ({
           discord_id={discord_id}
           full_name={full_name}
           image_url={image_url || ""}
-          steam_display_name={steam_display_name}
-          steam_link={steam_link}
+          steam_name={steam_name}
+          steam_profile_url={steam_profile_url}
         />
 
         {showRoles && (
