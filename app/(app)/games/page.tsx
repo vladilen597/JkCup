@@ -14,7 +14,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
-import Skeleton from "react-loading-skeleton";
 
 const GamesPage = () => {
   const [loading, setLoading] = useState(false);
@@ -91,8 +90,8 @@ const GamesPage = () => {
             <Gamepad2 className="h-6 w-6 text-primary" />
             Список игр ({games.length})
           </h2>
-          {(currentUser.role === "admin" ||
-            currentUser.role === "superadmin") && (
+          {(currentUser?.role === "admin" ||
+            currentUser?.role === "superadmin") && (
             <CustomButton
               icon={<Plus />}
               label="Добавить"
@@ -102,7 +101,7 @@ const GamesPage = () => {
         </div>
 
         {loading ? (
-          <ul className="mt-6 grid grid-cols-4 gap-2">
+          <ul className="leading-0 mt-6 grid grid-cols-4 gap-2">
             <CustomSkeleton height={134} />
             <CustomSkeleton height={134} />
             <CustomSkeleton height={134} />

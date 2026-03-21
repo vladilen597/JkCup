@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 import { IFeedback } from "../FeedbackList";
+import { format } from "date-fns";
 
 const FeedbackItem = ({ id, text, created_at, creator }: IFeedback) => {
   return (
@@ -12,7 +12,7 @@ const FeedbackItem = ({ id, text, created_at, creator }: IFeedback) => {
           <UserInfoBlock {...creator} />
         </div>
         <span className="text-neutral-400 text-xs">
-          {created_at && format(created_at?.toDate(), "dd.MM.yyyy HH:mm")}
+          {created_at && format(created_at, "dd.MM.yyyy HH:mm")}
         </span>
       </div>
     </li>

@@ -4,6 +4,11 @@ import RoleBadge from "../../Shared/RoleBadge/RoleBadge";
 import SocialLink from "../../Shared/SocialLink/SocialLink";
 import { IUser } from "@/app/lib/types";
 import CustomSkeleton from "../../Shared/CustomSkeleton/CustomSkeleton";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
+import { useState } from "react";
+import { roles } from "@/app/(app)/users/[id]/layout";
+import { roleSelectOptions } from "../../UserList/UserLine/UserLine";
 
 interface ProfileHeaderProps {
   user: IUser;
@@ -37,7 +42,15 @@ const ProfileHeader = ({
   isSuperAdmin,
   onImageChange,
 }: ProfileHeaderProps) => {
+  const { currentUser } = useAppSelector((state) => state.user);
+  const [userRole, setUserRole] = useState(
+    roleSelectOptions.find((option) => option.value === user.role),
+  );
   const isLoading = !user.id;
+
+  const handleChangeRole = (value) => {
+    setUserRole(value);
+  };
 
   return (
     <motion.div
@@ -92,6 +105,12 @@ const ProfileHeader = ({
 
           {isLoading ? (
             <CustomSkeleton width={116} height={26} borderRadius={12} />
+          ) : currentUser?.role === "superadmin" && !isCurrentUser ? (
+            <RoleSelect
+              value={userRole}
+              onChange={handleChangeRole}
+              options={roleSelectOptions}
+            />
           ) : (
             <motion.div variants={item}>
               <RoleBadge role={user.role} />

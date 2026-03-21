@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Skeleton, { SkeletonProps } from "react-loading-skeleton";
 
 import "react-loading-skeleton/dist/skeleton.css";
@@ -11,7 +12,7 @@ const CustomSkeleton = ({
 }: SkeletonProps) => {
   return (
     <Skeleton
-      className={className}
+      className={cn("relative leading-0 block", className)}
       baseColor="#1a1c23"
       highlightColor="#363d49"
       width={width}

@@ -1,10 +1,5 @@
 "use client";
 
-import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
-import ConnectDiscord from "@/app/components/Integrations/Discord/ConnectDiscord/ConnectDiscord";
-import Discord from "@/app/components/Icons/Discord";
-import Steam from "@/app/components/Icons/Steam";
-import Link from "next/link";
 import CustomInput from "@/app/components/Shared/CustomInput/CustomInput";
 import MultipleGameSelect from "@/app/components/MultipleGameSelect/MultipleGameSelect";
 import { toast } from "react-toastify";
@@ -23,30 +18,14 @@ import {
   updateUserInfo,
 } from "@/app/utils/store/userSlice";
 
-const steamLinkRegex = /steamcommunity\.com\/(?:id|profiles)\/([a-zA-Z0-9_-]+)/;
-
 const page = () => {
   const { userInfo } = useAppSelector((state) => state.user);
   const { currentUser } = useAppSelector((state) => state.user);
   const params = useParams();
   const [steamLinkError, setSteamLinkError] = useState("");
-  const isCurrentUser = params.id === currentUser.id;
+  const isCurrentUser = params.id === currentUser?.id;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
-
-  const handleUpdateSteamAccount = (event: ChangeEvent<HTMLInputElement>) => {
-    if (
-      !event.target.value.match(steamLinkRegex) &&
-      event.target.value.length !== 0
-    ) {
-      setSteamLinkError(
-        "Введите валидную ссылку формата https://steamcommunity.com/my/profile",
-      );
-    } else {
-      setSteamLinkError("");
-    }
-    dispatch(updateUserInfo({ name: "steam_link", value: event.target.value }));
-  };
 
   const handleUpdateInput = (event: ChangeEvent<HTMLInputElement>) => {
     dispatch(
@@ -203,8 +182,8 @@ const page = () => {
               </>
             )}
           </div>
-          {(currentUser.role === "superadmin" ||
-            currentUser.role === "admin") && (
+          {(currentUser?.role === "superadmin" ||
+            currentUser?.role === "admin") && (
             <CustomInput
               label="Приглашен"
               isLoading={!userInfo.id}

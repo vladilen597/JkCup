@@ -17,7 +17,7 @@ const UserInfoBlock = ({
   size = "default",
 }: Partial<IUser> & { size?: "small" | "default" }) => {
   const { currentUser } = useAppSelector((state) => state.user);
-  const isCurrentUser = currentUser.id === id;
+  const isCurrentUser = currentUser?.id === id;
 
   const handleClickSteamLink = (e: MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation();

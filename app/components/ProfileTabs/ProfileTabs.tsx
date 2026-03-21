@@ -1,12 +1,19 @@
 import { useParams, usePathname } from "next/navigation";
-import { Link as LinkIcon, User } from "lucide-react";
+import {
+  ChartNoAxesColumn,
+  Link as LinkIcon,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useAppSelector } from "@/app/utils/store/hooks";
 
 const ProfileTabs = () => {
   const pathname = usePathname();
   const { id } = useParams();
+  const { currentUser } = useAppSelector((state) => state.user);
 
   const tabLinks = [
     {
@@ -18,11 +25,29 @@ const ProfileTabs = () => {
     },
     {
       id: 2,
+      name: "Обзор",
+      link: `/users/${id}/info`,
+      slug: "info",
+      icon: <ChartNoAxesColumn className="w-4 h-4" />,
+    },
+    {
+      id: 3,
       name: "Интеграции",
       link: `/users/${id}/integrations`,
       slug: "integrations",
       icon: <LinkIcon className="w-4 h-4" />,
     },
+    ...(currentUser.id === id
+      ? [
+          {
+            id: 4,
+            name: "Безопасность",
+            link: `/users/${id}/security`,
+            slug: "security",
+            icon: <ShieldCheck className="w-4 h-4" />,
+          },
+        ]
+      : []),
   ];
 
   return (

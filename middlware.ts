@@ -1,37 +1,47 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { type EmailOtpType } from "@supabase/supabase-js"; // Импортируем тип
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  // Для сброса пароля тип всегда 'recovery'
+  const type = (searchParams.get("type") as EmailOtpType) || "recovery";
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set({ name, value, ...options }),
-          );
-
-          response = NextResponse.next({ request });
-
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set({ name, value, ...options }),
-          );
+  if (code) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
+          },
         },
       },
-    },
-  );
+    );
 
-  await supabase.auth.getUser();
+    // Используем verifyOtp — это более надежный способ для ссылок из почты
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: code,
+      type,
+    });
 
-  return response;
+    if (!error && data.user) {
+      // Редирект в профиль с флагом модалки
+      return NextResponse.redirect(
+        `${origin}/users/${data.user.id}/security?reset-modal=open`,
+      );
+    }
+
+    console.error("Auth Confirm Error:", error?.message);
+  }
+
+  // Если что-то пошло не так, вернем на главную с ошибкой
+  return NextResponse.redirect(`${origin}/?error=link_expired_or_invalid`);
 }
-
-export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-};

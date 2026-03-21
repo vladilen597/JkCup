@@ -1,17 +1,28 @@
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Diamond } from "lucide-react";
 
 const roles: Record<string, string> = {
   user: "Участник",
   admin: "Админ",
-  superadmin: "Суперадмин",
+  superadmin: "Гл.Админ",
   guest: "Гость",
 };
 
-const roleStyleMap: Record<string, string> = {
-  guest: "text-role-guest border-[hsl(var(--role-guest)/0.3)]",
-  user: "text-role-user border-[hsl(var(--role-user)/0.3)]",
-  admin: "text-role-admin border-[hsl(var(--role-admin)/0.3)] glow-primary-sm",
-  superadmin: "text-role-superadmin border-[hsl(var(--role-superadmin)/0.3)]",
+const roleStyleMap: Record<string, { text: string; block: string }> = {
+  guest: { text: "text-neutral-400", block: "border-neutral-400!" },
+  user: {
+    text: "text-white border-white!",
+    block: "border-white",
+  },
+  admin: {
+    text: "text-primary",
+    block: "border-primary!",
+  },
+  superadmin: {
+    text: "text-gold",
+    block: "border-gold!",
+  },
 };
 
 interface RoleBadgeProps {
@@ -23,10 +34,15 @@ const RoleBadge = ({ role }: RoleBadgeProps) => {
     <motion.span
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2 ${roleStyleMap[role] || roleStyleMap.guest}`}
+      className={cn(
+        "inline-flex bg-background items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2",
+        roleStyleMap[role].block,
+      )}
     >
-      <span className={`w-1.5 h-1.5 rounded-full bg-current`} />
-      {roles[role] || roles.guest}
+      <Diamond className={cn("w-3 h-3", roleStyleMap[role].text)} />
+      <span className={roleStyleMap[role].text || roleStyleMap.guest.text}>
+        {roles[role] || roles.guest}
+      </span>
     </motion.span>
   );
 };

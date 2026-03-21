@@ -1,6 +1,7 @@
-import { ChevronDown } from "lucide-react";
-import { MouseEvent, useState, useEffect, useRef } from "react";
+import { ChevronDown, Diamond } from "lucide-react";
+import { MouseEvent, useState, useEffect, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { cn } from "@/lib/utils";
 
 export interface ISelectOption {
   id: number;
@@ -39,6 +40,33 @@ const contentVariants = {
   },
 };
 
+const triggerVariants = {
+  expanded: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  collapsed: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+};
+
+const roleStyleMap: Record<string, { text: string; block: string }> = {
+  guest: { text: "text-neutral-400", block: "border-neutral-400!" },
+  user: {
+    text: "text-white border-white!",
+    block: "border-white",
+  },
+  admin: {
+    text: "text-primary",
+    block: "border-primary!",
+  },
+  superadmin: {
+    text: "text-gold",
+    block: "border-gold!",
+  },
+};
+
 const RoleSelect = ({
   value,
   containerClassName,
@@ -54,6 +82,11 @@ const RoleSelect = ({
     e.preventDefault();
     setIsOpen((prevState) => !prevState);
   };
+
+  const optionsWithoutCurrent = useMemo(
+    () => options.filter((option) => option.value !== value.value),
+    [options, value],
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | Event) => {
@@ -85,13 +118,22 @@ const RoleSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative ${containerClassName}`}
+      className={`block w-fit relative ${containerClassName}`}
       onClick={handleToggleIsOpen}
     >
-      <div
-        className={`text-xs font-mono flex items-center gap-2 justify-end py-2 cursor-pointer ${triggerClassName}`}
+      <motion.div
+        className={cn(
+          "inline-flex bg-background items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2 cursor-pointer",
+          triggerClassName,
+          roleStyleMap[value.value].block,
+          roleStyleMap[value.value].text,
+        )}
+        variants={triggerVariants}
       >
-        {value.label || "Не выбрано"}
+        <div className="flex items-center gap-2">
+          <Diamond className={cn("w-3 h-3")} />
+          {value.label || "Не выбрано"}
+        </div>
         <motion.div
           variants={labelVariants}
           initial="collapsed"
@@ -100,22 +142,31 @@ const RoleSelect = ({
         >
           <ChevronDown className="h-4 w-4" />
         </motion.div>
-      </div>
+      </motion.div>
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="absolute top-full font-mono text-xs right-0 bg-muted rounded-lg overflow-hidden z-10"
+            className={cn(
+              "absolute bg-background top-full w-full border-l border-r border-b font-mono text-xs right-0 rounded-b-lg overflow-hidden z-10",
+              roleStyleMap[value.value].block,
+            )}
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"
             exit="collapsed"
           >
-            {options.map((option) => (
+            {optionsWithoutCurrent.map((option) => (
               <li
                 key={option.id}
-                className="p-2 px-4 hover:bg-primary-foreground cursor-pointer"
+                className={cn(
+                  "flex items-center gap-2 p-2 px-3 hover:bg-primary/10 cursor-pointer uppercase",
+                  roleStyleMap[option.value].text,
+                )}
                 onClick={() => handleOptionClick(option)}
               >
+                <Diamond
+                  className={cn("w-3 h-3", roleStyleMap[option.value].text)}
+                />
                 {option.label}
               </li>
             ))}

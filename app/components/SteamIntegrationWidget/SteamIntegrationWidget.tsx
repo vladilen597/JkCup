@@ -4,13 +4,7 @@ import { motion } from "framer-motion";
 import Steam from "../Icons/Steam";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import Image from "next/image";
-import {
-  Check,
-  ExternalLink,
-  Link2Off,
-  MousePointer2,
-  Unlink,
-} from "lucide-react";
+import { Check, ExternalLink, MousePointer2, Unlink } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { setCurrentUser, setUserInfo } from "@/app/utils/store/userSlice";
@@ -26,7 +20,7 @@ const SteamIntegrationWidget = () => {
   const dispatch = useAppDispatch();
 
   const handleLinkSteam = () => {
-    window.location.href = `/api/users/${currentUser.id}/steam`;
+    window.location.href = `/api/users/${currentUser?.id}/steam`;
   };
 
   const handleUnlinkSteam = async () => {
@@ -35,7 +29,7 @@ const SteamIntegrationWidget = () => {
 
     try {
       const { data: updatedProfile } = await axios.post(
-        `/api/users/${userInfo.id}/steam/unlink`,
+        `/api/users/${userInfo?.id}/steam/unlink`,
       );
 
       dispatch(setCurrentUser(updatedProfile));
@@ -70,7 +64,7 @@ const SteamIntegrationWidget = () => {
   }, [window.location.search]);
 
   const isConnected = !!userInfo.steam_id && !!userInfo.steam_name;
-  const isOwnProfile = currentUser.id === userInfo.id;
+  const isOwnProfile = currentUser?.id === userInfo.id;
 
   return (
     <motion.div
@@ -87,7 +81,7 @@ const SteamIntegrationWidget = () => {
       </div>
 
       {!userInfo.id ? (
-        <div className="h-full overflow-hidden rounded-b-xl">
+        <div className="leading-0 h-full overflow-hidden rounded-b-xl">
           <CustomSkeleton className="h-full" borderRadius={0} height={220} />
         </div>
       ) : (

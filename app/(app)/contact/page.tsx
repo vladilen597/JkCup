@@ -4,7 +4,7 @@ import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import Title from "@/app/components/Title/Title";
 import { SubmitEvent, useState } from "react";
-import { ChevronDown, NotebookPen } from "lucide-react";
+import { ChevronDown, MessageCircle, NotebookPen } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import FeedbackList from "@/app/components/FeedbackList/FeedbackList";
@@ -58,64 +58,77 @@ const page = () => {
         </div>
       </motion.div>
 
-      {isFeedbackSent ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto text-center"
-        >
-          <h2 className="text-xl">Ваша форма успешно отправлена!</h2>
-          <p className="mt-2 text-neutral-400">Спасибо за обращение</p>
-          <Link href="/tournaments" className="mt-2 text-xs underline">
-            Вернуться на главную
-          </Link>
-        </motion.div>
-      ) : (
-        <motion.form
-          className="mt-2"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          onSubmit={handleSendForm}
-        >
-          <label>
-            <span>Введите ваше обращение</span>
-            <textarea
-              className="mt-1 p-2 w-full border border-border rounded-lg bg-muted min-h-100 outline-0 focus:outline-none focus:ring-2 focus:ring-primary text-lg"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-          </label>
-          <CustomButton
-            className="mt-1 w-full justify-center py-3 text-sm"
-            type="submit"
-            isLoading={isLoading}
-            label="Отправить"
-          />
-        </motion.form>
-      )}
-      {(currentUser.role === "admin" || currentUser.role === "superadmin") && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-5 w-full overflow-hidden bg-muted border border-border rounded-lg"
-        >
-          <button
-            className="w-full flex items-center justify-between p-3"
-            onClick={handleToggleExpanded}
-          >
-            <span>Показать обращения</span>
+      <div className="flex items-start gap-4 bg-card border border-border p-4 rounded-lg">
+        <div className="w-full">
+          {isFeedbackSent ? (
             <motion.div
-              animate={{ rotate: isFeedbacksExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mx-auto text-center"
             >
-              <ChevronDown />
+              <h2 className="text-xl">Ваша форма успешно отправлена!</h2>
+              <p className="mt-2 text-neutral-400">Спасибо за обращение</p>
+              <Link href="/tournaments" className="mt-2 text-xs underline">
+                Вернуться на главную
+              </Link>
             </motion.div>
-          </button>
-          {isFeedbacksExpanded && <FeedbackList />}
-        </motion.div>
-      )}
+          ) : currentUser?.id ? (
+            <motion.form
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              onSubmit={handleSendForm}
+            >
+              <label>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-card border border-border w-fit">
+                    <NotebookPen />
+                  </div>
+                  Введите ваше обращение
+                </div>
+                <textarea
+                  className="mt-1 p-2 w-full border border-border rounded-lg bg-muted min-h-100 outline-0 focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                />
+              </label>
+              <CustomButton
+                className="mt-1 w-full justify-center py-3 text-sm"
+                type="submit"
+                isLoading={isLoading}
+                label="Отправить"
+              />
+            </motion.form>
+          ) : (
+            <div className="border-dashed border rounded-lg p-4">
+              <p className="text-neutral-400 text-center">
+                Вам нужно войти в ваш аккаунт чтобы оставить отзыв
+              </p>
+            </div>
+          )}
+        </div>
+        {(currentUser?.role === "admin" ||
+          currentUser?.role === "superadmin") && (
+          <div className="w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-card border border-border w-fit">
+                  <MessageCircle />
+                </div>
+                Отзывы пользователей
+              </div>
+              <div className="mt-1">
+                <FeedbackList />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </div>
     </main>
   );
 };

@@ -219,7 +219,7 @@ const TournamentPage = () => {
   );
 
   const isUserCanCreateTeam =
-    !isCurrentUserJudge && !isUserHasTeam && currentUser.role !== "guest";
+    !isCurrentUserJudge && !isUserHasTeam && currentUser?.role !== "guest";
   const isBracketMode = tournament?.is_bracket === true;
 
   const canEdit =

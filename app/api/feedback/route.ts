@@ -46,7 +46,7 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ message: "Неавторизован" }, { status: 401 });
     }
 
-    const { title, text } = await req.json();
+    const { text } = await req.json();
 
     if (!text || text.trim().length < 3) {
       return NextResponse.json(
@@ -57,7 +57,6 @@ export const POST = async (req: NextRequest) => {
 
     const newFeedback = await prisma.feedback.create({
       data: {
-        title,
         text: text.trim(),
         creator_id: user.id,
       },

@@ -6,24 +6,18 @@ import {
   setUserInfo,
   updateUserInfo,
 } from "@/app/utils/store/userSlice";
-import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Camera, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { IGame, IUser } from "@/app/lib/types";
-import { toast } from "react-toastify";
-import RoleSelect from "@/app/components/Shared/RoleSelect/RoleSelect";
+import { IUser } from "@/app/lib/types";
 import { roleSelectOptions } from "@/app/components/UserList/UserLine/UserLine";
-import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
 import ProfileTabs from "@/app/components/ProfileTabs/ProfileTabs";
 import ProfileHeader from "@/app/components/Profile/ProfileHeader/ProfileHeader";
 
 export const roles = {
   user: "Участник",
   admin: "Админ",
-  superadmin: "Суперадмин",
+  superadmin: "Гл.Админ",
   guest: "Гость",
 };
 
@@ -35,9 +29,8 @@ export const roleColors = {
 };
 
 const page = ({ children }: { children: React.ReactNode }) => {
-  const { currentUser, userInfo } = useAppSelector((state) => state.user);
+  const { userInfo } = useAppSelector((state) => state.user);
   const params = useParams();
-  const isCurrentUser = params.id === currentUser.id;
   const [userRole, setUserRole] = useState<{
     id: number;
     value: string;
@@ -69,26 +62,7 @@ const page = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const handleUpdateRole = async (value: {
-    id: number;
-    value: string;
-    label: string;
-  }) => {
-    const oldRole = userRole;
-    setUserRole(value);
-    try {
-      await axios.post("/api/users/user/update/role", {
-        userId: userInfo.id,
-        newRole: value.value,
-      });
-    } catch (error) {
-      console.log(error);
-      setUserRole(oldRole);
-    }
-  };
-
-  const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleChangeImage = (file: File) => {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {

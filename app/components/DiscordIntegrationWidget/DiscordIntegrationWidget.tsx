@@ -75,7 +75,7 @@ const DiscordIntegrationWidget = (props: Props) => {
   }, []);
 
   const isConnected = !!userInfo.discord_full_name && !!userInfo.discord_id;
-  const isOwnProfile = currentUser.id === userInfo.id;
+  const isOwnProfile = currentUser?.id === userInfo.id;
 
   return (
     <motion.div
@@ -92,7 +92,7 @@ const DiscordIntegrationWidget = (props: Props) => {
       </div>
 
       {!userInfo.id ? (
-        <div className="h-full overflow-hidden rounded-b-xl">
+        <div className="leading-0 h-full overflow-hidden rounded-b-xl">
           <CustomSkeleton className="h-full" borderRadius={0} height={220} />
         </div>
       ) : (

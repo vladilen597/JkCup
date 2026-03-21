@@ -1,13 +1,13 @@
-import { FirestoreTimestamp, IUser } from "@/app/lib/types";
 import FeedbackItem from "./FeedbackItem/FeedbackItem";
 import { useEffect, useState } from "react";
+import { IUser } from "@/app/lib/types";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 
 export interface IFeedback {
   id: string;
   creator: IUser;
-  created_at: FirestoreTimestamp;
+  created_at: string;
   text: string;
 }
 
@@ -39,8 +39,16 @@ const FeedbackList = () => {
     );
   }
 
+  if (!feedbacks.length) {
+    return (
+      <div className="p-4 border-dashed border border-border rounded-lg text-neutral-400">
+        Отзывов пока нет
+      </div>
+    );
+  }
+
   return (
-    <ul className="max-h-100 overflow-y-auto space-y-2 p-2">
+    <ul className="max-h-113.5 h-full overflow-y-auto space-y-2">
       {feedbacks.map((feedback) => (
         <FeedbackItem key={feedback.id} {...feedback} />
       ))}

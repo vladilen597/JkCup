@@ -10,6 +10,7 @@ import { Lock, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IUser } from "@/app/lib/types";
 import axios from "axios";
+import RoleBadge from "../../Shared/RoleBadge/RoleBadge";
 
 export const roleSelectOptions = [
   {
@@ -64,7 +65,7 @@ const UserLine: React.FC<UserLineProps> = ({
   });
   const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
-  const isSuperAdmin = currentUser.role === "superadmin";
+  const isSuperAdmin = currentUser?.role === "superadmin";
 
   const handleClickLine = () => {
     router.push("/users/" + id);
@@ -117,25 +118,8 @@ const UserLine: React.FC<UserLineProps> = ({
           steam_profile_url={steam_profile_url}
         />
 
-        {showRoles && (
-          <>
-            {isSuperAdmin && currentUser.id !== id && role !== "superadmin" ? (
-              <RoleSelect
-                value={userRole}
-                onChange={handleUpdateRole}
-                options={roleSelectOptions}
-              />
-            ) : (
-              <div
-                className={`text-right text-xs text-muted-foreground font-mono ${roleColors[role as keyof typeof roleColors]}`}
-              >
-                {roles[role as keyof typeof roles]}
-              </div>
-            )}
-          </>
-        )}
         {onBlockClick &&
-          currentUser.role === "superadmin" &&
+          currentUser?.role === "superadmin" &&
           role !== "superadmin" && (
             <button
               type="button"
@@ -156,9 +140,9 @@ const UserLine: React.FC<UserLineProps> = ({
             </button>
           )}
         {!hideDelete &&
-          currentUser.role === "superadmin" &&
+          currentUser?.role === "superadmin" &&
           role !== "superadmin" &&
-          currentUser.id !== id &&
+          currentUser?.id !== id &&
           onDeleteClick && (
             <button
               className="cursor-pointer hover:bg-background/60 rounded-full p-1 transition-colors"
@@ -172,6 +156,19 @@ const UserLine: React.FC<UserLineProps> = ({
               <X className="w-5 h-5 text-neutral-400" />
             </button>
           )}
+        {showRoles && (
+          <>
+            {isSuperAdmin && currentUser?.id !== id && role !== "superadmin" ? (
+              <RoleSelect
+                value={userRole}
+                onChange={handleUpdateRole}
+                options={roleSelectOptions}
+              />
+            ) : (
+              <RoleBadge role={role} />
+            )}
+          </>
+        )}
       </motion.li>
     </div>
   );

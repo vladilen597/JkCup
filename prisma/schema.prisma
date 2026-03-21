@@ -156,7 +156,6 @@ model Game {
 model Feedback {
   id         String   @id @default(cuid())
   created_at DateTime @default(now()) @map("created_at")
-  title      String
   text       String
   creator_id String   @db.Uuid
 

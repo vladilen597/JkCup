@@ -23,7 +23,7 @@ const roles = [
   },
   {
     id: 2,
-    label: "Суперадмин",
+    label: "Гл.Админ",
     value: "superadmin",
   },
   {
@@ -108,10 +108,10 @@ const UsersPage = () => {
 
   const filteredUsers = users.filter(
     (user) =>
-      (user.full_name + user.steam_display_name)
+      (user.full_name + user.discord_full_name)
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) &&
-      (selectedRole.value === "any" || selectedRole.value === user.role),
+      (selectedRole.value === "any" || selectedRole.value === user?.role),
   );
 
   if (error) {

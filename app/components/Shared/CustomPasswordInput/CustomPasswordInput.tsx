@@ -12,6 +12,7 @@ interface ICustomPasswordInputProps {
   disabled?: boolean;
   placeholder?: string;
   autoComplete?: string;
+  autoFocus?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -24,6 +25,7 @@ const CustomPasswordInput = memo(
     icon,
     required = false,
     disabled = false,
+    autoFocus,
     placeholder,
     autoComplete = "off",
     onChange,
@@ -44,6 +46,7 @@ const CustomPasswordInput = memo(
         )}
         <div className="mt-1 relative flex items-center">
           <input
+            autoFocus={autoFocus}
             name={name}
             type={isPasswordShown ? "text" : "password"}
             value={value}

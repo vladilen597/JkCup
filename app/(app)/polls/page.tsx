@@ -17,7 +17,7 @@ const PollsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useAppSelector((user) => user.user);
 
-  const canCreatePoll = currentUser.role === "superadmin";
+  const canCreatePoll = currentUser?.role === "superadmin";
 
   const fetchData = async () => {
     try {
@@ -90,7 +90,7 @@ const PollsPage = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-3xl mx-auto"
           >
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2rem] relative overflow-hidden">
+            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-4xl relative overflow-hidden">
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -104,12 +104,14 @@ const PollsPage = () => {
                   </div>
                   <h2 className="text-3xl font-bold">{pollData.poll.title}</h2>
                 </div>
-                <button
-                  onClick={handleDeletePoll}
-                  className="p-3 hover:bg-red-500/10 text-zinc-600 hover:text-red-500 rounded-2xl transition-all"
-                >
-                  <Trash2 className="w-6 h-6" />
-                </button>
+                {canCreatePoll && (
+                  <button
+                    onClick={handleDeletePoll}
+                    className="p-3 hover:bg-red-500/10 text-zinc-600 hover:text-red-500 rounded-2xl transition-all"
+                  >
+                    <Trash2 className="w-6 h-6" />
+                  </button>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-6 mb-10 text-zinc-400 text-sm">
