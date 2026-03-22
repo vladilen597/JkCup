@@ -24,7 +24,6 @@ const SteamIntegrationWidget = () => {
   };
 
   const handleUnlinkSteam = async () => {
-    if (!confirm("Вы уверены, что хотите отвязать Steam?")) return;
     setIsUnlinkLoading(true);
 
     try {
@@ -45,21 +44,23 @@ const SteamIntegrationWidget = () => {
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("status") === "steam_success") {
-      const updateLocalData = async () => {
-        const { data: freshUser } = await axios.get(
-          `/api/users/${userInfo.id}`,
-        );
+    if (window) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("status") === "steam_success") {
+        const updateLocalData = async () => {
+          const { data: freshUser } = await axios.get(
+            `/api/users/${userInfo.id}`,
+          );
 
-        dispatch(setCurrentUser(freshUser));
-        dispatch(setUserInfo(freshUser));
+          dispatch(setCurrentUser(freshUser));
+          dispatch(setUserInfo(freshUser));
 
-        window.history.replaceState({}, "", window.location.pathname);
-        toast.success("Steam синхронизирован!");
-      };
+          window.history.replaceState({}, "", window.location.pathname);
+          toast.success("Steam синхронизирован!");
+        };
 
-      updateLocalData();
+        updateLocalData();
+      }
     }
   }, [window.location.search]);
 
@@ -90,7 +91,7 @@ const SteamIntegrationWidget = () => {
             {isOwnProfile
               ? isConnected
                 ? "Steam привязан к вашему профилю"
-                : "Привяжите Steam, чтобы отображать свой игровой профиль и VAC-статус"
+                : "Привяжите Steam, чтобы отображать свой игровой профиль"
               : "Игровой профиль пользователя в Steam"}
           </p>
 
@@ -150,26 +151,31 @@ const SteamIntegrationWidget = () => {
               )}
             </motion.div>
           ) : (
-            <div className="space-y-4">
-              {isOwnProfile ? (
+            <div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35 }}
+                className="flex min-h-20 items-center gap-3 text-muted-foreground bg-zinc-900/30 p-4 rounded-xl border border-dashed border-zinc-800"
+              >
+                <MousePointer2 className="w-5 h-5 opacity-30" />
+                <span className="text-sm">Профиль Steam не подключен</span>
+              </motion.div>
+              {isOwnProfile && (
                 <motion.div
+                  className="mt-4"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.4 }}
                 >
                   <CustomButton
+                    className="w-full justify-center border-white! hover:bg-blue-500/5 text-white"
                     label="Привязать аккаунт Steam"
                     buttonStyle={BUTTON_STYLES.OUTLINE}
-                    className="justify-center border-white! hover:bg-blue-500/5 text-white"
                     icon={<Steam className="h-5 w-5 text-white" />}
                     onClick={handleLinkSteam}
                   />
                 </motion.div>
-              ) : (
-                <div className="flex items-center gap-3 text-muted-foreground bg-zinc-900/30 p-4 rounded-xl border border-dashed border-zinc-800">
-                  <MousePointer2 className="w-5 h-5 opacity-30" />
-                  <span className="text-sm">Профиль Steam не подключен</span>
-                </div>
               )}
             </div>
           )}

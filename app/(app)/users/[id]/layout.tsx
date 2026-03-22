@@ -4,13 +4,12 @@ import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import {
   clearUserInfo,
   setUserInfo,
-  updateUserInfo,
+  updateUserInfoField,
 } from "@/app/utils/store/userSlice";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { IUser } from "@/app/lib/types";
-import { roleSelectOptions } from "@/app/components/UserList/UserLine/UserLine";
 import ProfileTabs from "@/app/components/ProfileTabs/ProfileTabs";
 import ProfileHeader from "@/app/components/Profile/ProfileHeader/ProfileHeader";
 
@@ -31,15 +30,6 @@ export const roleColors = {
 const page = ({ children }: { children: React.ReactNode }) => {
   const { userInfo } = useAppSelector((state) => state.user);
   const params = useParams();
-  const [userRole, setUserRole] = useState<{
-    id: number;
-    value: string;
-    label: string;
-  }>({
-    id: 1,
-    value: "guest",
-    label: "Гость",
-  });
   const dispatch = useAppDispatch();
 
   const handleLoadUser = async () => {
@@ -48,9 +38,6 @@ const page = ({ children }: { children: React.ReactNode }) => {
 
       if (data) {
         dispatch(setUserInfo(data));
-        setUserRole(
-          roleSelectOptions.find((option) => option.value === data.role),
-        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -70,11 +57,13 @@ const page = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    dispatch(updateUserInfo({ name: "imageFile", value: file }));
+    dispatch(updateUserInfoField({ name: "imageFile", value: file }));
   };
 
   useEffect(() => {
-    handleLoadUser();
+    if (!window.location.hash) {
+      handleLoadUser();
+    }
     return () => {
       dispatch(clearUserInfo());
     };

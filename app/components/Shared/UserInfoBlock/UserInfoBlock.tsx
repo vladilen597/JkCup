@@ -27,8 +27,6 @@ const UserInfoBlock = ({
     e.stopPropagation();
   };
 
-  console.log(discord_id);
-
   return (
     <>
       {image_url ? (

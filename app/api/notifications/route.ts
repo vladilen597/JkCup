@@ -1,7 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export const GET = async () => {
   try {
@@ -19,20 +17,48 @@ export const GET = async () => {
     });
   }
 };
-
 export const POST = async (req: NextRequest) => {
   try {
-    const { title, text } = await req.json();
+    const { title, text, type, priority, creatorId } = await req.json(); // Передай ID создателя с фронта
 
     const notification = await prisma.notification.create({
       data: {
         title: title.trim(),
         text: text.trim(),
+        type: type || "info",
+        priority: priority || 0,
       },
     });
 
-    return NextResponse.json(notification);
+    const users = await prisma.profile.findMany({
+      select: { id: true },
+      where: { status: "active" },
+    });
+
+    if (users.length > 0) {
+      await prisma.userNotification.createMany({
+        data: users.map((user) => ({
+          user_id: user.id,
+          notification_id: notification.id,
+          is_read: false,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    const userNotificationForCreator = await prisma.userNotification.findFirst({
+      where: {
+        user_id: creatorId,
+        notification_id: notification.id,
+      },
+      include: {
+        notification: true,
+      },
+    });
+
+    return NextResponse.json(userNotificationForCreator);
   } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 };
@@ -50,10 +76,16 @@ export const DELETE = async (req: NextRequest) => {
     });
 
     return NextResponse.json({
-      status: 200,
-      message: "Успешно удалено уведомление",
+      message: "Уведомление удалено у всех пользователей",
     });
-  } catch (err) {
-    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json(
+      {
+        error:
+          err.code === "P2025" ? "Уведомление не найдено" : "Ошибка сервера",
+      },
+      { status: 500 },
+    );
   }
 };

@@ -2,21 +2,26 @@ import { motion } from "motion/react";
 import Discord from "../Icons/Discord";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import Image from "next/image";
-import { Check, ExternalLink, MessageCircle, Unlink } from "lucide-react";
+import { Check, ExternalLink, MousePointer2, Unlink } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { setCurrentUser, setUserInfo } from "@/app/utils/store/userSlice";
+import {
+  setCurrentUser,
+  setUserInfo,
+  updateCurrentUser,
+  updateUserInfo,
+} from "@/app/utils/store/userSlice";
 import { toast } from "react-toastify";
 import ConnectDiscord from "../Integrations/Discord/ConnectDiscord/ConnectDiscord";
 import { supabase } from "@/app/utils/supabase";
 import CustomSkeleton from "../Shared/CustomSkeleton/CustomSkeleton";
+import { useRouter } from "next/navigation";
 
-type Props = {};
-
-const DiscordIntegrationWidget = (props: Props) => {
+const DiscordIntegrationWidget = () => {
   const { currentUser, userInfo } = useAppSelector((state) => state.user);
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const handleUnlink = async () => {
     setIsUnlinkLoading(true);
@@ -31,48 +36,53 @@ const DiscordIntegrationWidget = (props: Props) => {
 
       toast.success("Discord успешно отвязан");
     } catch (error) {
-      console.error("Ошибка отвязки:", error);
-      toast.error("Не удалось отвязать аккаунт");
+      toast.error(error.response?.data?.error || "Не удалось отвязать аккаунт");
     } finally {
       setIsUnlinkLoading(false);
     }
   };
 
-  useEffect(() => {
-    const syncDiscordData = async () => {
+  const syncDiscordData = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const discordData = user?.identities?.find(
+      (id) => id.provider === "discord",
+    );
+
+    if (discordData) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      const discordData = user?.identities?.find(
-        (id) => id.provider === "discord",
-      );
+      const discordId = user?.user_metadata.provider_id;
+      const discordGlobalName = user?.user_metadata.custom_claims.global_name;
+      const discordAvatar = user?.user_metadata.avatar_url;
+      const discordName = user?.user_metadata.full_name;
 
-      if (discordData) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+      try {
+        const { data } = await axios.patch(`/api/users/${user.id}/discord`, {
+          discord_global_name: discordGlobalName,
+          discord_full_name: discordName,
+          discord_id: discordId,
+          discord_avatar: discordAvatar,
+        });
 
-        const discordId = user?.user_metadata.provider_id;
-        const discordGlobalName = user?.user_metadata.custom_claims.global_name;
-        const discordAvatar = user?.user_metadata.avatar_url;
-        const discordName = user?.user_metadata.full_name;
-
-        try {
-          await axios.patch(`/api/users/${user.id}/discord`, {
-            discord_global_name: discordGlobalName,
-            discord_full_name: discordName,
-            discord_id: discordId,
-            discord_avatar: discordAvatar,
-          });
-        } catch (e) {
-          console.error("Ошибка синхронизации", e);
-        }
+        dispatch(setCurrentUser(data));
+        dispatch(setUserInfo(data));
+        router.refresh();
+      } catch (e) {
+        console.error("Ошибка синхронизации", e);
       }
-    };
+    }
+  };
 
-    syncDiscordData();
-  }, []);
+  useEffect(() => {
+    if (!userInfo.discord_id) {
+      syncDiscordData();
+    }
+  }, [userInfo.discord_id]);
 
   const isConnected = !!userInfo.discord_full_name && !!userInfo.discord_id;
   const isOwnProfile = currentUser?.id === userInfo.id;
@@ -162,21 +172,24 @@ const DiscordIntegrationWidget = (props: Props) => {
             </motion.div>
           ) : (
             <div>
-              {isOwnProfile ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35 }}
+                className="flex items-center gap-3 text-muted-foreground min-h-20 bg-zinc-900/30 p-4 rounded-xl border border-dashed border-zinc-800"
+              >
+                <MousePointer2 className="w-5 h-5 opacity-30" />
+                <span className="text-sm">Профиль Discord не подключен</span>
+              </motion.div>
+              {isOwnProfile && (
                 <motion.div
+                  className="mt-4"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.4 }}
                 >
                   <ConnectDiscord user_id={currentUser.id} />
                 </motion.div>
-              ) : (
-                <div className="flex items-center gap-3 text-muted-foreground py-3">
-                  <MessageCircle className="w-5 h-5 opacity-50" />
-                  <span className="text-sm">
-                    Пользователь ещё не подключил Discord
-                  </span>
-                </div>
               )}
             </div>
           )}

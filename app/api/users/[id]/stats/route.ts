@@ -21,10 +21,6 @@ export const GET = async (
       },
     });
 
-    const total =
-      (stats?._count.tournament_registrations || 0) +
-      (stats?._count.team_memberships || 0);
-
     return NextResponse.json({
       registrations: stats?._count.tournament_registrations || 0,
       team_membership: stats?._count.team_memberships || 0,

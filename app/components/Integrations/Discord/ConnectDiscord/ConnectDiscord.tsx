@@ -18,7 +18,7 @@ const ConnectDiscord = ({ user_id }: { user_id: string }) => {
 
   return (
     <CustomButton
-      className="bg-[#6266ec] text-white hover:bg-[#6266ec]/80"
+      className="bg-[#6266ec] text-white hover:bg-[#6266ec]/80 w-full justify-center"
       label="Подключить"
       icon={<Discord fill="white" />}
       onClick={linkDiscord}

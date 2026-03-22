@@ -1,6 +1,8 @@
 import { Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import { ChangeEvent, useRef } from "react";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import { useParams } from "next/navigation";
 
 interface ProfileAvatarProps {
   imageUrl?: string;
@@ -24,6 +26,8 @@ const ProfileAvatar = ({
   size = "lg",
 }: ProfileAvatarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentUser } = useAppSelector((state) => state.user);
+  const { id } = useParams();
 
   const handleClick = () => {
     if (isEditable) fileInputRef.current?.click();
@@ -54,7 +58,7 @@ const ProfileAvatar = ({
       whileTap={{ scale: 0.97 }}
       onClick={handleClick}
     >
-      <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-br from-primary/60 to-primary/20 animate-pulse-glow" />
+      <div className="absolute -inset-0.5 rounded-2xl bg-linear-to-br from-primary/60 to-primary/20 animate-pulse-glow" />
 
       <div className="relative w-full h-full rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center">
         {imageUrl ? (
@@ -69,7 +73,7 @@ const ProfileAvatar = ({
           </span>
         )}
 
-        {isEditable && (
+        {currentUser?.id === id && (
           <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
             <Camera className="w-6 h-6 text-foreground" />
           </div>

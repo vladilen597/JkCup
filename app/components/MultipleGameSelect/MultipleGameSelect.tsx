@@ -95,7 +95,7 @@ const MultipleGameSelect = ({
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
       className={cn(
-        "block border relative bg-muted rounded-lg",
+        "block border relative bg-background rounded-lg cursor-pointer",
         containerClassName,
         borderClass,
       )}
@@ -107,7 +107,7 @@ const MultipleGameSelect = ({
             value?.map((game) => (
               <div
                 key={game.id}
-                className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
+                className="flex bg-card p-1.5 rounded-lg items-center gap-2"
               >
                 {game?.image_url && (
                   <Image
@@ -150,7 +150,7 @@ const MultipleGameSelect = ({
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none max-h-60 overflow-y-auto"
+            className="border-b border-x w-full text-sm absolute top-full bg-card rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none max-h-60 overflow-y-auto"
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"

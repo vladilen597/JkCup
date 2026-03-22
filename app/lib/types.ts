@@ -16,6 +16,17 @@ export interface INotification {
   title: string;
   text: string;
   created_at: string;
+  is_active: boolean;
+  priority: number;
+  type: "info" | "warning";
+}
+
+export interface IUserNotification {
+  id: string;
+  user_id: string;
+  is_read: boolean;
+  read_at: null | string;
+  notification: INotification;
 }
 
 export interface IGame {
@@ -53,19 +64,6 @@ interface IJudgedTournament {
   profile_id: string;
   tournament_id: string;
   tournament: ITournament;
-}
-
-export interface IBracket {
-  rounds: {
-    id: string;
-    matches: {
-      id: string;
-      users: IUser[];
-      info: string;
-    }[];
-  }[];
-  currentRound: number;
-  participants: IUser[];
 }
 
 export interface ITeamMember {
@@ -122,7 +120,6 @@ export interface ITournament {
   winner_team_id: string | null;
   winner_team?: ITeam | null;
 
-  // ВАЖНО: Заменяем bracket: IBracket на rounds
   rounds?: IRound[];
 
   rewards: { id: string; value: string }[] | null;
@@ -135,7 +132,6 @@ export interface ITournament {
   is_bracket: boolean;
 }
 
-// Дополнительные интерфейсы для сетки
 export interface IRound {
   id: string;
   tournament_id: string;

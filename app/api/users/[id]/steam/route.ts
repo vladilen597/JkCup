@@ -9,7 +9,6 @@ export const GET = async (
   const { id } = await params;
   const cookieStore = await cookies();
 
-  // Сохраняем ID пользователя в куки на 5 минут, чтобы достать его в callback
   cookieStore.set("steam_linking_user_id", id, {
     maxAge: 300,
     httpOnly: true,

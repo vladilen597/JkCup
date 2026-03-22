@@ -1,14 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
-export const POST = async (
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) => {
+export const POST = async (req: Request) => {
   try {
-    const { id } = await params;
+    const { old_password, new_password } = await req.json();
     const cookieStore = await cookies();
 
     const supabase = createServerClient(
@@ -17,6 +13,7 @@ export const POST = async (
       {
         cookies: {
           getAll: () => cookieStore.getAll(),
+          setAll: (c) => c.forEach((cookie) => cookieStore.set(cookie)),
         },
       },
     );
@@ -26,22 +23,34 @@ export const POST = async (
       error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user || user.id !== id) {
-      return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+    if (userError || !user) {
+      return NextResponse.json({ error: "Сессия истекла" }, { status: 401 });
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(user.email!, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/confirm`,
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: old_password,
     });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (signInError) {
+      return NextResponse.json(
+        { error: "Старый пароль неверен" },
+        { status: 401 },
+      );
     }
 
-    return NextResponse.json({
-      message: "Инструкции отправлены на " + user.email,
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: new_password,
     });
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 400 });
+    }
+    await supabase.auth.signOut({ scope: "global" });
+
+    return NextResponse.json({ message: "Пароль успешно изменен" });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.log(error);
+    return NextResponse.json({ error: "Внутренняя ошибка" }, { status: 500 });
   }
 };

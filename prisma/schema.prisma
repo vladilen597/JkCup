@@ -40,6 +40,7 @@ model Profile {
   feedbacks       Feedback[]
   tournamentTeams TournamentTeam[]
   global_vote     GlobalVote?
+  notifications UserNotification[] 
 
   @@map("profiles")
 }
@@ -60,7 +61,6 @@ model Tournament {
   creator_id  String    @db.Uuid
   hidden      Boolean   @default(false)
   is_bracket  Boolean   @default(false)
-  bracket     Json?
   rules       String?
   stream_link String?
   rewards     Json?
@@ -173,7 +173,24 @@ model Notification {
   priority   Int      @default(0)
   created_at DateTime @default(now()) @map("created_at")
 
+  user_statuses UserNotification[]
+
   @@map("notifications")
+}
+
+model UserNotification {
+  id              String   @id @default(cuid())
+  user_id         String   @db.Uuid
+  notification_id String
+  is_read         Boolean  @default(false)
+  read_at         DateTime?
+
+  profile      Profile      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, notification_id])
+  @@index([user_id, is_read])         
+  @@map("user_notifications")
 }
 
 model Round {
@@ -191,9 +208,11 @@ model Round {
 model Match {
   id            String  @id @default(cuid())
   round_id      String
-  status        String  @default("pending") // pending, live, finished
-  next_match_id String?
+  status        String  @default("pending")
 
+  winner_id  String?  @map("winner_id")
+
+  winner       MatchParticipant?  @relation("MatchWinner", fields: [winner_id], references: [id])
   round        Round              @relation("RoundMatches", fields: [round_id], references: [id], onDelete: Cascade)
   participants MatchParticipant[]
 
@@ -213,6 +232,7 @@ model MatchParticipant {
   match   Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
   profile Profile?        @relation(fields: [profile_id], references: [id])
   team    TournamentTeam? @relation(fields: [team_id], references: [id])
+  won_matches Match[] @relation("MatchWinner")
 
   @@map("tournament_match_participants")
 }

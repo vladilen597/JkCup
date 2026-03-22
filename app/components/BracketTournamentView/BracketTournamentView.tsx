@@ -247,10 +247,10 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="relative overflow-x-auto pb-20 custom-scrollbar"
+          className="relative overflow-x-auto custom-scrollbar"
         >
           <Xwrapper>
-            <div className="inline-flex gap-24 items-stretch min-h-150 p-4">
+            <div className="inline-flex gap-12 items-stretch min-h-150 p-4">
               {rounds.map((round: any, rIdx: number) => (
                 <div
                   key={round.id}

@@ -1,36 +1,34 @@
 "use client";
 
-import UserList from "@/app/components/UserList/UserList";
-import { useAppSelector, useAppDispatch } from "@/app/utils/store/hooks";
-import { motion } from "motion/react";
-import { Users, Loader2, AlertCircle, Crown, Trophy } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
 import {
   removeTournament,
   updateTournament,
 } from "@/app/utils/store/tournamentsSlice";
-import TeamList from "@/app/components/TeamsList/TeamsList";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
-import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
-import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
-import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
-import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
-import UserInfoBlock from "@/app/components/Shared/UserInfoBlock/UserInfoBlock";
 import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
-import WinnerTeam from "@/app/components/WinnerTeam/WinnerTeam";
+import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
 import TournamentHero from "@/app/components/TournamentPage/TournamentHero/TournamentHero";
-import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
 import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
-import Script from "next/script";
+import AddJudgeBlock from "@/app/components/Shared/AddJudgeBlock/AddJudgeBlock";
+import CreateTeamModal from "@/app/components/CreateTeamModal/CreateTeamModal";
 import TwitchPlayer from "@/app/components/Shared/StreamFrame/StreamFrame";
-import Link from "next/link";
-import { ITournament } from "@/app/lib/types";
-import axios from "axios";
-import { toast } from "react-toastify";
+import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
+import { useAppSelector, useAppDispatch } from "@/app/utils/store/hooks";
 import WinnerBlock from "@/app/components/WinnerBlock/WinnerBlock";
+import TeamList from "@/app/components/TeamsList/TeamsList";
+import { Users, Loader2, AlertCircle } from "lucide-react";
+import UserList from "@/app/components/UserList/UserList";
+import { useParams, useRouter } from "next/navigation";
+import { ITournament } from "@/app/lib/types";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { motion } from "motion/react";
+import Script from "next/script";
+import Link from "next/link";
+import axios from "axios";
 
 export const statuses = {
   open: "Открыт",

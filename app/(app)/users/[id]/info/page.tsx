@@ -70,7 +70,7 @@ const page = () => {
   const handleLoadUserStats = async () => {
     try {
       const { data } = await axios.get(`/api/users/${id}/stats`);
-      console.log(stats);
+      console.log(data);
       setStats(data);
     } catch (error) {
       toast.error(
@@ -179,13 +179,14 @@ const page = () => {
                 >
                   Участвовал в
                 </motion.span>
-                <span className="">{stats?.registrations}</span>
+                <span className="">
+                  {(stats?.team_membership || 0) + (stats?.registrations || 0)}
+                </span>
                 <span className="text-xs font-mono tracking-widest text-muted-foreground">
-                  {declOfNum(stats?.judged_tournaments, [
-                    "турнире",
-                    "турнирах",
-                    "турнирах",
-                  ])}
+                  {declOfNum(
+                    (stats?.team_membership || 0) + (stats?.registrations || 0),
+                    ["турнире", "турнирах", "турнирах"],
+                  )}
                 </span>
               </div>
             ) : (

@@ -37,7 +37,7 @@ const ProfileTabs = () => {
       slug: "integrations",
       icon: <LinkIcon className="w-4 h-4" />,
     },
-    ...(currentUser.id === id
+    ...(currentUser?.id === id
       ? [
           {
             id: 4,
@@ -51,7 +51,7 @@ const ProfileTabs = () => {
   ];
 
   return (
-    <nav>
+    <motion.nav initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <ul className="flex items-center gap-2 font-inter">
         {tabLinks.map((tab) => {
           const isActive = pathname.includes(tab.slug);
@@ -84,7 +84,7 @@ const ProfileTabs = () => {
           );
         })}
       </ul>
-    </nav>
+    </motion.nav>
   );
 };
 

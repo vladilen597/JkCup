@@ -1,17 +1,23 @@
-import { SubmitEvent, useEffect, useState } from "react";
+import CustomInput from "../Shared/CustomInput/CustomInput";
+import { SetStateAction, SubmitEvent, useEffect, useState } from "react";
+import { useAppSelector } from "@/app/utils/store/hooks";
 import Notification from "./Notification/Notification";
-import { INotification } from "@/app/lib/types";
-import { Loader2, Plus } from "lucide-react";
+import { IUserNotification } from "@/app/lib/types";
 import CustomButton, {
   BUTTON_STYLES,
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
-import CustomInput from "../Shared/CustomInput/CustomInput";
-import { useAppSelector } from "@/app/utils/store/hooks";
+import { Loader2, Plus } from "lucide-react";
 import axios from "axios";
 
-const Notifications = () => {
-  const [notifications, setNotifications] = useState<INotification[]>([]);
+const Notifications = ({
+  handleUpdateUnreadAmount,
+}: {
+  handleUpdateUnreadAmount: (state: SetStateAction<number>) => void;
+}) => {
+  const [userNotifications, setUserNotifications] = useState<
+    IUserNotification[]
+  >([]);
   const [isNotificationAddOpen, setIsNotificationAddOpen] = useState(false);
   const [notificationData, setNotificationData] = useState<{
     title: string;
@@ -43,11 +49,13 @@ const Notifications = () => {
     }));
   };
 
-  const handleLoadNotifications = async () => {
+  const handleLoadUserNotifications = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get("/api/notifications");
-      setNotifications(data);
+      const { data } = await axios.get(
+        `/api/users/${currentUser.id}/notifications`,
+      );
+      setUserNotifications(data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -62,7 +70,8 @@ const Notifications = () => {
     setIsSubmitLoading(true);
     try {
       const { data } = await axios.post("/api/notifications", notificationData);
-      setNotifications((prevState) => [data, ...prevState]);
+      handleUpdateUnreadAmount((prevState) => prevState + 1);
+      setUserNotifications((prevState) => [data, ...prevState]);
       handleCloseModal();
     } catch (error) {
       console.log(error);
@@ -71,14 +80,37 @@ const Notifications = () => {
     }
   };
 
-  const handleDeleteNotification = (id: string) => {
-    setNotifications(
-      notifications.filter((notification) => notification.id !== id),
-    );
+  const handleMarkAsRead = async (userNotificationId: string) => {
+    try {
+      await axios.patch(`/api/users/${currentUser?.id}/notifications/read`, {
+        id: userNotificationId,
+      });
+      setUserNotifications((prev) =>
+        prev.map((n) =>
+          n.id === userNotificationId ? { ...n, is_read: true } : n,
+        ),
+      );
+      handleUpdateUnreadAmount((prevState) => prevState - 1);
+    } catch (error) {
+      console.error("Ошибка при обновлении статуса", error);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      await axios.delete(`/api/notifications?id=${notificationId}`);
+
+      handleUpdateUnreadAmount((prevState) => prevState - 1);
+      setUserNotifications((prevState) =>
+        prevState.filter((un) => un.notification.id !== notificationId),
+      );
+    } catch (error) {
+      console.error("Ошибка при удалении:", error);
+    }
   };
 
   useEffect(() => {
-    handleLoadNotifications();
+    handleLoadUserNotifications();
   }, []);
 
   if (isLoading) {
@@ -109,7 +141,7 @@ const Notifications = () => {
             <span className="text-sm font-medium">Описание</span>
             <textarea
               required
-              className="mt-1 w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full p-2.5 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               name="text"
               onChange={handleChangeInput}
             ></textarea>
@@ -128,13 +160,16 @@ const Notifications = () => {
           </div>
         </form>
       )}
-      {notifications.length ? (
+      {userNotifications.length ? (
         <ul className="mt-2 space-y-2">
-          {notifications?.map((notification) => (
+          {userNotifications.map((un) => (
             <Notification
-              key={notification.id}
-              {...notification}
-              onDeleteClick={handleDeleteNotification}
+              key={un.id}
+              id={un.id}
+              is_read={un.is_read}
+              {...un.notification}
+              onMarkAsRead={() => handleMarkAsRead(un.id)}
+              onDeleteClick={() => handleDeleteNotification(un.notification.id)}
             />
           ))}
         </ul>

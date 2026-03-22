@@ -18,7 +18,7 @@ import {
 import { setCurrentUser } from "@/app/utils/store/userSlice";
 import { AnimatePresence } from "motion/react";
 import Discord from "../../Icons/Discord";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CustomButton from "../CustomButton/CustomButton";
 import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
@@ -31,6 +31,8 @@ import axios from "axios";
 import CustomModal from "../CustomModal/CustomModal";
 import AuthModalContent from "../../AuthModalContent/AuthModalContent";
 import { IUser } from "@/app/lib/types";
+import RoleBadge from "../RoleBadge/RoleBadge";
+import NotificationsBlock from "../../NotificationsBlock/NotificationsBlock";
 
 const linkIconClassname = "h-4 w-4 text-primary";
 
@@ -177,22 +179,14 @@ const additionalOptions = [
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { currentUser } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleCloseProfileDropdown = () => {
     setIsProfileOpen(false);
-  };
-
-  const handleCloseDrawer = () => {
-    setIsNotificationsOpen(false);
-  };
-
-  const handleOpenDrawer = () => {
-    setIsNotificationsOpen(true);
   };
 
   const handleCloseNavDrawer = () => {
@@ -246,6 +240,20 @@ const Header = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -297,7 +305,7 @@ const Header = () => {
               href={link.href}
               target={link.target}
               referrerPolicy={link.referrerPolicy}
-              className="flex items-center gap-2 group"
+              className="select-none flex items-center gap-2 group"
             >
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
                 {link.icon}
@@ -309,7 +317,7 @@ const Header = () => {
           ))}
           <CustomNodeSelect
             titleNode={
-              <div className="flex items-center gap-2 group cursor-pointer">
+              <div className="select-none flex items-center gap-2 group cursor-pointer">
                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
                   <Ellipsis className="h-4 w-4 text-primary" />
                 </div>
@@ -324,23 +332,16 @@ const Header = () => {
 
         <div className="flex items-center gap-2">
           {currentUser?.id ? (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileOpen((p) => !p)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 <div>
-                  <span className="block text-sm text-right font-medium text-foreground">
+                  <span className="block text-sm text-right font-inter text-foreground font-bold">
                     {currentUser.full_name}
                   </span>
-                  <span
-                    className={cn(
-                      "block text-[9px] text-right",
-                      roleColors[currentUser?.role],
-                    )}
-                  >
-                    {roles[currentUser.role]}
-                  </span>
+                  <RoleBadge role={currentUser.role} type="small" />
                 </div>
                 {currentUser.image_url ? (
                   <Image
@@ -374,31 +375,9 @@ const Header = () => {
           ) : (
             <CustomButton label="Войти" onClick={handleOpenAuthModal} />
           )}
-          <button
-            className="cursor-pointer group"
-            type="button"
-            onClick={handleOpenDrawer}
-          >
-            <Bell className="w-5 h-5 text-primary/80 group-hover:text-primary transition-colors" />
-          </button>
+          {currentUser?.id && <NotificationsBlock />}
         </div>
       </div>
-      <AnimatePresence>
-        {isNotificationsOpen && (
-          <CustomDrawer title="Уведомления" onClose={handleCloseDrawer}>
-            <Notifications />
-          </CustomDrawer>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        <CustomModal
-          contentClassName="max-w-150"
-          isOpen={isAuthModalOpen}
-          onClose={handleCloseAuthModal}
-        >
-          <AuthModalContent onClose={handleCloseAuthModal} />
-        </CustomModal>
-      </AnimatePresence>
     </header>
   );
 };

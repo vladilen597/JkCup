@@ -26,10 +26,11 @@ const roleStyleMap: Record<string, { text: string; block: string }> = {
 };
 
 interface RoleBadgeProps {
+  type?: "default" | "small";
   role: string;
 }
 
-const RoleBadge = ({ role }: RoleBadgeProps) => {
+const RoleBadge = ({ type = "default", role }: RoleBadgeProps) => {
   return (
     <motion.span
       initial={{ opacity: 0, scale: 0.9 }}
@@ -37,6 +38,7 @@ const RoleBadge = ({ role }: RoleBadgeProps) => {
       className={cn(
         "inline-flex bg-background items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2",
         roleStyleMap[role].block,
+        type === "small" && "p-0! border-none!",
       )}
     >
       <Diamond className={cn("w-3 h-3", roleStyleMap[role].text)} />

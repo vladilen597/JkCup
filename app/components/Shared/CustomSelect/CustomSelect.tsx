@@ -77,7 +77,7 @@ const CustomSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative bg-muted rounded-lg ${containerClassName}`}
+      className={`block relative bg-muted rounded-lg ${containerClassName} cursor-pointer hover:bg-muted/90`}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center p-3 justify-between text-sm">

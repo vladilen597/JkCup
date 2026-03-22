@@ -62,7 +62,6 @@ export const POST = async (req: Request) => {
         players_per_team: body.players_per_team,
         description: body.description,
         is_bracket: body.is_bracket,
-        bracket: body.bracket,
         rules: body.rules,
         stream_link: body.stream_link,
         hidden: body.hidden,

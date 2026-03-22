@@ -69,7 +69,6 @@ const ProfileHeader = ({
             <ProfileAvatar
               imageUrl={user.image_url}
               fullName={user.full_name}
-              isEditable={isCurrentUser}
               onImageChange={onImageChange}
             />
           </motion.div>
@@ -130,6 +129,7 @@ const ProfileHeader = ({
                 <SocialLink
                   platform="discord"
                   nickname={user.discord_full_name}
+                  url={`discord://-/users/${user.discord_id}`}
                 />
               )}
             </motion.div>

@@ -24,8 +24,8 @@ const TeamUserItem = ({
   isLoading,
   isMyTeam,
   isCurrentUserCreator,
-  steam_display_name,
-  steam_link,
+  steam_name,
+  steam_profile_url,
   canLeave,
   creator_id,
   onLeaveClick,
@@ -51,8 +51,8 @@ const TeamUserItem = ({
             image_url={image_url}
             discord_full_name={discord_full_name}
             full_name={full_name}
-            steam_display_name={steam_display_name}
-            steam_link={steam_link}
+            steam_name={steam_name}
+            steam_profile_url={steam_profile_url}
           />
         </div>
         {creator_id === id && (

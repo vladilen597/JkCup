@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { ChangeEvent, memo, ReactNode } from "react";
 import CustomSkeleton from "../CustomSkeleton/CustomSkeleton";
+import { ChangeEvent, memo, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ICustomInputProps {
   name?: string;
@@ -51,7 +51,7 @@ const CustomInput = memo(
             value={value}
             onChange={onChange}
             className={cn(
-              "w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary",
+              "w-full p-2.5 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary",
               label && "mt-1",
             )}
             autoComplete={autoComplete}

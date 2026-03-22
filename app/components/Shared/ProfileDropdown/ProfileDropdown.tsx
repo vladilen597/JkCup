@@ -1,12 +1,18 @@
 import { useEffect, useRef } from "react";
-import { DoorClosed, LinkIcon, Settings, User } from "lucide-react";
+import {
+  DoorClosed,
+  LinkIcon,
+  Settings,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
 interface IProfileDropdownProps {
   handleClickLogout: () => void;
   userId: string;
-  onClose: () => void; // Добавляем пропс для закрытия
+  onClose: () => void;
 }
 
 const ProfileDropdown = ({
@@ -14,25 +20,8 @@ const ProfileDropdown = ({
   userId,
   onClose,
 }: IProfileDropdownProps) => {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onClose]);
-
   return (
     <motion.div
-      ref={dropdownRef}
       initial={{ opacity: 0, y: -8, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8, scale: 0.95 }}
@@ -54,6 +43,14 @@ const ProfileDropdown = ({
       >
         <LinkIcon className="h-4 w-4" />
         Интеграции
+      </Link>
+      <Link
+        href={`/users/${userId}/security`}
+        onClick={onClose}
+        className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
+      >
+        <ShieldCheck className="h-4 w-4" />
+        Безопасность
       </Link>
       <button
         className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
