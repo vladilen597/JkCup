@@ -32,6 +32,7 @@ import { toast } from "react-toastify";
 import GameLine from "../../Shared/GameLine/GameLine";
 import StatCard from "../../Shared/StatCard/StatCard";
 import { ru } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -132,9 +133,9 @@ const TournamentHero = ({
       className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl mb-8`}
     >
       <div className="absolute inset-0 -top-8 h-60 bg-linear-to-b from-primary/15 to-transparent rounded-3xl pointer-events-none" />
-      <div className="flex px-8 py-4 flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between border-b">
-        <div>
-          {canEditTournament && (
+      {canEditTournament && (
+        <div className="flex px-8 py-4 flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between border-b">
+          <div>
             <div className="flex items-center gap-4">
               {tournament.creator && (
                 <div className="flex flex-col justify-between">
@@ -167,9 +168,7 @@ const TournamentHero = ({
                 </div>
               )}
             </div>
-          )}
-        </div>
-        {canEditTournament && (
+          </div>
           <div className="flex gap-3">
             {tournament.status === "open" && (
               <CustomButton
@@ -214,10 +213,15 @@ const TournamentHero = ({
               onClick={onDeleteClick}
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="block px-8 relative mt-6">
+      <div
+        className={cn(
+          "block px-8 relative mt-6",
+          !canEditTournament && "pt-8!",
+        )}
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Badge
