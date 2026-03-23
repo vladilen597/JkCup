@@ -66,7 +66,7 @@ const TournamentDurationDisplay = ({
         remainingMs > 0 ? (
           <>
             Осталось:{" "}
-            <span className="font-mono text-foreground">
+            <span className="font-mono  text-primary">
               {formatDuration(remainingMs)}
             </span>
           </>

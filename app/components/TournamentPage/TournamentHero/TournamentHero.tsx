@@ -3,11 +3,15 @@ import CustomButton from "../../Shared/CustomButton/CustomButton";
 import {
   Album,
   Archive,
+  Calendar,
   Clock,
   Edit,
   Gamepad2,
+  Hash,
   Trash2,
   Trophy,
+  User,
+  Users,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -27,6 +31,7 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import GameLine from "../../Shared/GameLine/GameLine";
 import StatCard from "../../Shared/StatCard/StatCard";
+import { ru } from "date-fns/locale";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -114,6 +119,10 @@ const TournamentHero = ({
       toast.error(errorMessage);
     }
   };
+
+  const filledSlots = isTeamMode
+    ? tournament.teams?.length || 0
+    : tournament.registrations?.length || 0;
 
   return (
     <motion.div
@@ -232,43 +241,60 @@ const TournamentHero = ({
         </div>
 
         <Title title={tournament.name} className="mt-2" />
-
-        <div className="flex items-stretch gap-2 mt-2">
-          <StatCard
-            label="Игра"
-            icon={<Gamepad2 className="w-4 h-4" />}
-            content={
-              <div className="flex items-center gap-2">
-                {tournament.game?.image_url ? (
-                  <Image
-                    className="object-cover rounded h-8 w-8"
-                    src={tournament.game?.image_url}
-                    width={32}
-                    height={32}
-                    alt="Game image"
-                  />
-                ) : (
-                  <Gamepad2 />
-                )}
-                <span className="font-bold">{tournament.game?.name}</span>
-              </div>
-            }
-          />
-          <StatCard
-            label="Длительность"
-            icon={<Clock className="w-4 h-4" />}
-            content={
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2 max-w-5xl mx-auto py-4 border-b border-border"
+        >
+          <div className="flex items-center gap-2">
+            <Image
+              src={tournament.game?.image_url}
+              width={24}
+              height={24}
+              className="w-6 h-6 object-cover rounded-xs"
+              alt="Game image"
+            />
+            <div className="text-xs text-foreground/75 font-mono">
+              {tournament?.game?.name}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+            <Users className="h-4 w-4" />
+            <div className="text-xs text-foreground/75 font-mono">
+              {isTeamMode
+                ? `${tournament.players_per_team}v${tournament.players_per_team}`
+                : "1v1"}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+            <Hash className="h-4 w-4" />
+            <div className="text-xs text-foreground/75 font-mono">
+              {filledSlots} /{" "}
+              {isTeamMode ? tournament.max_teams : tournament.max_players}
+            </div>
+          </div>
+          {!!tournament.duration && (
+            <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+              <Clock className="h-4 w-4" />
               <TournamentDurationDisplay
                 duration={tournament.duration}
-                startedAt={tournament.started_at}
                 status={tournament.status}
                 plain
               />
-            }
-          />
-        </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+            <Calendar className="h-4 w-4" />
+            {tournament.start_date
+              ? format(new Date(tournament.start_date), "dd MMMM yyyy HH:mm", {
+                  locale: ru,
+                })
+              : "Скоро"}
+          </div>
+        </motion.div>
 
-        <div className="mt-4 whitespace-pre-wrap">
+        <div className="mt-2 whitespace-pre-wrap">
           <CleanHtml html={tournament.description} />
         </div>
       </div>

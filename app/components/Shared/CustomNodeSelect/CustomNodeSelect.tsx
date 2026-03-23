@@ -62,6 +62,25 @@ const CustomNodeSelect = ({
     setIsOpen((prevState) => !prevState);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | Event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
     <motion.label
       ref={containerRef}

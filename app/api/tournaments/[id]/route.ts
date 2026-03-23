@@ -55,8 +55,6 @@ export const GET = async (
       },
     });
 
-    console.log(tournament.game);
-
     if (!tournament) {
       return NextResponse.json({ error: "Турнир не найден" }, { status: 404 });
     }

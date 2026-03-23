@@ -9,7 +9,7 @@ const JudgeList = ({
   hideDelete?: boolean;
 }) => {
   return (
-    <ul className="mt-2 rounded-lg border border-border/50 overflow-hidden">
+    <ul className="mt-2 rounded-lg overflow-hidden">
       {judges.map((judge, index) => (
         <JudgeLine
           key={judge.profile_id}

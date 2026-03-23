@@ -122,7 +122,7 @@ const TeamItem = ({
     <>
       <li
         key={id}
-        className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 hover:border-primary/50 transition-all"
+        className="bg-gray-800/50 rounded-xl p-5 hover:border-primary/50 transition-all"
       >
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-bold text-lg">

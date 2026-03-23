@@ -250,8 +250,8 @@ const TournamentPage = () => {
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mb-6 max-w-5xl mx-auto bg-card border border-border p-3 rounded-lg"
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-2 max-w-5xl mx-auto bg-card p-3 rounded-lg font-mono text-xs"
         >
           <p>
             По желанию, оставьте ваш отзыв о проведенном турнире на{" "}
@@ -301,7 +301,7 @@ const TournamentPage = () => {
               %
             </span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-1 rounded-full bg-muted overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
               initial={{ width: 0 }}
@@ -337,11 +337,16 @@ const TournamentPage = () => {
         <div className="flex items-center justify-between mb-4">
           {tournament.type !== "bracket" && (
             <>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
-                {isTeamMode ? tournament.max_teams : tournament.max_players})
-              </h2>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                <span className="text-sm font-mono ">
+                  {isTeamMode ? "Команды" : "Участники"}
+                </span>
+                <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  {filledSlots} /{" "}
+                  {isTeamMode ? tournament.max_teams : tournament.max_players}
+                </span>
+              </div>
 
               {tournament.status === "open" && (
                 <JoinTournamentButton

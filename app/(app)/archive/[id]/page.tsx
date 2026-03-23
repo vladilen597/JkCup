@@ -20,6 +20,7 @@ import {
   Hash,
   User,
   Trophy,
+  Clock,
 } from "lucide-react";
 import UserList from "@/app/components/UserList/UserList";
 import { useParams, useRouter } from "next/navigation";
@@ -38,6 +39,7 @@ import StatCard from "@/app/components/Shared/StatCard/StatCard";
 import JudgeList from "@/app/components/Shared/AddJudgeBlock/JudgeList/JudgeList";
 import { cn } from "@/lib/utils";
 import RulesExpandableBlock from "@/app/components/RulesExpandableBlock/RulesExpandableBlock";
+import { ru } from "date-fns/locale";
 
 export const statuses = {
   open: "Открыт",
@@ -63,7 +65,7 @@ const trophyStyles = {
   },
 };
 
-const TournamentPage = () => {
+const ArchiveTournamentPage = () => {
   const [tournament, setTournament] = useState<IArchivedTournament>();
   const params = useParams();
   const dispatch = useAppDispatch();
@@ -136,8 +138,6 @@ const TournamentPage = () => {
     }
   };
 
-  console.log(tournament);
-
   if (isTournamentLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] gap-2">
@@ -162,7 +162,7 @@ const TournamentPage = () => {
     : tournament.registrations.length || 0;
 
   // const isBracketMode = tournament?.is_bracket === true;
-
+  console.log(tournament);
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
 
@@ -179,12 +179,9 @@ const TournamentPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-4 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
-        }}
+        className={`relative overflow-hidden max-w-5xl mx-auto rounded-t-2xl p-4 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
       >
+        <div className="absolute inset-0 -top-8 h-60 bg-linear-to-b from-primary/15 to-transparent rounded-3xl pointer-events-none" />
         <div className="block relative mt-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -213,22 +210,60 @@ const TournamentPage = () => {
 
           <Title title={tournament.name} className="mt-2" />
 
-          <div className="mt-2 flex items-center gap-2">
-            {tournament.game_snapshot?.image_url ? (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2 max-w-5xl mx-auto py-4 border-b border-border"
+          >
+            <div className="flex items-center gap-2">
               <Image
-                className="object-cover rounded h-8 w-8"
                 src={tournament.game_snapshot?.image_url}
-                width={32}
-                height={32}
+                width={24}
+                height={24}
+                className="w-6 h-6 object-cover rounded-xs"
                 alt="Game image"
               />
-            ) : (
-              <Gamepad2 />
+              <div className="text-xs text-foreground/75 font-mono">
+                {tournament?.game_snapshot?.name}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+              <Users className="h-4 w-4" />
+              <div className="text-xs text-foreground/75 font-mono">
+                {isTeamMode
+                  ? `${tournament.players_per_team}v${tournament.players_per_team}`
+                  : "1v1"}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+              <Hash className="h-4 w-4" />
+              <div className="text-xs text-foreground/75 font-mono">
+                {filledSlots} /{" "}
+                {isTeamMode ? tournament.max_teams : tournament.max_players}
+              </div>
+            </div>
+            {!!tournament.duration && (
+              <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+                <Clock className="h-4 w-4" />
+                {tournament.duration}
+              </div>
             )}
-            <span className="font-bold">{tournament.game_snapshot?.name}</span>
-          </div>
+            <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
+              <Calendar className="h-4 w-4" />
+              {tournament.start_date
+                ? format(
+                    new Date(tournament.start_date),
+                    "dd MMMM yyyy HH:mm",
+                    {
+                      locale: ru,
+                    },
+                  )
+                : "Скоро"}
+            </div>
+          </motion.div>
 
-          <div className="mt-4 whitespace-pre-wrap">
+          <div className="mt-4">
             <CleanHtml html={tournament.description} />
           </div>
         </div>
@@ -288,42 +323,6 @@ const TournamentPage = () => {
             <RulesExpandableBlock html={tournament.rules} />
           </div>
         )}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 mb-8 max-w-5xl mx-auto"
-        >
-          <StatCard
-            icon={<Users className="h-4 w-4" />}
-            label="Формат"
-            value={
-              isTeamMode
-                ? `${tournament.players_per_team}v${tournament.players_per_team}`
-                : "1v1"
-            }
-          />
-          <StatCard
-            icon={<Hash className="h-4 w-4" />}
-            label={isTeamMode ? "Команд" : "Игроков"}
-            value={`${filledSlots} / ${isTeamMode ? tournament.max_teams : tournament.max_players}`}
-          />
-          <StatCard
-            icon={<Calendar className="h-4 w-4" />}
-            label="Начало"
-            value={
-              tournament.start_date
-                ? format(new Date(tournament.start_date), "dd/MM/yyyy HH:mm")
-                : "Скоро"
-            }
-          />
-          <StatCard
-            icon={<User className="h-4 w-4" />}
-            label="Статус"
-            value="В архиве"
-            highlight
-          />
-        </motion.div>
       </section>
 
       {/* {isBracketMode && (
@@ -349,11 +348,16 @@ const TournamentPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <Users className="h-5 w-5 text-primary" />
-          {isTeamMode ? "Команды" : "Участники"} ({filledSlots} /{" "}
-          {isTeamMode ? tournament.max_teams : tournament.max_players})
-        </h2>
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5 text-primary" />
+          <span className="text-sm font-mono ">
+            {isTeamMode ? "Команды" : "Участники"}
+          </span>
+          <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            ({filledSlots} /{" "}
+            {isTeamMode ? tournament.max_teams : tournament.max_players})
+          </span>
+        </div>
 
         {errorMsg && (
           <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-sm text-red-400">
@@ -406,4 +410,4 @@ const TournamentPage = () => {
   );
 };
 
-export default TournamentPage;
+export default ArchiveTournamentPage;

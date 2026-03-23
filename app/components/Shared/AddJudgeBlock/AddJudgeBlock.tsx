@@ -46,10 +46,13 @@ const AddJudgeBlock = ({
     <>
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <ShieldUser className="h-5 w-5 text-primary" />
-            Судьи ({judges.length})
-          </h2>
+          <div className="flex items-center gap-2">
+            <ShieldUser className="w-5 h-5 text-primary" />
+            <span className="text-sm font-mono ">Судьи</span>
+            <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {judges.length}
+            </span>
+          </div>
           {(currentUser?.role === "superadmin" ||
             currentUser?.role === "admin") &&
             (tournamentStatus === "open" ||

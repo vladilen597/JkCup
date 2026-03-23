@@ -60,7 +60,7 @@ const JudgeLine: React.FC<{
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className={`flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/70  transition-all duration-200 group ${
+        className={`flex items-center justify-between p-3 bg-muted/40 hover:bg-muted/70 transition-all duration-200 group ${
           role === "superadmin" ? "border-neon" : ""
         }`}
       >

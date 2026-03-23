@@ -40,7 +40,13 @@ const RulesExpandableBlock = ({ html }: { html: string }) => {
                 Правила
               </span>
             </div>
-            <span className="font-mono text-xs">Нажмите чтобы раскрыть</span>
+            <motion.span
+              className="font-mono text-xs"
+              initial={{ opacity: 1 }}
+              animate={isExpanded ? { opacity: 0 } : { opacity: 1 }}
+            >
+              Нажмите чтобы раскрыть
+            </motion.span>
           </div>
           <motion.div
             variants={arrowVariants}
@@ -60,9 +66,7 @@ const RulesExpandableBlock = ({ html }: { html: string }) => {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="pt-4">
-            <CleanHtml html={html} />
-          </div>
+          <CleanHtml html={html} />
         </div>
       </div>
     </motion.div>

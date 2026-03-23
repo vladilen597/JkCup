@@ -68,6 +68,7 @@ const page = () => {
         controls={
           canCreateTournament && (
             <CustomButton
+              label="Создать"
               className="p-2 px-3"
               icon={<Plus className="h-5 w-5" />}
               buttonStyle={BUTTON_STYLES.OUTLINE}

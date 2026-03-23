@@ -20,6 +20,7 @@ export const POST = async (
         },
       });
 
+      console.log("rules", t.rules);
       if (!t) throw new Error("Турнир не найден");
 
       console.log("game", t);

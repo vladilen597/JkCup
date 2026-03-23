@@ -64,41 +64,46 @@ const Tournament = ({
                   text={
                     isTeam ? `${players_per_team}v${players_per_team}` : "1v1"
                   }
-                  className="bg-primary/10 text-primary border border-primary/20"
+                  className="bg-primary/10 text-primary"
                 />
                 <Badge
                   text={statuses[status as keyof typeof statuses]}
-                  className="bg-primary/10 text-primary border border-primary/20"
+                  className="bg-primary/10 text-primary"
                 />
                 {isFull && (
                   <Badge
                     text="Full"
-                    className="bg-destructive/10 text-destructive border border-destructive/20"
+                    className="bg-destructive/10 text-destructive"
                   />
                 )}
                 {hidden && (
-                  <Badge
-                    text="Скрыт"
-                    className="bg-amber-400 text-black border border-destructive/20"
-                  />
+                  <Badge text="Скрыт" className="bg-amber-400 text-black" />
                 )}
                 {tags?.map((tag) => (
                   <Tag key={tag?.id} {...tag} />
                 ))}
               </div>
-              <div className="flex gap-2 items-center text-sm text-neutral-300 line-clamp-1">
-                {game?.image_url ? (
-                  <Image
-                    className="rounded h-4 w-4 object-cover"
-                    src={game?.image_url}
-                    width={16}
-                    height={16}
-                    alt="Game image"
-                  />
-                ) : (
-                  <Gamepad2 />
+              <div className="mt-2 flex items-center gap-4">
+                <div className="font-mono flex gap-2 items-center text-xs text-neutral-400 line-clamp-1">
+                  {game?.image_url ? (
+                    <Image
+                      className="rounded h-4 w-4 object-cover"
+                      src={game?.image_url}
+                      width={16}
+                      height={16}
+                      alt="Game image"
+                    />
+                  ) : (
+                    <Gamepad2 />
+                  )}
+                  <span className="font-bold">{game?.name}</span>
+                </div>
+                {!!rewards?.length && (
+                  <div className="flex font-mono items-center gap-1 text-[#f29e0d]">
+                    <Trophy className="w-3 h-3" />
+                    <span className="text-[11px] font-medium">Награда</span>
+                  </div>
                 )}
-                <span className="font-bold">{game?.name}</span>
               </div>
               {currentUser &&
                 currentUser.games?.some(
@@ -111,11 +116,6 @@ const Tournament = ({
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />
               </div>
-              {!!rewards?.length && (
-                <span className="font-mono text-xs text-neutral-400">
-                  Турнир с наградой
-                </span>
-              )}
             </div>
 
             <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
@@ -128,12 +128,12 @@ const Tournament = ({
               ) : (
                 <User className="h-3.5 w-3.5" />
               )}
-              <span className="font-mono text-sm">
-                {currentPlayers}/{maxPlayers}
+              <span className="font-mono text-xs">
+                {currentPlayers} / {maxPlayers}
               </span>
             </div>
 
-            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
               <motion.div
                 className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
                 initial={{ width: 0 }}
@@ -146,7 +146,7 @@ const Tournament = ({
               />
             </div>
 
-            <span className="text-[14px] font-mono text-primary">
+            <span className="text-[12px] font-mono text-primary">
               {fillPercent}%
             </span>
           </div>

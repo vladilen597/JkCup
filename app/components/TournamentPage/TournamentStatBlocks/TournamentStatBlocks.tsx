@@ -36,42 +36,6 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
 
   return (
     <section>
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 max-w-5xl mx-auto"
-      >
-        <StatCard
-          icon={<Users className="h-4 w-4" />}
-          label="Формат"
-          value={
-            isTeamMode
-              ? `${tournament.players_per_team}v${tournament.players_per_team}`
-              : "1v1"
-          }
-        />
-        <StatCard
-          icon={<Hash className="h-4 w-4" />}
-          label={isTeamMode ? "Команд" : "Игроков"}
-          value={`${filledSlots} / ${isTeamMode ? tournament.max_teams : tournament.max_players}`}
-        />
-        <StatCard
-          icon={<Calendar className="h-4 w-4" />}
-          label="Начало"
-          value={
-            tournament.start_date
-              ? format(new Date(tournament.start_date), "dd/MM/yyyy HH:mm")
-              : "Скоро"
-          }
-        />
-        <StatCard
-          icon={<User className="h-4 w-4" />}
-          label="Статус"
-          value={statuses[tournament.status as keyof typeof statuses] || "—"}
-          highlight
-        />
-      </motion.div>
       {!!tournament.rewards?.length && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
