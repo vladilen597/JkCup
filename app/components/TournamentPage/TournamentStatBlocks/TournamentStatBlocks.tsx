@@ -51,25 +51,32 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
         </motion.div>
       )}
       {!!tournament.rules && tournament?.rules !== "<p></p>" && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
-        >
-          <span className="text-xs text-muted-foreground font-medium">
-            Правила
-          </span>
-          <div className="mt-4 whitespace-pre-wrap">
-            <CleanHtml html={tournament?.rules} />
-          </div>
-        </motion.div>
+        <div className="max-w-5xl mx-auto">
+          <StatCard
+            icon={<Users className="h-4 w-4" />}
+            label="Правила"
+            value={<CleanHtml html={tournament?.rules} />}
+          />
+        </div>
+        // <motion.div
+        //   initial={{ opacity: 0, y: 12 }}
+        //   animate={{ opacity: 1, y: 0 }}
+        //   transition={{ duration: 0.4, delay: 0.1 }}
+        //   className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
+        // >
+        //   <span className="text-xs text-muted-foreground font-medium">
+        //     Правила
+        //   </span>
+        //   <div className="mt-4 whitespace-pre-wrap">
+        //     <CleanHtml html={tournament?.rules} />
+        //   </div>
+        // </motion.div>
       )}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-3 mb-8 max-w-5xl mx-auto"
+        className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 mb-8 max-w-5xl mx-auto"
       >
         <StatCard
           icon={<Users className="h-4 w-4" />}

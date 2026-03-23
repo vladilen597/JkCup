@@ -164,6 +164,8 @@ const CreateTournamentModal = ({
         stream_link: "",
         tags: formData.tags,
         rewards: formData.rewards || [],
+        hidden: formData.hidden,
+        start_date: formData.start_date,
       };
 
       const { data } = await axios.post("/api/tournaments", payload);

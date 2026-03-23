@@ -40,19 +40,22 @@ const NotificationsBlock = () => {
 
   return (
     <div className="flex items-center">
-      <div className="relative">
+      <div className="relative flex items-center">
         <button
           className="cursor-pointer group"
           type="button"
           onClick={handleOpenDrawer}
         >
           <Bell className="w-5 h-5 text-primary/80 group-hover:text-primary transition-colors" />
+          {unreadCount > 0 && (
+            <>
+              <span className="absolute z-10 flex items-center justify-center bg-red-600 text-white rounded-full -top-2 -right-1 bottom-full text-xs h-4 min-w-4">
+                {unreadCount}
+              </span>
+              <span className="absolute animate-ping bg-red-600 rounded-full -top-2 -right-1 bottom-full text-xs h-4 min-w-4"></span>
+            </>
+          )}
         </button>
-        {unreadCount > 0 && (
-          <div className="absolute animate-pulse flex items-center justify-center bg-red-600 text-white rounded-full -top-2 -right-1 bottom-full text-xs h-4 min-w-4">
-            {unreadCount}
-          </div>
-        )}
       </div>
       <AnimatePresence>
         {isNotificationsOpen && (
