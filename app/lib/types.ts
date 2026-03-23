@@ -132,6 +132,75 @@ export interface ITournament {
   is_bracket: boolean;
 }
 
+export interface IArchivedTournament {
+  id: string;
+  name: string;
+  type: "single" | "team";
+  max_players?: number | null;
+  max_teams?: number | null;
+  players_per_team: number;
+  description?: string | null;
+  start_date?: string | Date | null;
+  status: "archived";
+  duration?: number | null;
+  rules?: string | null;
+  stream_link?: string | null;
+  rewards?: any;
+  tags?: any;
+
+  judges: IArchivedJudge[];
+
+  game_snapshot?: {
+    id: string;
+    name: string;
+    image_url?: string;
+  } | null;
+
+  creator_snapshot?: {
+    id: string;
+    name: string;
+  } | null;
+
+  winner_user_id?: string | null;
+  winner_user?: IUser | null;
+
+  winner_team_id?: string | null;
+  winner_team?: IArchivedTeam | null;
+
+  teams: IArchivedTeam[];
+  registrations: IArchivedParticipant[];
+
+  started_at?: string | Date | null;
+  created_at: string | Date;
+  archived_at: string | Date;
+}
+
+export interface IArchivedJudge {
+  id: string;
+  tournament_id: string;
+  user_id: string;
+  profile: IUser;
+}
+
+export interface IArchivedTeam {
+  id: string;
+  tournament_id: string;
+  name: string;
+
+  members: IArchivedParticipant[];
+}
+
+export interface IArchivedParticipant {
+  id: string;
+  tournament_id: string;
+  user_id: string;
+  team_id?: string | null;
+  team_name?: string | null;
+  is_winner: boolean;
+
+  profile: IUser;
+}
+
 export interface IRound {
   id: string;
   tournament_id: string;

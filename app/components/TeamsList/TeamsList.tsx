@@ -1,10 +1,15 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
 import TeamItem from "./TeamItem/TeamItem";
-import { ITeam, ITournamentJudge } from "@/app/lib/types";
+import {
+  IArchivedJudge,
+  IArchivedTeam,
+  ITeam,
+  ITournamentJudge,
+} from "@/app/lib/types";
 
 interface TeamListProps {
-  teams: ITeam[];
-  judges: ITournamentJudge[];
+  teams: ITeam[] | IArchivedTeam[];
+  judges: ITournamentJudge[] | IArchivedJudge[];
   tournamentId: string;
   maxPlayersPerTeam: number;
   isLoading?: boolean;

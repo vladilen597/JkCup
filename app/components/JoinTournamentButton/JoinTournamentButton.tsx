@@ -1,4 +1,6 @@
-import CustomButton from "../Shared/CustomButton/CustomButton";
+import CustomButton, {
+  BUTTON_TYPES,
+} from "../Shared/CustomButton/CustomButton";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { Users } from "lucide-react";
 
@@ -24,6 +26,8 @@ const JoinTournamentButton = ({
   handleJoinLeave,
 }: IJoinTournamentButtonProps) => {
   const { currentUser } = useAppSelector((state) => state.user);
+
+  console.log(!isTeamMode, !isFull, canJoinSingleTournament);
 
   if (!currentUser?.id) {
     return (
@@ -52,10 +56,8 @@ const JoinTournamentButton = ({
     return (
       <CustomButton
         label={isJoinedSingleTournament ? "Покинуть" : "Вступить"}
-        className={
-          isJoinedSingleTournament
-            ? "bg-red-600/20 hover:bg-red-600/40 text-white border border-red-600!"
-            : "bg-primary hover:bg-primary/90 text-primary-foreground"
+        buttonType={
+          isJoinedSingleTournament ? BUTTON_TYPES.DANGER : BUTTON_TYPES.DEFAULT
         }
         isLoading={isLoading}
         disabled={isLoading}

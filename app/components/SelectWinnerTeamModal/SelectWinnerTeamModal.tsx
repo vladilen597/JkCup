@@ -9,10 +9,10 @@ import { useParams } from "next/navigation";
 import { useAppDispatch } from "@/app/utils/store/hooks";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { ITeam } from "@/app/lib/types";
+import { IArchivedTeam, ITeam } from "@/app/lib/types";
 
 interface ISelectWinnerTeamModalProps {
-  teams: ITeam[];
+  teams: ITeam[] | IArchivedTeam[];
   onClose: () => void;
 }
 
@@ -30,16 +30,10 @@ const SelectWinnerTeamModal = ({
 
     setIsLoading(true);
     try {
-      await axios.put(
-        `/api/tournaments`,
-        {
-          status: "finished",
-          winner_team_id: selectedTeam.id,
-        },
-        {
-          params: { id: tournamentId },
-        },
-      );
+      await axios.patch(`/api/tournaments/${tournamentId}/winner`, {
+        winnerId: selectedTeam.id,
+        type: "team",
+      });
 
       dispatch(
         selectWinnerTeam({

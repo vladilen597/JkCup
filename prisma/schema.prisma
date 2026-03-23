@@ -9,23 +9,23 @@ datasource db {
 }
 
 model Profile {
-  id                 String   @id @db.Uuid
-  email              String   @unique
-  full_name          String?
-  image_url          String?
-  role               String   @default("guest")
-  status             String   @default("active")
-  created_at         DateTime @default(now()) @map("created_at")
-  who_invited        String   @default("none")
+  id          String   @id @db.Uuid
+  email       String   @unique
+  full_name   String?
+  image_url   String?
+  role        String   @default("guest")
+  status      String   @default("active")
+  created_at  DateTime @default(now()) @map("created_at")
+  who_invited String   @default("none")
 
-  discord_global_name String? 
+  discord_global_name String?
   discord_full_name   String?
-  discord_id          String?  @unique 
-  discord_avatar      String? 
+  discord_id          String? @unique
+  discord_avatar      String?
 
-  steam_id          String?  @unique 
-  steam_name        String? 
-  steam_avatar      String? 
+  steam_id          String? @unique
+  steam_name        String?
+  steam_avatar      String?
   steam_profile_url String?
 
   created_tournaments      Tournament[]             @relation("TournamentCreator")
@@ -36,11 +36,15 @@ model Profile {
 
   match_participations MatchParticipant[]
 
-  games           Game[]           @relation("UserGames")
+  won_archives            ArchivedTournament[]  @relation("ArchivedWinner")
+  archived_participations ArchivedParticipant[] @relation("UserHistory")
+  archived_judged    ArchivedJudge[]       @relation("UserJudgeHistory")
+
+  games           Game[]             @relation("UserGames")
   feedbacks       Feedback[]
   tournamentTeams TournamentTeam[]
   global_vote     GlobalVote?
-  notifications UserNotification[] 
+  notifications   UserNotification[]
 
   @@map("profiles")
 }
@@ -82,6 +86,84 @@ model Tournament {
   rounds        Round[]                  @relation("TournamentRounds")
 
   @@map("tournaments")
+}
+
+model ArchivedTournament {
+  id               String    @id
+  name             String
+  type             String    @default("single")
+  max_players      Int?
+  max_teams        Int?
+  players_per_team Int       @default(1)
+  description      String?
+  start_date       DateTime?
+  status           String    @default("archived")
+  duration         Int?
+  rules            String?
+  stream_link      String?
+  rewards          Json?
+  tags             Json?
+  bracket          Json?
+
+  game_snapshot    Json?
+  creator_snapshot Json?
+
+  teams            ArchivedTeam[]        @relation("ArchivedTournamentTeams")
+  registrations    ArchivedParticipant[] @relation("ArchivedTournamentRegistrations")
+  judges           ArchivedJudge[]
+
+  started_at  DateTime?
+  created_at  DateTime
+  archived_at DateTime  @default(now()) @map("archived_at")
+  creator_id  String    @db.Uuid
+
+  winner_team_id String?        @unique // @unique если одна команда на турнир
+  winner_team    ArchivedTeam?  @relation("ArchivedWinnerTeam", fields: [winner_team_id], references: [id])
+
+  winner_user_id String?  @db.Uuid
+  winner_user    Profile? @relation("ArchivedWinner", fields: [winner_user_id], references: [id])
+
+  @@map("archived_tournaments")
+}
+
+model ArchivedJudge {
+  id            String             @id @default(cuid())
+  tournament_id String
+  user_id       String             @db.Uuid
+
+  tournament    ArchivedTournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  profile       Profile            @relation("UserJudgeHistory", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([tournament_id, user_id])
+  @@map("archived_tournament_judges")
+}
+
+model ArchivedTeam {
+  id            String  @id @default(cuid())
+  tournament_id String
+  name          String?
+
+  tournament    ArchivedTournament @relation("ArchivedTournamentTeams", fields: [tournament_id], references: [id], onDelete: Cascade)
+  won_tournament ArchivedTournament? @relation("ArchivedWinnerTeam")
+  
+  members       ArchivedParticipant[]
+
+  @@map("archived_tournament_teams")
+}
+
+model ArchivedParticipant {
+  id            String   @id @default(cuid())
+  tournament_id String
+  user_id       String   @db.Uuid
+  team_id       String?
+  team_name     String?
+  is_winner     Boolean  @default(false)
+
+  tournament    ArchivedTournament @relation("ArchivedTournamentRegistrations", fields: [tournament_id], references: [id], onDelete: Cascade)
+  profile       Profile            @relation("UserHistory", fields: [user_id], references: [id], onDelete: Cascade)
+  archived_team ArchivedTeam?      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+
+  @@map("archived_tournament_participants")
 }
 
 model TournamentRegistration {
@@ -140,15 +222,15 @@ model TournamentJudge {
 }
 
 model Game {
-  id        String   @id @default(cuid())
+  id        String @id @default(cuid())
   image_url String
   name      String
 
-  profiles     Profile[]    @relation("UserGames")
-  tournaments  Tournament[]
-  
+  profiles    Profile[]    @relation("UserGames")
+  tournaments Tournament[]
+
   global_votes GlobalVote[]
-  poll_options PollOption[] 
+  poll_options PollOption[]
 
   @@map("games")
 }
@@ -179,17 +261,17 @@ model Notification {
 }
 
 model UserNotification {
-  id              String   @id @default(cuid())
-  user_id         String   @db.Uuid
+  id              String    @id @default(cuid())
+  user_id         String    @db.Uuid
   notification_id String
-  is_read         Boolean  @default(false)
+  is_read         Boolean   @default(false)
   read_at         DateTime?
 
   profile      Profile      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, notification_id])
-  @@index([user_id, is_read])         
+  @@index([user_id, is_read])
   @@map("user_notifications")
 }
 
@@ -206,11 +288,11 @@ model Round {
 }
 
 model Match {
-  id            String  @id @default(cuid())
-  round_id      String
-  status        String  @default("pending")
+  id       String @id @default(cuid())
+  round_id String
+  status   String @default("pending")
 
-  winner_id  String?  @map("winner_id")
+  winner_id String? @map("winner_id")
 
   winner       MatchParticipant?  @relation("MatchWinner", fields: [winner_id], references: [id])
   round        Round              @relation("RoundMatches", fields: [round_id], references: [id], onDelete: Cascade)
@@ -229,10 +311,10 @@ model MatchParticipant {
   profile_id String? @db.Uuid
   team_id    String?
 
-  match   Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  profile Profile?        @relation(fields: [profile_id], references: [id])
-  team    TournamentTeam? @relation(fields: [team_id], references: [id])
-  won_matches Match[] @relation("MatchWinner")
+  match       Match           @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  profile     Profile?        @relation(fields: [profile_id], references: [id])
+  team        TournamentTeam? @relation(fields: [team_id], references: [id])
+  won_matches Match[]         @relation("MatchWinner")
 
   @@map("tournament_match_participants")
 }
@@ -244,8 +326,8 @@ model GlobalPoll {
   ends_at    DateTime
   created_at DateTime @default(now())
 
-  options    PollOption[]
-  votes      GlobalVote[]
+  options PollOption[]
+  votes   GlobalVote[]
 
   @@map("global_polls")
 }
@@ -255,15 +337,15 @@ model PollOption {
   poll_id String
   game_id String
 
-  poll    GlobalPoll @relation(fields: [poll_id], references: [id], onDelete: Cascade)
-  game    Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  poll GlobalPoll @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  game Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
 
   @@map("poll_options")
 }
 
 model GlobalVote {
   poll_id    String
-  profile_id String   @db.Uuid @unique
+  profile_id String   @unique @db.Uuid
   game_id    String
   updated_at DateTime @updatedAt
 
@@ -274,4 +356,3 @@ model GlobalVote {
   @@id([poll_id, profile_id])
   @@map("global_votes")
 }
-

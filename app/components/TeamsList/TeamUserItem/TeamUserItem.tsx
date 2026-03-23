@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/app/utils/store/hooks";
-import { DoorOpen, Loader2, Trash2 } from "lucide-react";
+import { DoorOpen, Loader2, Trash2, X } from "lucide-react";
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 import { useRouter } from "next/navigation";
 import { IUser } from "@/app/lib/types";
@@ -66,7 +66,7 @@ const TeamUserItem = ({
               className="p-1 rounded-sm bg-red-600/20 border border-red-600! text-red-600"
               buttonType={BUTTON_TYPES.DANGER}
               isLoading={isLoading}
-              icon={<Trash2 className="w-4 h-4" />}
+              icon={<X className="w-4 h-4" />}
               onClick={onLeaveClick}
             />
           )}

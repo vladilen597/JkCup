@@ -36,6 +36,7 @@ export const statuses = {
   about_to_start: "Регистрация закрыта",
   in_progress: "LIVE",
   finished: "Окончен",
+  archived: "В архиве",
 };
 
 const TournamentPage = () => {
@@ -205,7 +206,7 @@ const TournamentPage = () => {
     : tournament.registrations?.length || 0;
 
   const isFull =
-    tournament.players_per_team > 1
+    tournament.type === "team"
       ? tournament.teams.length === tournament.max_teams
       : tournament.registrations?.length === tournament.max_players;
 

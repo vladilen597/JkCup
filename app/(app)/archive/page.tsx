@@ -1,27 +1,26 @@
 "use client";
 
 import CreateTournamentModal from "@/app/components/CreateTournamentModal/CreateTournamentModal";
-import TournamentStats from "@/app/components/TournamentStats/TournamentStats";
-import CustomButton, {
-  BUTTON_STYLES,
-} from "@/app/components/Shared/CustomButton/CustomButton";
+import ArchivedTournament from "@/app/components/ArchivedTournament/ArchivedTournament";
 import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
+import { IArchivedTournament, ITournament } from "@/app/lib/types";
+import Title from "@/app/components/Title/Title";
 import {
   addTournament,
   setTournaments,
 } from "@/app/utils/store/tournamentsSlice";
-import Title from "@/app/components/Title/Title";
-import Tournament from "@/app/utils/Tournament";
-import { ITournament } from "@/app/lib/types";
-import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Archive } from "lucide-react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import axios from "axios";
 import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const page = () => {
+  const [archivedTournaments, setArchivedTournaments] = useState<
+    IArchivedTournament[]
+  >([]);
   const { tournaments } = useAppSelector((state) => state.tournaments);
   const { currentUser } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
@@ -32,12 +31,12 @@ const page = () => {
   const canCreateTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
-  const handleLoadTournaments = async () => {
+  const handleLoadArchive = async () => {
     try {
-      const { data } = await axios.get("/api/tournaments");
-      dispatch(setTournaments(data));
+      const { data } = await axios.get("/api/tournaments/archive");
+      setArchivedTournaments(data);
     } catch (error) {
-      toast.error("Ошибка загрузки турниров");
+      toast.error("Ошибка загрузки архива");
     }
   };
 
@@ -46,43 +45,24 @@ const page = () => {
   };
 
   useEffect(() => {
-    handleLoadTournaments();
+    handleLoadArchive();
   }, []);
 
   const handleCloseCreateTournamentModal = () => {
     setIsCreateTournamentModalOpen(false);
   };
 
-  const filteredTournaments = tournaments?.filter((tournament: ITournament) => {
-    if (!tournament.hidden) return true;
-
-    return currentUser?.role !== "user";
-  });
-
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
       <PageHero
-        title="Турниры"
-        description="Следите и участвуйте в турнирах"
-        icon={<Trophy className="h-8 w-8 text-primary" />}
-        controls={
-          canCreateTournament && (
-            <CustomButton
-              className="p-2 px-3"
-              icon={<Plus className="h-5 w-5" />}
-              buttonStyle={BUTTON_STYLES.OUTLINE}
-              onClick={() => setIsCreateTournamentModalOpen(true)}
-            />
-          )
-        }
-        bottomContent={<TournamentStats />}
+        title="Архив"
+        description="Просматривайте турниры, победителей и участников прошедших ранее турниров!"
+        icon={<Archive className="h-8 w-8 text-primary" />}
       />
       <ul className="space-y-3">
-        {filteredTournaments?.map((tournament, index) => {
+        {archivedTournaments?.map((tournament, index) => {
           const isTeam = tournament.type === "team";
-          const usersAmount = isTeam
-            ? tournament?.teams?.length
-            : tournament?.registrations?.length || 0;
+          const usersAmount = tournament.registrations?.length || 0;
           const teamsAmount = tournament?.teams?.length || 0;
           const fillPercent = isTeam
             ? Math.round((teamsAmount / tournament.max_teams) * 100)
@@ -95,7 +75,7 @@ const page = () => {
             : tournament.max_players;
 
           return (
-            <Tournament
+            <ArchivedTournament
               key={tournament.id}
               index={index}
               {...tournament}

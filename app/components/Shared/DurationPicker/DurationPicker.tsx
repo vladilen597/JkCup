@@ -17,7 +17,7 @@ const DurationPicker: React.FC<{
     <div className="relative w-full">
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full group flex items-center justify-between px-2 py-1.5 bg-muted border border-border rounded-2xl shadow-2xl cursor-pointer transition-all"
+        className="w-full group flex items-center justify-between px-2 py-1.5 bg-background border border-border rounded-2xl shadow-2xl cursor-pointer transition-all"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-xl">
@@ -39,7 +39,7 @@ const DurationPicker: React.FC<{
             initial={{ opacity: 0, scaleY: 0 }}
             animate={{ opacity: 1, scaleY: 1 }}
             exit={{ opacity: 0, scaleY: 0 }}
-            className="absolute origin-top top-full mt-2 left-0 right-0 z-50 p-4 bg-muted border border-border rounded-2xl shadow-2xl flex justify-center gap-8"
+            className="absolute origin-top top-full mt-2 left-0 right-0 z-50 p-4 bg-background border border-border rounded-2xl shadow-2xl flex justify-center gap-8"
           >
             <Wheel
               items={Array.from({ length: 24 }, (_, i) => i)}

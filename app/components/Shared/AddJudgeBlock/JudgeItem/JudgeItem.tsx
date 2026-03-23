@@ -11,10 +11,11 @@ import { IUser } from "@/app/lib/types";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
-  user,
-  index,
-}) => {
+const JudgeLine: React.FC<{
+  user: IUser;
+  index: number;
+  hideDelete?: boolean;
+}> = ({ user, hideDelete }) => {
   const { currentUser } = useAppSelector((state) => state.user);
   const { id: tournamentId }: { id: string } = useParams();
   const { id, role } = user;
@@ -66,21 +67,21 @@ const JudgeLine: React.FC<{ user: IUser; index: number }> = ({
         <div className="flex items-center gap-3">
           <UserInfoBlock {...user} />
         </div>
-        {(currentUser.role === "superadmin" ||
-          currentUser.role === "admin") && (
-          <div className="flex items-center justify-center w-10">
-            {isLoading ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <button
-                onClick={handleRemoveJudge}
-                className="rounded-full p-1 hover:bg-background/60 hover:text-white! group transition-colors cursor-pointer"
-              >
-                <X className="text-neutral-500 group-hover:text-white transition-colors" />
-              </button>
-            )}
-          </div>
-        )}
+        {(currentUser.role === "superadmin" || currentUser.role === "admin") &&
+          !hideDelete && (
+            <div className="flex items-center justify-center w-10">
+              {isLoading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <button
+                  onClick={handleRemoveJudge}
+                  className="rounded-full p-1 hover:bg-background/60 hover:text-white! group transition-colors cursor-pointer"
+                >
+                  <X className="text-neutral-500 group-hover:text-white transition-colors" />
+                </button>
+              )}
+            </div>
+          )}
       </motion.li>
     </div>
   );

@@ -1,4 +1,3 @@
-// app/faq/page.tsx
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,6 +16,7 @@ import { useState } from "react";
 import Title from "@/app/components/Title/Title";
 import { cn } from "@/lib/utils";
 import Badge from "@/app/components/Shared/Badge/Badge";
+import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const FAQPage = () => {
   const [openCategories, setOpenCategories] = useState<string[]>([]);
@@ -187,24 +187,12 @@ const FAQPage = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <HelpCircle className="h-8 w-8 text-primary" />
-            <Title title="FAQ" />
-          </div>
-
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Часто задаваемые вопросы о турнирах, правилах участия и полномочиях
-            администрации
-          </p>
-        </div>
-      </motion.div>
+      <PageHero
+        title="FAQ"
+        description="Часто задаваемые вопросы о турнирах, правилах участия и полномочиях
+            администрации"
+        icon={<HelpCircle className="h-8 w-8 text-primary" />}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

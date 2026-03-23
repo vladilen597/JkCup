@@ -5,15 +5,26 @@ import { motion } from "motion/react";
 import { format } from "date-fns";
 import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
 import { ITournament } from "@/app/lib/types";
+import { cn } from "@/lib/utils";
+import RulesExpandableBlock from "../../RulesExpandableBlock/RulesExpandableBlock";
 
 interface ITournamentStatBlocksProps {
   tournament: ITournament;
 }
 
-const trophyIndexes = {
-  1: <Trophy className="h-6 w-6 text-[#EFBF04]" />,
-  2: <Trophy className="h-6 w-6 text-[#C4C4C4]" />,
-  3: <Trophy className="h-6 w-6 text-[#CE8946]" />,
+const trophyStyles = {
+  0: {
+    icon: "text-gold",
+    container: "from-gold/20 to-gold-dark/10 border-gold/20!",
+  },
+  1: {
+    icon: "text-silver",
+    container: "from-silver/20 to-silver-dark/10 border-silver/20!",
+  },
+  2: {
+    icon: "text-bronze",
+    container: "from-bronze/20 to-bronze-dark/10 border-bronze/20!",
+  },
 };
 
 const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
@@ -25,58 +36,11 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
 
   return (
     <section>
-      {!!tournament.rewards?.length && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
-        >
-          <span className="text-xs text-muted-foreground font-medium">
-            Награды
-          </span>
-          <ul className="mt-2">
-            {tournament.rewards?.map((reward, index) => (
-              <div className="flex items-center gap-2" key={reward.id}>
-                <span className="text-xs w-6 text-center">
-                  {trophyIndexes[(index + 1) as keyof typeof trophyIndexes] ||
-                    index + 1}
-                </span>
-                <span className="text-lg font-bold font-mono text-foreground">
-                  {reward.value}
-                </span>
-              </div>
-            ))}
-          </ul>
-        </motion.div>
-      )}
-      {!!tournament.rules && tournament?.rules !== "<p></p>" && (
-        <div className="max-w-5xl mx-auto">
-          <StatCard
-            icon={<Users className="h-4 w-4" />}
-            label="Правила"
-            value={<CleanHtml html={tournament?.rules} />}
-          />
-        </div>
-        // <motion.div
-        //   initial={{ opacity: 0, y: 12 }}
-        //   animate={{ opacity: 1, y: 0 }}
-        //   transition={{ duration: 0.4, delay: 0.1 }}
-        //   className="rounded-xl p-4 bg-card border border-border/50 hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
-        // >
-        //   <span className="text-xs text-muted-foreground font-medium">
-        //     Правила
-        //   </span>
-        //   <div className="mt-4 whitespace-pre-wrap">
-        //     <CleanHtml html={tournament?.rules} />
-        //   </div>
-        // </motion.div>
-      )}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 mb-8 max-w-5xl mx-auto"
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 max-w-5xl mx-auto"
       >
         <StatCard
           icon={<Users className="h-4 w-4" />}
@@ -108,6 +72,54 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
           highlight
         />
       </motion.div>
+      {!!tournament.rewards?.length && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="rounded-xl p-4 bg-card hover:border-primary/20 transition-colors mt-2 max-w-5xl mx-auto "
+        >
+          <div className="flex items-center gap-2 text-muted-foreground text-xs font-mono tracking-widest">
+            <Trophy className="h-4 w-4 " />
+            Награды
+          </div>
+          <ul className="mt-1.5 space-y-2">
+            {tournament.rewards?.map((reward, index) => (
+              <div className="flex items-center gap-2" key={reward.id}>
+                {index < 3 ? (
+                  <div
+                    className={cn(
+                      "flex p-2 items-center justify-center rounded-xl bg-linear-to-br border",
+                      trophyStyles[index].container,
+                    )}
+                  >
+                    <Trophy
+                      className={cn("w-6 h-6", trophyStyles[index].icon)}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex p-2 items-center justify-center border rounded-xl">
+                    <Trophy className="w-6 h-6 text-neutral-600" />
+                  </div>
+                )}
+                <div>
+                  <span className="block font-mono text-neutral-400 text-xs">
+                    {index + 1}-е место
+                  </span>
+                  <p className="leading-5 block text-lg font-bold font-mono text-foreground">
+                    {reward.value}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </ul>
+        </motion.div>
+      )}
+      {!!tournament.rules && tournament?.rules !== "<p></p>" && (
+        <div className="mt-2 max-w-5xl mx-auto">
+          <RulesExpandableBlock html={tournament.rules} />
+        </div>
+      )}
     </section>
   );
 };

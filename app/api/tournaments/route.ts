@@ -51,7 +51,8 @@ export const GET = async () => {
 export const POST = async (req: Request) => {
   try {
     const body = await req.json();
-    console.log(body.tags);
+
+    console.log(body);
 
     const tournament = await prisma.tournament.create({
       data: {
@@ -68,6 +69,7 @@ export const POST = async (req: Request) => {
         duration: body.duration,
         start_date: body.start_date,
         tags: body.tags || [],
+        rewards: body.rewards,
 
         creator: {
           connect: { id: body.creator_id },

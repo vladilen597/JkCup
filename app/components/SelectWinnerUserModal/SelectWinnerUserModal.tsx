@@ -30,28 +30,24 @@ const SelectWinnerUserModal = ({
     if (!selectedUser) return;
 
     try {
-      const { data: updatedTournament } = await axios.put(
-        `/api/tournaments`,
+      const { data: updatedTournament } = await axios.patch(
+        `/api/tournaments/${tournamentId}/winner`,
         {
-          status: "finished",
-          winner_user_id: selectedUser.id,
-        },
-        {
-          params: { id: tournamentId },
+          winnerId: selectedUser.id,
+          type: "user",
         },
       );
 
       dispatch(
         selectWinnerUser({
           tournamentId: tournamentId,
-          user: selectedUser,
+          user: updatedTournament.winner_user,
         }),
       );
 
       toast.success(`Победитель ${selectedUser.full_name} выбран!`);
       onClose();
     } catch (error: any) {
-      console.error(error);
       toast.error("Не удалось сохранить победителя");
     }
   };

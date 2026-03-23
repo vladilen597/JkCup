@@ -77,7 +77,7 @@ const CustomSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative bg-muted rounded-lg ${containerClassName} cursor-pointer hover:bg-muted/90`}
+      className={`block relative bg-background rounded-lg ${containerClassName} cursor-pointer hover:bg-background/90`}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center p-3 justify-between text-sm">
@@ -94,7 +94,7 @@ const CustomSelect = ({
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none"
+            className="w-full box-border text-sm absolute top-full right-0 bg-background rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none"
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"
@@ -103,7 +103,7 @@ const CustomSelect = ({
             {options.map((option) => (
               <li
                 key={option.id}
-                className={`p-3 hover:bg-primary-foreground/50 ${value.id === option.id && "bg-primary-foreground/80"}`}
+                className={`p-3 hover:bg-primary/20 ${value.id === option.id && "bg-primary/10"}`}
                 onClick={() => onChange(option)}
               >
                 {option.label}

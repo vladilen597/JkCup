@@ -7,7 +7,7 @@ const GameLine = ({
   image_url,
   name,
   onDeleteClick,
-}: IGame & { onDeleteClick: () => void }) => {
+}: IGame & { onDeleteClick?: () => void }) => {
   const { currentUser } = useAppSelector((state) => state.user);
 
   return (
@@ -27,7 +27,7 @@ const GameLine = ({
         </span>
       </div>
 
-      {currentUser?.role === "superadmin" && (
+      {currentUser?.role === "superadmin" && onDeleteClick && (
         <button
           className="cursor-pointer absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-zinc-400 backdrop-blur-md transition-all hover:bg-red-500 hover:text-white"
           type="button"

@@ -1,11 +1,11 @@
 import SelectTeamUserList from "./SelectTeamUserList/SelectTeamUserList";
 import { useAppSelector } from "@/app/utils/store/hooks";
-import { ITeam } from "@/app/lib/types";
+import { IArchivedTeam, ITeam } from "@/app/lib/types";
 import { SetStateAction } from "react";
 import { cn } from "@/lib/utils";
 
 interface TeamListProps {
-  teams: ITeam[];
+  teams: ITeam[] | IArchivedTeam[];
   selectedTeam: ITeam | null;
   onTeamClick: (team: SetStateAction<ITeam | null>) => void;
 }

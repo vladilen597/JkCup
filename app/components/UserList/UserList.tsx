@@ -2,11 +2,11 @@
 
 import UserLine from "./UserLine/UserLine";
 import { Users } from "lucide-react";
-import { ITournamentRegistration } from "@/app/lib/types";
+import { IArchivedParticipant, ITournamentRegistration } from "@/app/lib/types";
 
 interface UserListProps {
   showRoles?: boolean;
-  registrations: ITournamentRegistration[];
+  registrations: ITournamentRegistration[] | IArchivedParticipant[];
   emptyMessage?: string;
   hideDelete?: boolean;
   handleClickDelete?: (userId: any) => void;

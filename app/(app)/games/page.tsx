@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
+import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const GamesPage = () => {
   const [loading, setLoading] = useState(false);
@@ -63,22 +64,11 @@ const GamesPage = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Gamepad2 className="h-8 w-8 text-primary" />
-            <Title title="Игры" />
-          </div>
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Все зарегистрированные на сайте игры
-          </p>
-        </div>
-      </motion.div>
+      <PageHero
+        title="Игры"
+        description="Все зарегистрированные на сайте игры"
+        icon={<Gamepad2 className="h-8 w-8 text-primary" />}
+      />
 
       <motion.section
         initial={{ opacity: 0, y: 12 }}

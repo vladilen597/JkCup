@@ -1,6 +1,14 @@
 import { updateTournamentStatus } from "@/app/utils/store/tournamentsSlice";
 import CustomButton from "../../Shared/CustomButton/CustomButton";
-import { Album, Edit, Gamepad2, Trash2, Trophy } from "lucide-react";
+import {
+  Album,
+  Archive,
+  Clock,
+  Edit,
+  Gamepad2,
+  Trash2,
+  Trophy,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
@@ -16,12 +24,15 @@ import { ITournament } from "@/app/lib/types";
 import axios from "axios";
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import GameLine from "../../Shared/GameLine/GameLine";
+import StatCard from "../../Shared/StatCard/StatCard";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
   onDeleteClick: () => void;
   handleClickDeleteWinner: () => void;
-  handleClickEdit: () => void;
+  handleClickEdit?: () => void;
 }
 
 const TournamentHero = ({
@@ -82,41 +93,25 @@ const TournamentHero = ({
     }
   };
 
-  const handleChangeStatus = async (
-    status: "open" | "about_to_start" | "in_progress" | "finished" | "closed",
-  ) => {
-    setIsLoading(true);
-    let payload = { status: "open" };
-    switch (status) {
-      case "about_to_start": {
-        payload.status = "about_to_start";
-        break;
-      }
-      case "in_progress": {
-        payload.status = "in_progress";
-        break;
-      }
-      case "finished": {
-        payload.status = "finished";
-        break;
-      }
-      case "closed": {
-        payload.status = "closed";
-        break;
-      }
-    }
+  const handleArhiveTournament = async () => {
+    const isConfirmed = confirm(
+      "Вы уверены? Турнир будет перенесен в архив и удален из текущего списка. Это действие необратимо.",
+    );
+
+    if (!isConfirmed) return;
+
     try {
-      const { data } = await axios.put(
-        `/api/tournaments/${tournament.id}/status`,
-        payload,
-      );
-      dispatch(
-        updateTournamentStatus({ tournamentId: id, status: payload.status }),
-      );
-    } catch (err) {
-      console.error("Failed to load tournaments:", err);
-    } finally {
-      setIsLoading(false);
+      await axios.post(`/api/tournaments/${tournament.id}/archive`);
+
+      toast.success("Турнир успешно архивирован!");
+
+      router.push("/tournaments");
+      router.refresh();
+    } catch (error: any) {
+      console.error("Ошибка архивации:", error);
+      const errorMessage =
+        error.response?.data?.error || "Не удалось архивировать турнир";
+      toast.error(errorMessage);
     }
   };
 
@@ -125,32 +120,29 @@ const TournamentHero = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl neon-border p-4 md:p-12 mb-8  ${canEditTournament && "pt-4!"}`}
-      style={{
-        background:
-          "linear-gradient(135deg, hsl(220 18% 14%) 0%, hsl(220 20% 8%) 100%)",
-      }}
+      className={`relative overflow-hidden max-w-5xl mx-auto rounded-2xl mb-8`}
     >
-      <div className="flex flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between">
+      <div className="absolute inset-0 -top-8 h-60 bg-linear-to-b from-primary/15 to-transparent rounded-3xl pointer-events-none" />
+      <div className="flex px-8 py-4 flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between border-b">
         <div>
           {canEditTournament && (
             <div className="flex items-center gap-4">
               {tournament.creator && (
-                <div>
-                  <span className="text-sm">Создатель</span>
+                <div className="flex flex-col justify-between">
+                  <span className="text-xs font-mono">Создатель</span>
                   <Link
                     href={`/users/${tournament.creator_id}`}
                     className="cursor-pointer group"
                   >
                     <div className="mt-1 flex gap-2 items-center">
                       <Image
-                        width={32}
-                        height={32}
-                        className="w-6 h-6 rounded-full"
+                        width={16}
+                        height={16}
+                        className="w-4 h-4 rounded-full"
                         src={tournament?.creator?.image_url || ""}
                         alt="User photo"
                       />
-                      <span className="text-xs font-bold group-hover:underline">
+                      <span className="text-xs font-mono font-bold group-hover:underline">
                         {tournament?.creator?.full_name}
                       </span>
                     </div>
@@ -158,8 +150,8 @@ const TournamentHero = ({
                 </div>
               )}
               {tournament?.created_at && (
-                <div className="">
-                  <span className="text-sm">Время создания</span>
+                <div className="flex flex-col justify-between border-l border-border px-4 text-xs font-mono">
+                  <span>Время создания</span>
                   <div className="mt-1 flex gap-2 items-center">
                     {format(tournament?.created_at, "dd.MM.yyyy HH:mm")}
                   </div>
@@ -193,14 +185,14 @@ const TournamentHero = ({
                 onClick={handleClickDeleteWinner}
               />
             )}
-            {/* {tournament.status === "finished" && (
+            {tournament.status === "finished" && (
               <CustomButton
                 icon={<Archive className="h-4 w-4" />}
                 label="Архивировать"
                 onClick={handleArhiveTournament}
               />
-            )} */}
-            {tournament.status !== "finished" && (
+            )}
+            {tournament.status !== "finished" && handleClickEdit && (
               <CustomButton
                 icon={<Edit className="h-4 w-4 text-amber-600" />}
                 className="py-1.5 px-2.5 bg-amber-600/20 hover:bg-amber-600/40 text-white border border-amber-600!"
@@ -216,14 +208,14 @@ const TournamentHero = ({
         )}
       </div>
 
-      <div className="block relative mt-6">
+      <div className="block px-8 relative mt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Badge
               className="bg-primary/10 text-primary font-bold tracking-wider"
               text={statuses[tournament.status as keyof typeof statuses]}
             />
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+            <span className="px-3 py-1 font-mono rounded-full text-xs font-medium bg-muted text-muted-foreground">
               {isTeamMode ? "Командный" : "Одиночный"}
             </span>
 
@@ -241,26 +233,40 @@ const TournamentHero = ({
 
         <Title title={tournament.name} className="mt-2" />
 
-        <div className="mt-2 flex items-center gap-2">
-          {tournament.game?.image_url ? (
-            <Image
-              className="object-cover rounded h-8 w-8"
-              src={tournament.game?.image_url}
-              width={32}
-              height={32}
-              alt="Game image"
-            />
-          ) : (
-            <Gamepad2 />
-          )}
-          <span className="font-bold">{tournament.game?.name}</span>
+        <div className="flex items-stretch gap-2 mt-2">
+          <StatCard
+            label="Игра"
+            icon={<Gamepad2 className="w-4 h-4" />}
+            content={
+              <div className="flex items-center gap-2">
+                {tournament.game?.image_url ? (
+                  <Image
+                    className="object-cover rounded h-8 w-8"
+                    src={tournament.game?.image_url}
+                    width={32}
+                    height={32}
+                    alt="Game image"
+                  />
+                ) : (
+                  <Gamepad2 />
+                )}
+                <span className="font-bold">{tournament.game?.name}</span>
+              </div>
+            }
+          />
+          <StatCard
+            label="Длительность"
+            icon={<Clock className="w-4 h-4" />}
+            content={
+              <TournamentDurationDisplay
+                duration={tournament.duration}
+                startedAt={tournament.started_at}
+                status={tournament.status}
+                plain
+              />
+            }
+          />
         </div>
-
-        <TournamentDurationDisplay
-          duration={tournament.duration}
-          startedAt={tournament.started_at}
-          status={tournament.status}
-        />
 
         <div className="mt-4 whitespace-pre-wrap">
           <CleanHtml html={tournament.description} />

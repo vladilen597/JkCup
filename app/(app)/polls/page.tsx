@@ -9,6 +9,7 @@ import CustomModal from "@/app/components/Shared/CustomModal/CustomModal";
 import CreatePollModal from "@/app/components/CreatePollModal/CreatePollModal";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import CustomButton from "@/app/components/Shared/CustomButton/CustomButton";
+import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const PollsPage = () => {
   const [pollData, setPollData] = useState<any>(null);
@@ -51,33 +52,20 @@ const PollsPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-4 pb-20">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Vote className="h-8 w-8 text-primary" />
-              <Title title="Голосования" />
-            </div>
-
-            {canCreatePoll && (
-              <CustomButton
-                icon={<Plus className="h-5 w-5" />}
-                label="Создать голосование"
-                onClick={() => setIsCreateModalOpen(true)}
-              />
-            )}
-          </div>
-
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Следите за голосованиями за игры на турнирах
-          </p>
-        </div>
-      </motion.div>
+      <PageHero
+        title="Голосования"
+        description="Следите за голосованиями за игры на турнирах"
+        icon={<Vote className="h-8 w-8 text-primary" />}
+        controls={
+          canCreatePoll && (
+            <CustomButton
+              icon={<Plus className="h-5 w-5" />}
+              label="Создать голосование"
+              onClick={() => setIsCreateModalOpen(true)}
+            />
+          )
+        }
+      />
 
       <AnimatePresence mode="wait">
         {isLoading ? (

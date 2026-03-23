@@ -34,9 +34,8 @@ export const GET = async (
         judges: {
           include: { profile: true },
         },
-        // ДОБАВЛЯЕМ СЕТКУ (РАУНДЫ -> МАТЧИ -> УЧАСТНИКИ)
         rounds: {
-          orderBy: { number: "asc" }, // Сортируем по порядку (Раунд 1, 2...)
+          orderBy: { number: "asc" },
           include: {
             matches: {
               include: {
@@ -55,6 +54,8 @@ export const GET = async (
         },
       },
     });
+
+    console.log(tournament.game);
 
     if (!tournament) {
       return NextResponse.json({ error: "Турнир не найден" }, { status: 404 });

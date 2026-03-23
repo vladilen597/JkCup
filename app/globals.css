@@ -23,6 +23,14 @@
   --color-gold: hsl(var(--gold));
   --color-gold-dark: hsl(var(--gold-dark));
 
+  --color-silver-light: hsl(var(--silver-light));
+  --color-silver: hsl(var(--silver));
+  --color-silver-dark: hsl(var(--silver-dark));
+
+  --color-bronze-light: hsl(var(--bronze-light));
+  --color-bronze: hsl(var(--bronze));
+  --color-bronze-dark: hsl(var(--bronze-dark));
+
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   --color-background: hsl(var(--background));
@@ -140,6 +148,14 @@
   --gold-light: 45 100% 70%;
   --gold: 45 100% 50%;
   --gold-dark: 38 90% 40%;
+
+  --silver-light: 210 10% 80%;
+  --silver: 210 10% 65%;
+  --silver-dark: 210 10% 45%;
+
+  --bronze-light: 30 50% 70%;
+  --bronze: 30 50% 50%;
+  --bronze-dark: 25 55% 35%;
 
   --card: 220 18% 12%;
   --card-foreground: 210 20% 92%;

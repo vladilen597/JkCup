@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import CustomSelect, {
   ISelectOption,
 } from "../Shared/CustomSelect/CustomSelect";
@@ -27,6 +27,7 @@ import GameSelect from "../Shared/GameSelect/GameSelect";
 import axios from "axios";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { toast } from "react-toastify";
+import CustomInput from "../Shared/CustomInput/CustomInput";
 
 export const selectTypeOptions = [
   { id: 1, value: "team", label: "Командный" },
@@ -159,6 +160,7 @@ const CreateTournamentModal = ({
         description: formData.description || "",
         is_bracket: formData.is_bracket,
         creator_id: currentUser.id,
+        duration: formData.duration,
         status: "open",
         rules: "",
         stream_link: "",
@@ -183,6 +185,13 @@ const CreateTournamentModal = ({
     }
   };
 
+  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   return (
     <motion.form
       initial={{ opacity: 0, y: 20 }}
@@ -193,19 +202,12 @@ const CreateTournamentModal = ({
 
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-full">
-            <label className="block text-sm font-medium mb-1">Название</label>
-            <input
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
+          <CustomInput
+            label="Название"
+            name="name"
+            value={formData.value}
+            onChange={handleChangeInput}
+          />
 
           <div className="w-full">
             <label className="flex items-center gap-2 text-sm font-medium mb-1">
@@ -281,57 +283,30 @@ const CreateTournamentModal = ({
           checked={formData.is_bracket}
           onChange={() =>
             setFormData((prevState) => ({
-              ...prevState, // Используем prevState, чтобы не потерять другие поля
+              ...prevState,
               is_bracket: !prevState.is_bracket,
             }))
           }
         />
 
         <div className="flex items-center gap-2">
-          <div className="w-full">
-            <label className="flex items-center gap-2 text-sm font-medium mb-1">
-              <Users className="w-4 h-4" /> Макс.{" "}
-              {formData.type.value === "team" ? "команд" : "игроков"}
-            </label>
-            <input
-              type="number"
-              value={
-                formData.type.value === "team"
-                  ? formData.max_teams
-                  : formData.max_players
-              }
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  ...(formData.type.value === "team"
-                    ? { max_teams: Number(e.target.value), rewards: [] }
-                    : { max_players: Number(e.target.value), rewards: [] }),
-                });
-              }}
-              className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              min="2"
-              required
-            />
-          </div>
+          <CustomInput
+            label={`Макс. ${formData.type.value === "team" ? "команд" : "игроков"}`}
+            name={formData.type.value === "team" ? "max_teams" : "max_players"}
+            value={
+              formData.type.value === "team"
+                ? formData.max_teams
+                : formData.max_players
+            }
+            onChange={handleChangeInput}
+          />
           {formData.type.value === "team" && (
-            <div className="w-full">
-              <label className="block text-sm font-medium mb-1">
-                Игроков в команде
-              </label>
-              <input
-                type="number"
-                value={formData.players_per_team}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    players_per_team: Number(e.target.value),
-                  })
-                }
-                className="w-full p-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                min="2"
-                required
-              />
-            </div>
+            <CustomInput
+              label="Игроков в команде"
+              name="players_per_team"
+              value={formData.players_per_team}
+              onChange={handleChangeInput}
+            />
           )}
         </div>
 

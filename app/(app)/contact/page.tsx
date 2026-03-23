@@ -9,18 +9,14 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import FeedbackList from "@/app/components/FeedbackList/FeedbackList";
 import axios from "axios";
+import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFeedbackSent, setIsFeedbackSent] = useState(false);
-  const [isFeedbacksExpanded, setIsFeedbacksExpanded] = useState(false);
   const [text, setText] = useState("");
 
   const { currentUser } = useAppSelector((state) => state.user);
-
-  const handleToggleExpanded = () => {
-    setIsFeedbacksExpanded((prevState) => !prevState);
-  };
 
   const handleSendForm = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -39,24 +35,11 @@ const page = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <NotebookPen className="h-8 w-8 text-primary" />
-            <Title title="Обратная связь" />
-          </div>
-
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Здесь вы можете оставить вашу обратную связь о турнирах,
-            предложения, баг-репорты на сайте и т.д.
-          </p>
-        </div>
-      </motion.div>
+      <PageHero
+        title="Обратная связь"
+        description="Оставьте ваш отзыв о турнире, найденной ошибке на сайте или просто поделитель эмоциями"
+        icon={<NotebookPen className="h-8 w-8 text-primary" />}
+      />
 
       <div className="flex items-start gap-4 bg-card border border-border p-4 rounded-lg">
         <div className="w-full">
@@ -82,13 +65,13 @@ const page = () => {
             >
               <label>
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-card border border-border w-fit">
+                  <div className="p-2 rounded-lg bg-background border border-border w-fit">
                     <NotebookPen />
                   </div>
                   Введите ваше обращение
                 </div>
                 <textarea
-                  className="mt-1 p-2 w-full border border-border rounded-lg bg-muted min-h-100 outline-0 focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+                  className="mt-1 p-2 w-full border border-border rounded-lg bg-background min-h-100 outline-0 focus:outline-none focus:ring-2 focus:ring-primary text-lg"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                 />
@@ -117,7 +100,7 @@ const page = () => {
               transition={{ duration: 0.5, delay: 0.25 }}
             >
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-card border border-border w-fit">
+                <div className="p-2 rounded-lg bg-background border border-border w-fit">
                   <MessageCircle />
                 </div>
                 Отзывы пользователей

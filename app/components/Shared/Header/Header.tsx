@@ -378,6 +378,15 @@ const Header = () => {
           {currentUser?.id && <NotificationsBlock />}
         </div>
       </div>
+      <AnimatePresence>
+        <CustomModal
+          contentClassName="max-w-150"
+          isOpen={isAuthModalOpen}
+          onClose={handleCloseAuthModal}
+        >
+          <AuthModalContent onClose={handleCloseAuthModal} />
+        </CustomModal>
+      </AnimatePresence>
     </header>
   );
 };

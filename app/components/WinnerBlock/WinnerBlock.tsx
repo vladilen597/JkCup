@@ -2,7 +2,12 @@ import { Crown, Star, Trophy } from "lucide-react";
 import { motion } from "motion/react";
 import WinnerTeam from "../WinnerTeam/WinnerTeam";
 import UserInfoBlock from "../Shared/UserInfoBlock/UserInfoBlock";
-import { ITeam, ITournamentRegistration, IUser } from "@/app/lib/types";
+import {
+  IArchivedTeam,
+  ITeam,
+  ITournamentRegistration,
+  IUser,
+} from "@/app/lib/types";
 
 const Sparkle = ({ delay, x, y }: { delay: number; x: string; y: string }) => (
   <motion.div
@@ -38,9 +43,9 @@ const WinnerBlock = ({
   winner_team,
 }: {
   winner_user: IUser;
-  winner_team: ITeam;
+  winner_team: ITeam | IArchivedTeam;
 }) => {
-  console.log(winner_user);
+  if (!winner_user && !winner_team) return null;
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

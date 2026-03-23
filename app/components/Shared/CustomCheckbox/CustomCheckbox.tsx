@@ -24,7 +24,7 @@ const CustomCheckbox = ({
 
   return (
     <label className={`flex items-center gap-2 ${className}`}>
-      <div className="relative flex items-center justify-center h-5 w-5 border border-zinc-600 rounded overflow-hidden">
+      <div className="relative bg-background flex items-center justify-center h-5 w-5 border border-zinc-600 rounded overflow-hidden">
         <input
           name={name}
           ref={inputRef}

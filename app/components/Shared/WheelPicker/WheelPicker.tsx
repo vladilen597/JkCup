@@ -42,7 +42,7 @@ const Wheel: React.FC<WheelProps> = ({ items, value, label, onChange }) => {
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-muted via-transparent to-muted opacity-80" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-background via-transparent to-background opacity-80" />
         <div className="absolute top-1/2 -translate-y-1/2 h-8 w-full border-y border-primary/20 pointer-events-none" />
       </div>
       <span className="text-[10px] uppercase text-muted-foreground font-bold mt-1">

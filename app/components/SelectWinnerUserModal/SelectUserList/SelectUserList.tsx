@@ -4,6 +4,7 @@ import { SetStateAction } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { IUser } from "@/app/lib/types";
+import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
 
 interface ISelectUserListProps {
   users: IUser[];
@@ -31,42 +32,13 @@ const SelectUserList = ({
       {users.map((user) => (
         <li
           className={cn(
-            "border rounded-lg p-4 cursor-pointer",
-            selectedUser?.id === user.id && "outline-2 outline-neon",
+            "flex items-center gap-2 border rounded-lg p-4 cursor-pointer",
+            selectedUser?.id === user.id && "border-neon!",
           )}
           key={user.id}
           onClick={() => onUserClick(user)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-sm">
-              {user.image_url ? (
-                <Image
-                  width={40}
-                  height={40}
-                  src={user.image_url}
-                  alt=""
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white">
-                  {user.full_name?.[0] || "?"}
-                </div>
-              )}
-              <div>
-                <div>
-                  <span className="truncate">{user.full_name}</span>
-                  {currentUser.id === user.id && (
-                    <span className="ml-2 text-xs text-orange-400">Вы</span>
-                  )}
-                </div>
-                {user.discord_full_name && (
-                  <p className="flex items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400">
-                    <Discord className="w-4 h-4" /> {user.discord_full_name}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          <UserInfoBlock {...user} />
         </li>
       ))}
     </ul>

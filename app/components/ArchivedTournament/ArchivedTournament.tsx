@@ -1,15 +1,15 @@
 import { ChevronRight, Gamepad2, Trophy, User, Users } from "lucide-react";
-import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { statuses } from "../(app)/tournaments/[id]/page";
-import CleanHtml from "../components/Shared/CleanHtml/CleanHtml";
-import { IGame, ITag, ITournament } from "../lib/types";
-import Tag from "../components/Shared/Tag/Tag";
 import Image from "next/image";
-import { useAppSelector } from "./store/hooks";
+import { IArchivedTournament, ITag } from "@/app/lib/types";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import Badge from "../Shared/Badge/Badge";
+import { statuses } from "@/app/(app)/archive/[id]/page";
+import Tag from "../Shared/Tag/Tag";
+import CleanHtml from "../Shared/CleanHtml/CleanHtml";
 
-interface ITournamentProps extends ITournament {
+interface ITournamentProps extends IArchivedTournament {
   id: string;
   name: string;
   isTeam: boolean;
@@ -17,7 +17,6 @@ interface ITournamentProps extends ITournament {
   index: number;
   currentPlayers: number;
   isFull: boolean;
-  tags: ITag[];
   maxPlayers: number;
 }
 
@@ -27,7 +26,7 @@ const trophyIndexes = {
   3: <Trophy className="h-3 w-3 text-[#CE8946]" />,
 };
 
-const Tournament = ({
+const ArchivedTournament = ({
   id,
   name,
   isTeam,
@@ -36,13 +35,12 @@ const Tournament = ({
   status,
   currentPlayers,
   index,
-  game,
   maxPlayers,
   isFull,
-  hidden,
-  rewards,
   tags,
   description,
+  game_snapshot,
+  rewards,
 }: ITournamentProps) => {
   const { currentUser } = useAppSelector((state) => state.user);
 
@@ -52,8 +50,8 @@ const Tournament = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.06 }}
     >
-      <Link href={"/tournaments/" + id}>
-        <div className="group relative rounded-xl border border-border/50 bg-background p-5 hover:border-primary/30 hover:shadow-(--neon-shadow) transition-all duration-300 cursor-pointer">
+      <Link href={"/archive/" + id}>
+        <div className="group relative rounded-xl border border-border/50 bg-card p-5 hover:border-primary/30 hover:shadow-(--neon-shadow) transition-all duration-300 cursor-pointer">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -76,21 +74,15 @@ const Tournament = ({
                     className="bg-destructive/10 text-destructive border border-destructive/20"
                   />
                 )}
-                {hidden && (
-                  <Badge
-                    text="Скрыт"
-                    className="bg-amber-400 text-black border border-destructive/20"
-                  />
-                )}
                 {tags?.map((tag) => (
                   <Tag key={tag?.id} {...tag} />
                 ))}
               </div>
               <div className="flex gap-2 items-center text-sm text-neutral-300 line-clamp-1">
-                {game?.image_url ? (
+                {game_snapshot?.image_url ? (
                   <Image
                     className="rounded h-4 w-4 object-cover"
-                    src={game?.image_url}
+                    src={game_snapshot?.image_url}
                     width={16}
                     height={16}
                     alt="Game image"
@@ -98,23 +90,26 @@ const Tournament = ({
                 ) : (
                   <Gamepad2 />
                 )}
-                <span className="font-bold">{game?.name}</span>
+                <span className="font-bold">{game_snapshot?.name}</span>
               </div>
-              {currentUser &&
-                currentUser.games?.some(
-                  (userGame) => userGame.id === game?.id,
-                ) && (
-                  <span className="text-xs text-primary">
-                    Турнир по одной из ваших игр
-                  </span>
-                )}
               <div className="mt-2 text-sm text-muted-foreground line-clamp-1">
                 <CleanHtml html={description} />
               </div>
               {!!rewards?.length && (
-                <span className="font-mono text-xs text-neutral-400">
-                  Турнир с наградой
-                </span>
+                <ul className="mt-2">
+                  {rewards?.map((reward, index) => (
+                    <div className="flex items-center gap-1" key={reward.id}>
+                      <span className="text-xs gap-2 w-3 text-center">
+                        {trophyIndexes[
+                          (index + 1) as keyof typeof trophyIndexes
+                        ] || index + 1}
+                      </span>
+                      <span className="text-sm text-neutral-400">
+                        {reward.value}
+                      </span>
+                    </div>
+                  ))}
+                </ul>
               )}
             </div>
 
@@ -156,4 +151,4 @@ const Tournament = ({
   );
 };
 
-export default Tournament;
+export default ArchivedTournament;

@@ -5,11 +5,13 @@ const StatCard = ({
   label,
   value,
   highlight = false,
+  content,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string | ReactNode;
+  value?: string | ReactNode;
   highlight?: boolean;
+  content?: ReactNode;
 }) => {
   return (
     <div className="rounded-xl font-mono p-4 bg-card hover:border-primary/20 transition-colors">
@@ -19,11 +21,15 @@ const StatCard = ({
           {label}
         </span>
       </div>
-      <span
-        className={`capitalize text-lg font-bold font-mono ${highlight ? "text-primary" : "text-foreground"}`}
-      >
-        {value}
-      </span>
+      {value ? (
+        <span
+          className={`capitalize text-lg font-bold font-mono ${highlight ? "text-primary" : "text-foreground"}`}
+        >
+          {value}
+        </span>
+      ) : (
+        content
+      )}
     </div>
   );
 };

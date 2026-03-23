@@ -15,6 +15,7 @@ import CustomSelect from "@/app/components/Shared/CustomSelect/CustomSelect";
 import { IUser } from "@/app/lib/types";
 import { toast } from "react-toastify";
 import UserExpandableLine from "@/app/components/UserExpandableLine/UserExpandableLine";
+import PageHero from "@/app/components/Shared/PageHero/PageHero";
 
 const roles = [
   {
@@ -121,23 +122,12 @@ const UsersPage = () => {
 
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl neon-border p-8 md:p-12 mb-10 bg-linear-to-br from-background to-muted/30"
-      >
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Users className="h-8 w-8 text-primary" />
-            <Title title="Пользователи" />
-          </div>
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Все зарегистрированные участники платформы. Найдите друзей,
-            соперников или просто посмотрите, кто уже здесь!
-          </p>
-        </div>
-      </motion.div>
+      <PageHero
+        title="Пользователи"
+        icon={<Users className="h-8 w-8 text-primary" />}
+        description="Все зарегистрированные участники платформы. Найдите друзей,
+            соперников или просто посмотрите, кто уже здесь!"
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
