@@ -155,7 +155,7 @@ const UsersPage = () => {
         <div className="flex items-stretch gap-2">
           <SearchInput value={searchQuery} onChange={handleChangeQuery} />
           <CustomSelect
-            containerClassName="min-w-40"
+            containerClassName="min-w-40 border"
             options={roles}
             value={selectedRole}
             onChange={setSelectedRole}
