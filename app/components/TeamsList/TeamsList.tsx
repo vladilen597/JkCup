@@ -6,6 +6,8 @@ import {
   ITeam,
   ITournamentJudge,
 } from "@/app/lib/types";
+import EmptyListPlaceholder from "../Shared/EmptyListPlaceholder/EmptyListPlaceholder";
+import { Users } from "lucide-react";
 
 interface TeamListProps {
   teams: ITeam[] | IArchivedTeam[];
@@ -41,7 +43,10 @@ const TeamList = ({
 
   if (teams.length === 0) {
     return (
-      <p className="text-center text-muted-foreground py-8">Команд пока нет</p>
+      <EmptyListPlaceholder
+        icon={<Users className="h-10 w-10" />}
+        text="Команд пока нет"
+      />
     );
   }
 

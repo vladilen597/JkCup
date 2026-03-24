@@ -1,16 +1,15 @@
 "use client";
 
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
-import { roleColors, roles } from "@/app/(app)/users/[id]/layout";
 import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useAppSelector } from "@/app/utils/store/hooks";
+import RoleBadge from "../../Shared/RoleBadge/RoleBadge";
 import React, { useEffect, useState } from "react";
-import { motion } from "motion/react";
-import { Lock, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IUser } from "@/app/lib/types";
+import { Lock, X } from "lucide-react";
+import { motion } from "motion/react";
 import axios from "axios";
-import RoleBadge from "../../Shared/RoleBadge/RoleBadge";
 
 export const roleSelectOptions = [
   {

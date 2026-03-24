@@ -58,7 +58,7 @@ const ProfileAvatar = ({
       whileTap={{ scale: 0.97 }}
       onClick={handleClick}
     >
-      <div className="absolute -inset-0.5 rounded-2xl bg-linear-to-br from-primary/60 to-primary/20 animate-pulse-glow" />
+      <div className="absolute -inset-0.5 rounded-2xl bg-card/50 animate-pulse-glow" />
 
       <div className="relative w-full h-full rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center">
         {userInfo?.imageFile ? (

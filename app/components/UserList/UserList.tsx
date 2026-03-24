@@ -3,6 +3,7 @@
 import UserLine from "./UserLine/UserLine";
 import { Users } from "lucide-react";
 import { IArchivedParticipant, ITournamentRegistration } from "@/app/lib/types";
+import EmptyListPlaceholder from "../Shared/EmptyListPlaceholder/EmptyListPlaceholder";
 
 interface UserListProps {
   showRoles?: boolean;
@@ -15,16 +16,15 @@ interface UserListProps {
 const UserList = ({
   showRoles,
   registrations,
-  emptyMessage = "Пока нет участников",
   hideDelete,
   handleClickDelete,
 }: UserListProps) => {
   if (registrations?.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <Users className="h-10 w-10 mb-3 opacity-30" />
-        <p className="text-sm">{emptyMessage}</p>
-      </div>
+      <EmptyListPlaceholder
+        icon={<Users className="h-10 w-10" />}
+        text="Участников пока нет"
+      />
     );
   }
 

@@ -2,12 +2,12 @@ import { ChevronRight, Gamepad2, Trophy, User, Users } from "lucide-react";
 import Badge from "../components/Shared/Badge/Badge";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { statuses } from "../(app)/tournaments/[id]/page";
 import CleanHtml from "../components/Shared/CleanHtml/CleanHtml";
 import { IGame, ITag, ITournament } from "../lib/types";
 import Tag from "../components/Shared/Tag/Tag";
 import Image from "next/image";
 import { useAppSelector } from "./store/hooks";
+import { statuses } from "../components/Pages/TournamentItemPage/TournamentItemPage";
 
 interface ITournamentProps extends ITournament {
   id: string;
@@ -53,7 +53,7 @@ const Tournament = ({
       transition={{ duration: 0.3, delay: index * 0.06 }}
     >
       <Link href={"/tournaments/" + id}>
-        <div className="group relative rounded-xl border border-border/50 bg-background p-5 hover:border-primary/30 hover:shadow-(--neon-shadow) transition-all duration-300 cursor-pointer">
+        <div className="group bg-card/25 relative rounded-xl border border-border/50 p-5 hover:border-primary/30 hover:shadow-(--neon-shadow) transition-all duration-300 cursor-pointer">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

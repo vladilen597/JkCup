@@ -1,12 +1,8 @@
-import { Calendar, Hash, Trophy, User, Users } from "lucide-react";
-import { statuses } from "@/app/(app)/tournaments/[id]/page";
-import StatCard from "../../Shared/StatCard/StatCard";
-import { motion } from "motion/react";
-import { format } from "date-fns";
-import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
-import { ITournament } from "@/app/lib/types";
-import { cn } from "@/lib/utils";
 import RulesExpandableBlock from "../../RulesExpandableBlock/RulesExpandableBlock";
+import { ITournament } from "@/app/lib/types";
+import { Trophy } from "lucide-react";
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 
 interface ITournamentStatBlocksProps {
   tournament: ITournament;

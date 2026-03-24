@@ -17,9 +17,10 @@ export const GET = async () => {
     });
   }
 };
+
 export const POST = async (req: NextRequest) => {
   try {
-    const { title, text, type, priority, creatorId } = await req.json(); // Передай ID создателя с фронта
+    const { title, text, type, priority, creatorId } = await req.json();
 
     const notification = await prisma.notification.create({
       data: {

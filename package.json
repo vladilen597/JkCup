@@ -47,7 +47,6 @@
     "react-player": "^3.4.0",
     "react-redux": "^9.2.0",
     "react-toastify": "^11.0.5",
-    "react-xarrows": "^2.0.2",
     "reactjs-tiptap-editor": "^1.0.17",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",

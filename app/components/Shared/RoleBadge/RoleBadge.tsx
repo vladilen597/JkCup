@@ -12,8 +12,8 @@ const roles: Record<string, string> = {
 const roleStyleMap: Record<string, { text: string; block: string }> = {
   guest: { text: "text-neutral-400", block: "border-neutral-400!" },
   user: {
-    text: "text-white border-white!",
-    block: "border-white",
+    text: "text-white",
+    block: "border-white!",
   },
   admin: {
     text: "text-primary",

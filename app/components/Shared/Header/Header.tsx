@@ -9,7 +9,6 @@ import {
   Archive,
   Gamepad2,
   Ellipsis,
-  Bell,
   Menu,
   FileQuestionMark,
   NotebookPen,
@@ -23,10 +22,7 @@ import Link from "next/link";
 import CustomButton from "../CustomButton/CustomButton";
 import CustomNodeSelect from "../CustomNodeSelect/CustomNodeSelect";
 import CustomDrawer from "../CustomDrawer/CustomDrawer";
-import Notifications from "../../Notifications/Notifications";
 import Image from "next/image";
-import { roleColors, roles } from "@/app/(app)/users/[id]/layout";
-import { cn } from "@/lib/utils";
 import axios from "axios";
 import CustomModal from "../CustomModal/CustomModal";
 import AuthModalContent from "../../AuthModalContent/AuthModalContent";
@@ -337,8 +333,8 @@ const Header = () => {
                 onClick={() => setIsProfileOpen((p) => !p)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <div className="text-right max-w-20 overflow-hidden text-ellipsis">
-                  <span className="block text-sm text-right font-inter text-foreground font-bold">
+                <div className="text-right">
+                  <span className="block max-w-34 truncate text-sm text-right font-inter text-foreground font-bold">
                     {currentUser.full_name}
                   </span>
                   <RoleBadge

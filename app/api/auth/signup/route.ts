@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,7 +28,7 @@ export const POST = async (req: NextRequest) => {
   try {
     const { email, password, full_name, who_invited } = await req.json();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -40,6 +41,25 @@ export const POST = async (req: NextRequest) => {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    const supabaseUser = data.user;
+
+    if (supabaseUser) {
+      const allNotifications = await prisma.notification.findMany({
+        select: { id: true },
+      });
+
+      if (allNotifications.length > 0) {
+        await prisma.userNotification.createMany({
+          data: allNotifications.map((n) => ({
+            user_id: supabaseUser.id,
+            notification_id: n.id,
+            is_read: false,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     return NextResponse.json(

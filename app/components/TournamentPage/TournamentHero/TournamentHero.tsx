@@ -17,7 +17,6 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
-import { statuses } from "@/app/(app)/tournaments/[id]/page";
 import { useParams, useRouter } from "next/navigation";
 import Tag from "../../Shared/Tag/Tag";
 import Title from "../../Title/Title";
@@ -33,6 +32,7 @@ import GameLine from "../../Shared/GameLine/GameLine";
 import StatCard from "../../Shared/StatCard/StatCard";
 import { ru } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { statuses } from "../../Pages/TournamentItemPage/TournamentItemPage";
 
 interface ITournamentHeroProps {
   tournament: ITournament;

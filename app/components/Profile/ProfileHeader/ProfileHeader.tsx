@@ -7,7 +7,6 @@ import CustomSkeleton from "../../Shared/CustomSkeleton/CustomSkeleton";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useState } from "react";
-import { roles } from "@/app/(app)/users/[id]/layout";
 import { roleSelectOptions } from "../../UserList/UserLine/UserLine";
 import { useParams } from "next/navigation";
 

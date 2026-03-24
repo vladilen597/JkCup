@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import Xarrow, { useXarrow, Xwrapper } from "react-xarrows";
 import { Plus, Trash2 } from "lucide-react";
 import {
   DndContext,
@@ -32,7 +31,7 @@ interface BracketProps {
 }
 
 const MatchBox = ({ match, isAdmin, onRemoveMatch, children }: any) => {
-  useXarrow();
+  // useXarrow();
   return (
     <div className="relative flex flex-col items-center group/match my-4">
       {isAdmin && (
@@ -72,7 +71,7 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
   );
 
   const handleScroll = () => {
-    useXarrow();
+    // useXarrow();
   };
 
   const rounds = useMemo(() => {
@@ -249,127 +248,127 @@ const BracketTournamentView = ({ tournament }: BracketProps) => {
           onScroll={handleScroll}
           className="relative overflow-x-auto custom-scrollbar"
         >
-          <Xwrapper>
-            <div className="inline-flex gap-12 items-stretch min-h-150 p-4">
-              {rounds.map((round: any, rIdx: number) => (
-                <div
-                  key={round.id}
-                  className="flex flex-col justify-around gap-4 min-w-65 group/round"
-                >
-                  <div className="flex justify-between items-center px-1 mb-4">
-                    <h3 className="font-bold text-zinc-500 uppercase text-[11px] tracking-widest">
-                      {rIdx + 1 === rounds?.length
-                        ? "Победитель"
-                        : rIdx + 1 === rounds?.length - 1
-                          ? "Финал"
-                          : rIdx + 1 === rounds?.length - 2
-                            ? "Полуфинал"
-                            : `Раунд ${rIdx + 1}`}
-                    </h3>
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleRemoveRound(round.id)}
-                        className="opacity-0 group-hover/round:opacity-100 text-zinc-600 hover:text-red-500 transition-all cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-around">
-                    {round.matches?.map((match: any, mIdx: number) => {
-                      const nextRound = rounds[rIdx + 1];
-                      const targetMatch =
-                        nextRound?.matches?.[Math.floor(mIdx / 2)];
-
-                      return (
-                        <React.Fragment key={match.id}>
-                          <MatchBox
-                            match={match}
-                            isAdmin={isAdmin}
-                            onRemoveMatch={() =>
-                              handleRemoveMatch(round.id, match.id)
-                            }
-                          >
-                            <div className="flex flex-col min-w-45">
-                              <DroppableSlot
-                                match={match}
-                                roundId={round.id}
-                                slot={1}
-                                isAdmin={isAdmin}
-                                label="Участник 1"
-                                onRemove={handleRemoveParticipantFromMatch}
-                                onWinnerClick={() => {}}
-                                // onWinnerClick={handleSetWinner}
-                              />
-
-                              <ChangeInfoInput
-                                matchId={match.id}
-                                currentValue={match.metadata?.info || ""}
-                                disabled={!isAdmin}
-                                onUpdate={async (mId, info) => {
-                                  const { data } = await axios.patch(
-                                    `/api/matches/${mId}`,
-                                    {
-                                      metadata: { ...match.metadata, info },
-                                    },
-                                  );
-                                  dispatch(updateTournament(data));
-                                }}
-                              />
-
-                              <DroppableSlot
-                                match={match}
-                                roundId={round.id}
-                                slot={2}
-                                isAdmin={isAdmin}
-                                label="Участник 2"
-                                onRemove={handleRemoveParticipantFromMatch}
-                                onWinnerClick={() => {}}
-                                // onWinnerClick={handleSetWinner}
-                              />
-                            </div>
-                          </MatchBox>
-
-                          {match.next_match_id && (
-                            <Xarrow
-                              start={match.id}
-                              end={match.next_match_id}
-                              strokeWidth={2}
-                              color="#3f3f46"
-                              path="grid"
-                              headSize={0}
-                              startAnchor="right"
-                              endAnchor="left"
-                            />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
+          {/* <Xwrapper> */}
+          <div className="inline-flex gap-12 items-stretch min-h-150 p-4">
+            {rounds.map((round: any, rIdx: number) => (
+              <div
+                key={round.id}
+                className="flex flex-col justify-around gap-4 min-w-65 group/round"
+              >
+                <div className="flex justify-between items-center px-1 mb-4">
+                  <h3 className="font-bold text-zinc-500 uppercase text-[11px] tracking-widest">
+                    {rIdx + 1 === rounds?.length
+                      ? "Победитель"
+                      : rIdx + 1 === rounds?.length - 1
+                        ? "Финал"
+                        : rIdx + 1 === rounds?.length - 2
+                          ? "Полуфинал"
+                          : `Раунд ${rIdx + 1}`}
+                  </h3>
                   {isAdmin && (
                     <button
-                      onClick={() => handleAddMatch(round.id)}
-                      className="mt-4 p-2 border border-dashed border-zinc-800 rounded-lg text-zinc-600 hover:text-primary transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
+                      onClick={() => handleRemoveRound(round.id)}
+                      className="opacity-0 group-hover/round:opacity-100 text-zinc-600 hover:text-red-500 transition-all cursor-pointer"
                     >
-                      <Plus className="w-4 h-4" /> Матч
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
-              ))}
 
-              {isAdmin && (
-                <div className="flex items-center">
-                  <button
-                    onClick={handleAddRound}
-                    className="h-10 px-4 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-400 hover:bg-zinc-700 transition-all text-sm font-medium whitespace-nowrap cursor-pointer"
-                  >
-                    + Раунд
-                  </button>
+                <div className="flex-1 flex flex-col justify-around">
+                  {round.matches?.map((match: any, mIdx: number) => {
+                    const nextRound = rounds[rIdx + 1];
+                    const targetMatch =
+                      nextRound?.matches?.[Math.floor(mIdx / 2)];
+
+                    return (
+                      <React.Fragment key={match.id}>
+                        <MatchBox
+                          match={match}
+                          isAdmin={isAdmin}
+                          onRemoveMatch={() =>
+                            handleRemoveMatch(round.id, match.id)
+                          }
+                        >
+                          <div className="flex flex-col min-w-45">
+                            <DroppableSlot
+                              match={match}
+                              roundId={round.id}
+                              slot={1}
+                              isAdmin={isAdmin}
+                              label="Участник 1"
+                              onRemove={handleRemoveParticipantFromMatch}
+                              onWinnerClick={() => {}}
+                              // onWinnerClick={handleSetWinner}
+                            />
+
+                            <ChangeInfoInput
+                              matchId={match.id}
+                              currentValue={match.metadata?.info || ""}
+                              disabled={!isAdmin}
+                              onUpdate={async (mId, info) => {
+                                const { data } = await axios.patch(
+                                  `/api/matches/${mId}`,
+                                  {
+                                    metadata: { ...match.metadata, info },
+                                  },
+                                );
+                                dispatch(updateTournament(data));
+                              }}
+                            />
+
+                            <DroppableSlot
+                              match={match}
+                              roundId={round.id}
+                              slot={2}
+                              isAdmin={isAdmin}
+                              label="Участник 2"
+                              onRemove={handleRemoveParticipantFromMatch}
+                              onWinnerClick={() => {}}
+                              // onWinnerClick={handleSetWinner}
+                            />
+                          </div>
+                        </MatchBox>
+
+                        {/* {match.next_match_id && (
+                          <Xarrow
+                            start={match.id}
+                            end={match.next_match_id}
+                            strokeWidth={2}
+                            color="#3f3f46"
+                            path="grid"
+                            headSize={0}
+                            startAnchor="right"
+                            endAnchor="left"
+                          />
+                        )} */}
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-          </Xwrapper>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleAddMatch(round.id)}
+                    className="mt-4 p-2 border border-dashed border-zinc-800 rounded-lg text-zinc-600 hover:text-primary transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" /> Матч
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {isAdmin && (
+              <div className="flex items-center">
+                <button
+                  onClick={handleAddRound}
+                  className="h-10 px-4 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-400 hover:bg-zinc-700 transition-all text-sm font-medium whitespace-nowrap cursor-pointer"
+                >
+                  + Раунд
+                </button>
+              </div>
+            )}
+          </div>
+          {/* </Xwrapper> */}
         </div>
       </div>
 
