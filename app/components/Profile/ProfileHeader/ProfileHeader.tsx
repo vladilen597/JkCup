@@ -9,6 +9,7 @@ import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useState } from "react";
 import { roles } from "@/app/(app)/users/[id]/layout";
 import { roleSelectOptions } from "../../UserList/UserLine/UserLine";
+import { useParams } from "next/navigation";
 
 interface ProfileHeaderProps {
   user: IUser;
@@ -46,6 +47,7 @@ const ProfileHeader = ({
   const [userRole, setUserRole] = useState(
     roleSelectOptions.find((option) => option.value === user.role),
   );
+  const { id } = useParams();
   const isLoading = !user.id;
 
   const handleChangeRole = (value) => {
@@ -70,6 +72,7 @@ const ProfileHeader = ({
               imageUrl={user.image_url}
               fullName={user.full_name}
               onImageChange={onImageChange}
+              isEditable={currentUser?.id === id}
             />
           </motion.div>
         )}
