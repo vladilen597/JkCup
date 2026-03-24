@@ -28,13 +28,34 @@ const roleStyleMap: Record<string, { text: string; block: string }> = {
 interface RoleBadgeProps {
   type?: "default" | "small";
   role: string;
+  withAnimation?: boolean;
 }
 
-const RoleBadge = ({ type = "default", role }: RoleBadgeProps) => {
+const RoleBadge = ({
+  type = "default",
+  role,
+  withAnimation = true,
+}: RoleBadgeProps) => {
+  if (withAnimation) {
+    return (
+      <motion.span
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={cn(
+          "inline-flex bg-background items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2",
+          roleStyleMap[role].block,
+          type === "small" && "p-0! border-none!",
+        )}
+      >
+        <Diamond className={cn("w-3 h-3", roleStyleMap[role].text)} />
+        <span className={roleStyleMap[role].text || roleStyleMap.guest.text}>
+          {roles[role] || roles.guest}
+        </span>
+      </motion.span>
+    );
+  }
   return (
-    <motion.span
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <span
       className={cn(
         "inline-flex bg-background items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-mono font-medium tracking-wider uppercase bg-surface-2",
         roleStyleMap[role].block,
@@ -45,7 +66,7 @@ const RoleBadge = ({ type = "default", role }: RoleBadgeProps) => {
       <span className={roleStyleMap[role].text || roleStyleMap.guest.text}>
         {roles[role] || roles.guest}
       </span>
-    </motion.span>
+    </span>
   );
 };
 

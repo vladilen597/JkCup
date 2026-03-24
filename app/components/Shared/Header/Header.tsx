@@ -337,11 +337,15 @@ const Header = () => {
                 onClick={() => setIsProfileOpen((p) => !p)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <div>
+                <div className="text-right max-w-20 overflow-hidden text-ellipsis">
                   <span className="block text-sm text-right font-inter text-foreground font-bold">
                     {currentUser.full_name}
                   </span>
-                  <RoleBadge role={currentUser.role} type="small" />
+                  <RoleBadge
+                    role={currentUser.role}
+                    type="small"
+                    withAnimation={false}
+                  />
                 </div>
                 {currentUser.image_url ? (
                   <Image
