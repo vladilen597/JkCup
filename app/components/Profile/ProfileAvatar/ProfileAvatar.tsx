@@ -26,7 +26,7 @@ const ProfileAvatar = ({
   size = "lg",
 }: ProfileAvatarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { currentUser } = useAppSelector((state) => state.user);
+  const { currentUser, userInfo } = useAppSelector((state) => state.user);
   const { id } = useParams();
 
   const handleClick = () => {
@@ -61,7 +61,13 @@ const ProfileAvatar = ({
       <div className="absolute -inset-0.5 rounded-2xl bg-linear-to-br from-primary/60 to-primary/20 animate-pulse-glow" />
 
       <div className="relative w-full h-full rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center">
-        {imageUrl ? (
+        {userInfo?.imageFile ? (
+          <img
+            src={URL.createObjectURL(userInfo.imageFile)}
+            alt={fullName}
+            className="w-full h-full object-cover"
+          />
+        ) : imageUrl ? (
           <img
             src={imageUrl}
             alt={fullName}
