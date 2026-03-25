@@ -52,8 +52,6 @@ export const POST = async (req: Request) => {
   try {
     const body = await req.json();
 
-    console.log(body);
-
     const tournament = await prisma.tournament.create({
       data: {
         name: body.name,

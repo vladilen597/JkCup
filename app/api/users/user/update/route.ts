@@ -73,7 +73,6 @@ export const POST = async (req: NextRequest) => {
     const gameIdsRaw = formData.get("gameIds") as string;
     let gameConnect: any = undefined;
 
-    console.log("gameIdsRaw", gameIdsRaw);
     if (gameIdsRaw) {
       const gameIds: string[] = JSON.parse(gameIdsRaw);
 
@@ -92,8 +91,6 @@ export const POST = async (req: NextRequest) => {
         games: true,
       },
     });
-
-    console.log(updatedProfile);
 
     return NextResponse.json({ user: updatedProfile }, { status: 200 });
   } catch (err: any) {

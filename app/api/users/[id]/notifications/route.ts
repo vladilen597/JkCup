@@ -13,7 +13,6 @@ export const GET = async (
       include: { notification: true },
       orderBy: { notification: { created_at: "desc" } },
     });
-    console.log(userNotifications);
     return NextResponse.json(userNotifications);
   } catch (error) {
     return NextResponse.json({

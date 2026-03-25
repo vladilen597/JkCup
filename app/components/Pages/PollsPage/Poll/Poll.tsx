@@ -97,7 +97,6 @@ const Poll = ({
 
         <div className="space-y-6">
           {options?.map((option: IPollOption) => {
-            console.log(option);
             const votes = stats[option.game.id] || 0;
             const percent = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 

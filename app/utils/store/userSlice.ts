@@ -40,7 +40,6 @@ const currentUserSlice = createSlice({
       state.currentUser = action.payload;
     },
     updateCurrentUser: (state, action: PayloadAction<IUser>) => {
-      console.log("update");
       state.currentUser = { ...state.currentUser, ...action.payload };
     },
     setUserInfo: (state, action: PayloadAction<IUser>) => {

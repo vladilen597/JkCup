@@ -27,8 +27,6 @@ const JoinTournamentButton = ({
 }: IJoinTournamentButtonProps) => {
   const { currentUser } = useAppSelector((state) => state.user);
 
-  console.log(!isTeamMode, !isFull, canJoinSingleTournament);
-
   if (!currentUser?.id) {
     return (
       <button

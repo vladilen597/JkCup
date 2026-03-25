@@ -74,7 +74,6 @@ const page = () => {
   const handleLoadUserStats = async () => {
     try {
       const { data } = await axios.get(`/api/users/${id}/stats`);
-      console.log(data);
       setStats(data);
     } catch (error) {
       toast.error(

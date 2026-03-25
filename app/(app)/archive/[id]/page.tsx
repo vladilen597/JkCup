@@ -163,7 +163,7 @@ const ArchiveTournamentPage = () => {
     : tournament.registrations.length || 0;
 
   // const isBracketMode = tournament?.is_bracket === true;
-  console.log(tournament);
+
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
 
