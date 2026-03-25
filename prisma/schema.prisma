@@ -16,7 +16,7 @@ model Profile {
   role        String   @default("guest")
   status      String   @default("active")
   created_at  DateTime @default(now()) @map("created_at")
-  who_invited String?  @default("none")
+  who_invited String   @default("none")
 
   discord_global_name String?
   discord_full_name   String?

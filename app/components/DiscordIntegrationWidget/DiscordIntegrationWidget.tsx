@@ -11,7 +11,6 @@ import ConnectDiscord from "../Integrations/Discord/ConnectDiscord/ConnectDiscor
 import { supabase } from "@/app/utils/supabase";
 import CustomSkeleton from "../Shared/CustomSkeleton/CustomSkeleton";
 import { useParams, useRouter } from "next/navigation";
-import { IUser } from "@/app/lib/types";
 
 const DiscordIntegrationWidget = () => {
   const { currentUser, userInfo } = useAppSelector((state) => state.user);

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 const ConnectDiscord = ({ user_id }: { user_id: string }) => {
   const linkDiscord = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.linkIdentity({
       provider: "discord",
       options: {
         redirectTo: `${window.location.origin}/users/${user_id}/integrations`,
@@ -13,7 +13,9 @@ const ConnectDiscord = ({ user_id }: { user_id: string }) => {
       },
     });
 
-    if (error) toast.error("Ошибка привязки: " + error.message);
+    if (error) {
+      toast.error("Ошибка привязки: " + error.message);
+    }
   };
 
   return (
