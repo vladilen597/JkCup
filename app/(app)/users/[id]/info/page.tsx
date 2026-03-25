@@ -83,8 +83,18 @@ const page = () => {
     }
   };
 
+  const handleLoadFaceitStats = async () => {
+    try {
+      const { data } = await axios.get(`/api/users/${id}/faceit`);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     handleLoadUserStats();
+    handleLoadFaceitStats();
   }, []);
 
   return (
