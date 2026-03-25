@@ -167,7 +167,7 @@ const page = () => {
                         userInfo?.games.map((game) => (
                           <div
                             key={game.id}
-                            className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
+                            className="flex bg-card p-1.5 rounded-lg items-center gap-2"
                           >
                             {game?.image_url && (
                               <Image
