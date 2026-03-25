@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
+  ChartNoAxesColumn,
   DoorClosed,
   LinkIcon,
   Settings,
@@ -35,6 +36,14 @@ const ProfileDropdown = ({
       >
         <User className="h-4 w-4" />
         Профиль
+      </Link>
+      <Link
+        href={`/users/${userId}/info`}
+        onClick={onClose}
+        className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-bg-primary hover:bg-primary/10 transition-colors cursor-pointer"
+      >
+        <ChartNoAxesColumn className="h-4 w-4" />
+        Обзор
       </Link>
       <Link
         href={`/users/${userId}/integrations`}

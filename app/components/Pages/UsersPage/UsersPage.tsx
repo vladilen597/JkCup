@@ -146,11 +146,11 @@ const UsersPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-          <Users className="h-6 w-6 text-primary" />
-          Список пользователей
+        <h2 className="flex items-center gap-2">
+          <Users className="w-8 h-8 text-primary" />
+          <span className="text-xl font-mono ">Список пользователей</span>
         </h2>
-        <div className="flex items-stretch gap-2">
+        <div className="mt-2 flex items-stretch gap-2">
           <SearchInput value={searchQuery} onChange={handleChangeQuery} />
           <CustomSelect
             containerClassName="min-w-40 border"

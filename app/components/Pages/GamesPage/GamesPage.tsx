@@ -76,9 +76,12 @@ const GamesPage = () => {
         transition={{ duration: 0.4, delay: 0.3 }}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold flex items-center gap-3">
-            <Gamepad2 className="h-6 w-6 text-primary" />
-            Список игр ({games.length})
+          <h2 className="flex items-center gap-2">
+            <Gamepad2 className="w-8 h-8 text-primary" />
+            <span className="text-xl font-mono ">Список игр</span>
+            <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {games.length}
+            </span>
           </h2>
           {(currentUser?.role === "admin" ||
             currentUser?.role === "superadmin") && (

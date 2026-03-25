@@ -1,8 +1,9 @@
-import { Camera } from "lucide-react";
-import { motion } from "framer-motion";
-import { ChangeEvent, useRef } from "react";
+import { Camera, X } from "lucide-react"; // Добавили X для закрытия
+import { motion, AnimatePresence } from "framer-motion";
+import { ChangeEvent, useRef, useState } from "react"; // Добавили useState
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { useParams } from "next/navigation";
+import CustomModal from "../../Shared/CustomModal/CustomModal";
 
 interface ProfileAvatarProps {
   imageUrl?: string;
@@ -25,12 +26,22 @@ const ProfileAvatar = ({
   onImageChange,
   size = "lg",
 }: ProfileAvatarProps) => {
+  const [isOpen, setIsOpen] = useState(false); // Состояние модалки
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentUser, userInfo } = useAppSelector((state) => state.user);
   const { id } = useParams();
 
+  const isMyProfile = currentUser?.id === id;
+  const currentImage = userInfo?.imageFile
+    ? URL.createObjectURL(userInfo.imageFile)
+    : imageUrl;
+
   const handleClick = () => {
-    if (isEditable) fileInputRef.current?.click();
+    if (isEditable && isMyProfile) {
+      fileInputRef.current?.click();
+    } else if (currentImage) {
+      setIsOpen(true); // Открываем модалку, если есть фото и это не наш профиль (или просто просмотр)
+    }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -52,50 +63,59 @@ const ProfileAvatar = ({
       .toUpperCase() || "U";
 
   return (
-    <motion.div
-      className={`relative ${sizeMap[size]} rounded-2xl overflow-hidden group cursor-pointer`}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      onClick={handleClick}
-    >
-      <div className="absolute -inset-0.5 rounded-2xl bg-card/50 animate-pulse-glow" />
+    <>
+      <motion.div
+        className={`relative ${sizeMap[size]} rounded-2xl overflow-hidden group cursor-pointer`}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={handleClick}
+      >
+        <div className="absolute -inset-0.5 rounded-2xl bg-card/50 animate-pulse-glow" />
 
-      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center">
-        {userInfo?.imageFile ? (
-          <img
-            src={URL.createObjectURL(userInfo.imageFile)}
-            alt={fullName}
-            className="w-full h-full object-cover"
+        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center">
+          {currentImage ? (
+            <img
+              src={currentImage}
+              alt={fullName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="font-bold text-muted-foreground select-none">
+              {initials}
+            </span>
+          )}
+
+          {isMyProfile && (
+            <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+              <Camera className="w-6 h-6 text-foreground" />
+            </div>
+          )}
+        </div>
+
+        {isEditable && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleChange}
           />
-        ) : imageUrl ? (
+        )}
+      </motion.div>
+
+      <AnimatePresence>
+        <CustomModal
+          isOpen={isOpen && !!currentImage}
+          onClose={() => setIsOpen(false)}
+        >
           <img
-            src={imageUrl}
+            src={currentImage}
             alt={fullName}
-            className="w-full h-full object-cover"
+            className="w-full h-auto max-h-[80vh] rounded-xl object-contain"
           />
-        ) : (
-          <span className="font-bold text-muted-foreground select-none">
-            {initials}
-          </span>
-        )}
-
-        {currentUser?.id === id && (
-          <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-            <Camera className="w-6 h-6 text-foreground" />
-          </div>
-        )}
-      </div>
-
-      {isEditable && (
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleChange}
-        />
-      )}
-    </motion.div>
+        </CustomModal>
+      </AnimatePresence>
+    </>
   );
 };
 

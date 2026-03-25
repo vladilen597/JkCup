@@ -77,7 +77,7 @@ const Layout = ({ children }: Props) => {
       <ToastContainer
         position="bottom-left"
         transition={Slide}
-        toastClassName="relative flex p-1 min-h-10 rounded-lg bg-card! font-inter! text-white!"
+        toastClassName="relative flex p-1 min-h-10 rounded-lg bg-card! font-mono! text-white!"
         progressClassName="bg-neon!"
         closeButton={({ closeToast }) => (
           <button
