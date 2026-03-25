@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Vote, X, Users } from "lucide-react";
@@ -6,12 +7,15 @@ import axios from "axios";
 import { supabase } from "@/app/utils/supabase";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useAppSelector } from "@/app/utils/store/hooks";
+import { format } from "date-fns";
 
-const PollWidget = ({ currentUser }: { currentUser: any }) => {
+const PollWidget = () => {
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isOpen, setIsOpen] = useState(false);
   const [pollData, setPollData] = useState<any>(null);
   const [userVoted, setUserVoted] = useState(false);
-  const [selectedGameId, setSelectedGameId] = useState<string | null>(null); // Храним ID выбранной игры
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -23,11 +27,14 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
           .from("global_votes")
           .select("game_id")
           .eq("poll_id", data.poll.id)
-          .eq("profile_id", currentUser.id)
+          .eq("profile_id", currentUser?.id)
           .maybeSingle();
 
         if (error) console.error("Ошибка проверки голоса:", error.message);
 
+        if (new Date(data.poll.ends_at).getTime() < Date.now()) {
+          setUserVoted(true);
+        }
         if (vote) {
           setUserVoted(true);
           setSelectedGameId(vote.game_id);
@@ -45,7 +52,7 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
       .channel("poll-changes")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "global_votes" }, // Слушаем все события для синхронизации
+        { event: "*", schema: "public", table: "global_votes" },
         () => fetchData(),
       )
       .subscribe();
@@ -59,7 +66,6 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
     if (!currentUser) return alert("Войдите, чтобы проголосовать");
     if (userVoted) return;
 
-    // Optimistic UI
     setUserVoted(true);
     setSelectedGameId(gameId);
     setPollData((prev: any) => ({
@@ -75,7 +81,7 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
       await axios.post(`/api/polls/active/vote`, {
         pollId: pollData.poll.id,
         gameId,
-        userId: currentUser.id,
+        userId: currentUser?.id,
       });
       fetchData();
     } catch (e) {
@@ -113,6 +119,15 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
               >
                 <X className="w-4 h-4" />
               </button>
+            </div>
+
+            <div className="px-5 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">
+                Заканчивается:
+              </span>
+              <span className="text-xs font-mono font-bold text-zinc-300">
+                {format(pollData.poll.ends_at, "dd.MM.yyyy HH:mm")}
+              </span>
             </div>
 
             <div className="p-4 space-y-2 max-h-100 overflow-y-auto custom-scrollbar">
@@ -177,7 +192,7 @@ const PollWidget = ({ currentUser }: { currentUser: any }) => {
                             {votes}
                           </span>
                         </div>
-                        {userVoted && (
+                        {(userVoted || pollData.poll.ends_at < Date.now()) && (
                           <span
                             className={cn(
                               "text-[11px] font-mono font-bold",

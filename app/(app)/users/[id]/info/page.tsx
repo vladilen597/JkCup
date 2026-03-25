@@ -64,6 +64,10 @@ const page = () => {
     registrations: number;
     team_membership: number;
     judged_tournaments: number;
+    archived_judged: number;
+    archived_participations: number;
+    won_archives: number;
+    won_tournaments: number;
   }>();
   const { id } = useParams();
 
@@ -153,13 +157,14 @@ const page = () => {
                 >
                   Был судьёй на
                 </motion.span>
-                <span className="">{stats?.judged_tournaments}</span>
+                <span className="">
+                  {stats?.judged_tournaments + stats?.archived_judged}
+                </span>
                 <span className="text-xs font-mono tracking-widest text-muted-foreground">
-                  {declOfNum(stats?.judged_tournaments, [
-                    "турнире",
-                    "турнирах",
-                    "турнирах",
-                  ])}
+                  {declOfNum(
+                    stats?.judged_tournaments + stats?.archived_judged,
+                    ["турнире", "турнирах", "турнирах"],
+                  )}
                 </span>
               </div>
             ) : (
@@ -180,11 +185,15 @@ const page = () => {
                   Участвовал в
                 </motion.span>
                 <span className="">
-                  {(stats?.team_membership || 0) + (stats?.registrations || 0)}
+                  {(stats?.team_membership || 0) +
+                    (stats?.registrations || 0) +
+                    (stats?.archived_participations || 0)}
                 </span>
                 <span className="text-xs font-mono tracking-widest text-muted-foreground">
                   {declOfNum(
-                    (stats?.team_membership || 0) + (stats?.registrations || 0),
+                    (stats?.team_membership || 0) +
+                      (stats?.registrations || 0) +
+                      (stats?.archived_participations || 0),
                     ["турнире", "турнирах", "турнирах"],
                   )}
                 </span>

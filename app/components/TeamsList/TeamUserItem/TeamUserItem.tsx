@@ -6,6 +6,7 @@ import { IUser } from "@/app/lib/types";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../../Shared/CustomButton/CustomButton";
+import { useState } from "react";
 
 interface ITeamUserItemProps extends IUser {
   isLoading: boolean;
@@ -30,6 +31,7 @@ const TeamUserItem = ({
   creator_id,
   onLeaveClick,
 }: ITeamUserItemProps) => {
+  const [isLeaveLoading, setIsLeaveLoading] = useState(false);
   const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
 
@@ -37,6 +39,12 @@ const TeamUserItem = ({
 
   const handleClickLine = () => {
     router.push("/users/" + id);
+  };
+
+  const handleClickLeave = async () => {
+    setIsLeaveLoading(true);
+    await onLeaveClick();
+    setIsLeaveLoading(false);
   };
 
   return (
@@ -65,9 +73,9 @@ const TeamUserItem = ({
             <CustomButton
               className="p-1 rounded-sm bg-red-600/20 border border-red-600! text-red-600"
               buttonType={BUTTON_TYPES.DANGER}
-              isLoading={isLoading}
+              isLoading={isLeaveLoading}
               icon={<X className="w-4 h-4" />}
-              onClick={onLeaveClick}
+              onClick={handleClickLeave}
             />
           )}
 
@@ -75,9 +83,9 @@ const TeamUserItem = ({
             <CustomButton
               className="p-1 rounded-sm bg-red-600/20 border border-red-600! text-red-600"
               buttonType={BUTTON_TYPES.DANGER}
-              isLoading={isLoading}
+              isLoading={isLeaveLoading}
               icon={<DoorOpen className="w-4 h-4" />}
-              onClick={onLeaveClick}
+              onClick={handleClickLeave}
             />
           )}
         </>

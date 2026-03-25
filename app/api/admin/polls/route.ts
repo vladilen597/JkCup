@@ -19,7 +19,7 @@ export const POST = async (req: Request) => {
           create: game_ids.map((id: string) => ({ game_id: id })),
         },
       },
-      include: { options: { include: { game: true } } },
+      include: { options: { include: { game: true } }, votes: true },
     });
 
     return NextResponse.json(poll);

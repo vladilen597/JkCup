@@ -13,7 +13,11 @@ export const POST = async (req: Request) => {
         },
       },
       update: { game_id: gameId },
-      create: { poll_id: pollId, profile_id: userId, game_id: gameId },
+      create: {
+        poll_id: pollId,
+        profile_id: userId,
+        game_id: gameId,
+      },
     });
 
     return NextResponse.json(vote);

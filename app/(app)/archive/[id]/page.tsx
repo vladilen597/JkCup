@@ -21,6 +21,7 @@ import {
   User,
   Trophy,
   Clock,
+  ShieldUser,
 } from "lucide-react";
 import UserList from "@/app/components/UserList/UserList";
 import { useParams, useRouter } from "next/navigation";
@@ -337,6 +338,13 @@ const ArchiveTournamentPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
+        <div className="flex items-center gap-2">
+          <ShieldUser className="w-5 h-5 text-primary" />
+          <span className="text-sm font-mono ">Судьи</span>
+          <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            {tournament.judges.length}
+          </span>
+        </div>
         {tournament.judges.length > 0 && (
           <JudgeList judges={tournament.judges} hideDelete />
         )}
@@ -354,8 +362,8 @@ const ArchiveTournamentPage = () => {
             {isTeamMode ? "Команды" : "Участники"}
           </span>
           <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-            ({filledSlots} /{" "}
-            {isTeamMode ? tournament.max_teams : tournament.max_players})
+            {filledSlots} /{" "}
+            {isTeamMode ? tournament.max_teams : tournament.max_players}
           </span>
         </div>
 

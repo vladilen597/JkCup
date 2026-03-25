@@ -6,9 +6,6 @@ export const GET = async () => {
     const poll = await prisma.globalPoll.findFirst({
       where: {
         is_active: true,
-        ends_at: {
-          gt: new Date(),
-        },
       },
       include: {
         options: {

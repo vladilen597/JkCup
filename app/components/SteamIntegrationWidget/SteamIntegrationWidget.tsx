@@ -169,7 +169,7 @@ const SteamIntegrationWidget = () => {
                   transition={{ delay: 0.15, duration: 0.4 }}
                 >
                   <CustomButton
-                    className="w-full justify-center border-white! hover:bg-blue-500/5 text-white"
+                    className="w-full justify-center border-white! hover:bg-neutral-500/5 bg-transparent text-white"
                     label="Привязать аккаунт Steam"
                     buttonStyle={BUTTON_STYLES.OUTLINE}
                     icon={<Steam className="h-5 w-5 text-white" />}

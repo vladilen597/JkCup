@@ -1,15 +1,15 @@
 "use client";
 
+import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { IGame } from "@/app/lib/types";
+import CustomInput from "../Shared/CustomInput/CustomInput";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
+import { IGame } from "@/app/lib/types";
+import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
-import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
-import CustomInput from "../Shared/CustomInput/CustomInput";
+import axios from "axios";
 
 const CreatePollModal = ({ onClose, onCreated }: any) => {
   const [title, setTitle] = useState("Следующая игра на турнире");
@@ -36,8 +36,6 @@ const CreatePollModal = ({ onClose, onCreated }: any) => {
       prev.includes(id) ? prev.filter((gid) => gid !== id) : [...prev, id],
     );
   };
-
-  console.log(endsAt);
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();

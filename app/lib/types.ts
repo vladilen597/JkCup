@@ -206,7 +206,7 @@ export interface IRound {
   tournament_id: string;
   number: number;
   name: string | null;
-  matches: IMatch[]; // Проверь, что тут именно IMatch[]
+  matches: IMatch[];
 }
 
 export interface IMatch {
@@ -215,7 +215,7 @@ export interface IMatch {
   status: string;
   next_match_id: string | null;
   winner_id: string | null;
-  metadata: any | null; // Здесь можно хранить { info: string }
+  metadata: any | null;
   participants: IMatchParticipant[];
 }
 
@@ -227,6 +227,30 @@ export interface IMatchParticipant {
   is_winner: boolean;
   profile_id: string | null;
   team_id: string | null;
-  profile?: IUser; // Данные игрока из Prisma include
-  team?: ITeam; // Данные команды из Prisma include
+  profile?: IUser;
+  team?: ITeam;
+}
+
+export interface IGlobalPoll {
+  id: string;
+  title: string;
+  is_active: boolean;
+  ends_at: string;
+  created_at: string;
+  options: IPollOption[];
+  votes: IVote[];
+}
+
+export interface IPollOption {
+  id: string;
+  poll_id: string;
+  game_id: string;
+  game: IGame;
+}
+
+export interface IVote {
+  poll_id: string;
+  profile_id: string;
+  game_id: string;
+  updated_at: string;
 }
