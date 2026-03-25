@@ -158,11 +158,13 @@ const page = () => {
                   Был судьёй на
                 </motion.span>
                 <span className="">
-                  {stats?.judged_tournaments + stats?.archived_judged}
+                  {(stats?.judged_tournaments || 0) +
+                    (stats?.archived_judged || 0)}
                 </span>
                 <span className="text-xs font-mono tracking-widest text-muted-foreground">
                   {declOfNum(
-                    stats?.judged_tournaments + stats?.archived_judged,
+                    (stats?.judged_tournaments || 0) +
+                      (stats?.archived_judged || 0),
                     ["турнире", "турнирах", "турнирах"],
                   )}
                 </span>
