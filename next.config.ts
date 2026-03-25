@@ -38,6 +38,10 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "://faceit.com", // Именно этот хост использует FACEIT для картинок уровней
+      },
     ],
   },
   async redirects() {

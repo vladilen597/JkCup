@@ -1,5 +1,6 @@
 "use client";
 
+import FaceitInfoBlock from "@/app/components/FaceitInfoBlock/FaceitInfoBlock";
 import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import axios from "axios";
@@ -82,19 +83,8 @@ const page = () => {
       );
     }
   };
-
-  const handleLoadFaceitStats = async () => {
-    try {
-      const { data } = await axios.get(`/api/users/${id}/faceit`);
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     handleLoadUserStats();
-    handleLoadFaceitStats();
   }, []);
 
   return (
@@ -215,6 +205,13 @@ const page = () => {
               </div>
             )}
           </div>
+          {userInfo?.id ? (
+            <FaceitInfoBlock />
+          ) : (
+            <div className="leading-0 block h-24">
+              <CustomSkeleton className="h-full" />
+            </div>
+          )}
         </div>
       </motion.section>
     </section>
