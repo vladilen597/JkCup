@@ -21,11 +21,11 @@ import {
 const page = () => {
   const { userInfo } = useAppSelector((state) => state.user);
   const { currentUser } = useAppSelector((state) => state.user);
-  const params = useParams();
-  const [steamLinkError, setSteamLinkError] = useState("");
-  const isCurrentUser = params.id === currentUser?.id;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
+
+  const params = useParams();
+  const isCurrentUser = params.id === currentUser?.id;
 
   const handleUpdateInput = (event: ChangeEvent<HTMLInputElement>) => {
     dispatch(

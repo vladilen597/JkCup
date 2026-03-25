@@ -5,12 +5,7 @@ import Image from "next/image";
 import { Check, ExternalLink, MousePointer2, Unlink } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  setCurrentUser,
-  setUserInfo,
-  updateCurrentUser,
-  updateUserInfo,
-} from "@/app/utils/store/userSlice";
+import { setCurrentUser, setUserInfo } from "@/app/utils/store/userSlice";
 import { toast } from "react-toastify";
 import ConnectDiscord from "../Integrations/Discord/ConnectDiscord/ConnectDiscord";
 import { supabase } from "@/app/utils/supabase";
@@ -79,10 +74,10 @@ const DiscordIntegrationWidget = () => {
   };
 
   useEffect(() => {
-    if (!userInfo.discord_id) {
+    if (!userInfo.discord_id && currentUser?.id === userInfo.id) {
       syncDiscordData();
     }
-  }, [userInfo.discord_id]);
+  }, [userInfo.discord_id, currentUser?.id, userInfo.id]);
 
   const isConnected = !!userInfo.discord_full_name && !!userInfo.discord_id;
   const isOwnProfile = currentUser?.id === userInfo.id;
