@@ -10,13 +10,15 @@ import { toast } from "react-toastify";
 import ConnectDiscord from "../Integrations/Discord/ConnectDiscord/ConnectDiscord";
 import { supabase } from "@/app/utils/supabase";
 import CustomSkeleton from "../Shared/CustomSkeleton/CustomSkeleton";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { IUser } from "@/app/lib/types";
 
 const DiscordIntegrationWidget = () => {
   const { currentUser, userInfo } = useAppSelector((state) => state.user);
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const params = useParams();
 
   const handleUnlink = async () => {
     setIsUnlinkLoading(true);
@@ -38,7 +40,7 @@ const DiscordIntegrationWidget = () => {
   };
 
   const syncDiscordData = async () => {
-    if (currentUser?.id !== userInfo?.id) return;
+    if (currentUser?.id !== params?.id) return;
 
     const {
       data: { user },
@@ -76,7 +78,7 @@ const DiscordIntegrationWidget = () => {
   };
 
   useEffect(() => {
-    if (!userInfo.discord_id && currentUser?.id === userInfo.id) {
+    if (!userInfo.discord_id && currentUser?.id === params.id) {
       syncDiscordData();
     }
   }, [userInfo.discord_id, currentUser?.id, userInfo.id]);
