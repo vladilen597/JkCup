@@ -90,7 +90,7 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
       {currentUser.id !== user.id && (
         <button
           type="button"
-          className="flex items-center gap-2 border border-neon p-2 rounded-lg text-sm"
+          className="flex items-center gap-2 border border-neon p-2 rounded-lg text-sm cursor-pointer hover:bg-primary/5"
           onClick={() => handleAddUser(user)}
         >
           {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}

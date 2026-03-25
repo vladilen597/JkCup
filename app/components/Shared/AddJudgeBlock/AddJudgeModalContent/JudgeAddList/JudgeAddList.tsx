@@ -1,8 +1,6 @@
 import JudgeAddItem from "./JudgeAddItem/JudgeAddItem";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
-import Skeleton from "react-loading-skeleton";
 import UserShimmer from "@/app/components/UserShimmer/UserShimmer";
 import { IUser } from "@/app/lib/types";
 import CustomButton, { BUTTON_TYPES } from "../../../CustomButton/CustomButton";

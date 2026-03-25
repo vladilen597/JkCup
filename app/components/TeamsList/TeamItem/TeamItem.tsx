@@ -5,7 +5,7 @@ import {
   removeTeam,
   removeTeamParticipant,
 } from "@/app/utils/store/tournamentsSlice";
-import { Lock, Trash2, X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import CustomModal from "../../Shared/CustomModal/CustomModal";
 import UserAddList from "./UserAddList/UserAddList";
