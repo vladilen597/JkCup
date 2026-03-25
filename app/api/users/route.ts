@@ -14,7 +14,12 @@ export const GET = async () => {
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { error: "Ошибка при получении игр" },
+      {
+        error:
+          error.response?.error ||
+          error.response?.data ||
+          "Ошибка при получении пользователей",
+      },
       { status: 500 },
     );
   }

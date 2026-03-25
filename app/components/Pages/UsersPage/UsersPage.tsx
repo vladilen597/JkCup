@@ -66,7 +66,7 @@ const UsersPage = () => {
       setUsers(data || []);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Ошибка загрузки пользователей");
+      setError(err.respose?.data?.message || "Ошибка загрузки пользователей");
     } finally {
       setLoading(false);
     }
@@ -114,10 +114,6 @@ const UsersPage = () => {
       (selectedRole.value === "any" || selectedRole.value === user?.role),
   );
 
-  if (error) {
-    return <div className="text-center py-12 text-destructive">{error}</div>;
-  }
-
   return (
     <main className="max-w-5xl mx-auto w-full px-4 py-12">
       <PageHero
@@ -159,6 +155,10 @@ const UsersPage = () => {
             onChange={setSelectedRole}
           />
         </div>
+
+        {error && (
+          <div className="text-center py-12 text-destructive">{error}</div>
+        )}
 
         <ul className="mt-2 flex flex-col gap-2">
           {loading ? (

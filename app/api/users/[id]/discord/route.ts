@@ -17,8 +17,8 @@ export const PATCH = async (
     const updated = await prisma.profile.update({
       where: { id },
       data: {
-        discord_global_name: discord_global_name,
-        discord_full_name: discord_full_name,
+        discord_global_name,
+        discord_full_name,
         discord_id,
         discord_avatar,
       },
