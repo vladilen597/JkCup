@@ -50,14 +50,11 @@ const DiscordIntegrationWidget = () => {
     );
 
     if (discordData) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const discordId = user?.user_metadata.provider_id;
-      const discordGlobalName = user?.user_metadata.custom_claims.global_name;
-      const discordAvatar = user?.user_metadata.avatar_url;
-      const discordName = user?.user_metadata.full_name;
+      const discordId = discordData?.id;
+      const discordGlobalName =
+        discordData.identity_data.custom_claims.global_name;
+      const discordAvatar = discordData.identity_data.avatar_url;
+      const discordName = discordData.identity_data.full_name;
 
       try {
         const { data } = await axios.patch(`/api/users/${user.id}/discord`, {
@@ -72,6 +69,7 @@ const DiscordIntegrationWidget = () => {
         router.refresh();
       } catch (e) {
         console.error("Ошибка синхронизации", e);
+        323389651429883914;
       }
     }
   };

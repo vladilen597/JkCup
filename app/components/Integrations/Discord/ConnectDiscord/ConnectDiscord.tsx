@@ -5,6 +5,10 @@ import { toast } from "react-toastify";
 
 const ConnectDiscord = ({ user_id }: { user_id: string }) => {
   const linkDiscord = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     const { data, error } = await supabase.auth.linkIdentity({
       provider: "discord",
       options: {
