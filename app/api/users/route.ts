@@ -18,6 +18,8 @@ export const GET = async () => {
         error:
           error.response?.error ||
           error.response?.data ||
+          error.response?.data?.message ||
+          error.response?.data?.error ||
           "Ошибка при получении пользователей",
       },
       { status: 500 },
