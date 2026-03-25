@@ -38,6 +38,8 @@ const DiscordIntegrationWidget = () => {
   };
 
   const syncDiscordData = async () => {
+    if (currentUser?.id !== userInfo?.id) return;
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
