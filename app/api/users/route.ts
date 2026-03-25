@@ -15,14 +15,9 @@ export const GET = async () => {
     console.log(error);
     return NextResponse.json(
       {
-        error:
-          error.response?.error ||
-          error.response?.data ||
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Ошибка при получении пользователей",
+        error: error || "Ошибка при получении пользователей",
       },
-      { status: 500 },
+      { status: error.response.status },
     );
   }
 };
