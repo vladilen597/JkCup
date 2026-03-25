@@ -44,7 +44,7 @@ const DarkDateTimePicker: React.FC<DateTimePickerProps> = ({
       <div
         onClick={() => inputRef.current?.showPicker()}
         className="w-full group relative flex items-center justify-between px-2 py-1.5 
-                   bg-muted border border-border rounded-2xl shadow-2xl cursor-pointer
+                   bg-background border border-border rounded-2xl shadow-2xl cursor-pointer
                    transition-all duration-300"
       >
         <div className="flex items-center gap-3">

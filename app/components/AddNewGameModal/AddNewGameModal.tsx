@@ -1,15 +1,13 @@
 import { useAppDispatch } from "@/app/utils/store/hooks";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { AlertCircle, Camera, Gamepad2 } from "lucide-react";
-import { ChangeEvent, SubmitEvent, useState } from "react";
-import { db } from "@/app/utils/firebase";
-import { motion } from "motion/react";
+import { Camera, Gamepad2 } from "lucide-react";
+import { ChangeEvent, useState } from "react";
 import CustomButton, {
   BUTTON_TYPES,
 } from "../Shared/CustomButton/CustomButton";
 import Image from "next/image";
 import { addGame } from "@/app/utils/store/gamesSlice";
-import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import ErrorBlock from "../Shared/ErrorBlock/ErrorBlock";
 
 interface IAddNewGameModalProps {
   onClose: () => void;
@@ -17,7 +15,7 @@ interface IAddNewGameModalProps {
 
 const AddNewGameModal = ({ onClose }: IAddNewGameModalProps) => {
   const [name, setName] = useState("");
-  const [image, setImage] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const dispatch = useAppDispatch();
@@ -27,54 +25,37 @@ const AddNewGameModal = ({ onClose }: IAddNewGameModalProps) => {
   };
 
   const handleChangeImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      if (file.size > 1048487) {
-        alert("Файл слишком большой");
-        return;
-      }
-      const reader = new FileReader();
-
-      reader.readAsDataURL(file);
-
-      reader.onload = (event) => {
-        const img = new window.Image();
-        img.src = event.target?.result as string;
-
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 200;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          const compressedBase64 = canvas.toDataURL("image/png", 0.7);
-
-          setImage(compressedBase64);
-        };
-      };
+    if (event.target.files?.[0]) {
+      setFile(event.target.files[0]);
     }
   };
 
-  const handleSubmit = async (e: SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!name || !file) {
+      setError("Заполните все поля");
+      return;
+    }
+
     setIsLoading(true);
-    const id = uuidv4();
+    setError("");
+
     try {
-      const newGameRef = doc(collection(db, "games"));
-      await setDoc(newGameRef, {
-        id: newGameRef.id,
-        name,
-        image,
-      });
-      dispatch(addGame({ id, name, image, uid: newGameRef.id }));
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("file", file);
+
+      const { data } = await axios.post("/api/games", formData);
+
+      if (data) {
+        dispatch(addGame(data));
+      }
+
       onClose();
-    } catch (error) {
-      console.log(error);
-      setError(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -107,24 +88,19 @@ const AddNewGameModal = ({ onClose }: IAddNewGameModalProps) => {
             />
             <Camera />
           </div>
-          {image && (
+          {file && (
             <Image
               width={64}
               height={64}
               className="w-16 h-16 object-cover"
-              src={image as string}
+              src={URL.createObjectURL(file)}
               alt="Profile picture"
             />
           )}
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4" />
-          {error}
-        </div>
-      )}
+      {error && <ErrorBlock error={error} />}
       <div className="flex justify-end gap-3 mt-4">
         <CustomButton
           label="Отмена"

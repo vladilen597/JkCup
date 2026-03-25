@@ -6,7 +6,7 @@ interface IBadgeProps {
 const Badge = ({ text, className }: IBadgeProps) => {
   return (
     <div
-      className={`shrink-0 p-2 py-0.5 rounded-full text-[13px] font-bold uppercase tracking-wider font-mono ${className}`}
+      className={`shrink-0 p-2 py-0.5 rounded-full text-[13px] uppercase tracking-wider font-mono ${className}`}
     >
       {text}
     </div>

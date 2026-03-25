@@ -1,96 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, or, query, where } from "firebase/firestore";
-import admin from "firebase-admin";
-import { db as firebaseDB } from "@/app/utils/firebase";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-  });
-}
-
-const rolePriority: Record<string, number> = {
-  superadmin: 1,
-  admin: 2,
-};
+import { prisma } from "@/lib/prisma";
 
 export const GET = async () => {
   try {
-    const usersQuery = query(collection(firebaseDB, "users"));
-    const snapshot = await getDocs(usersQuery);
-
-    const users = snapshot.docs.map((doc) => ({
-      uid: doc.id,
-      displayName: doc.data().displayName || "Anonymous",
-      photoUrl: doc.data().photoUrl || null,
-      discord: doc.data().discord || "",
-      role: doc.data().role,
-      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || null,
-      steamLink: doc.data().steamLink,
-      steamDisplayName: doc.data().steamDisplayName,
-      games: doc.data().games,
-      status: doc.data().status,
-    }));
-
-    users.sort((a, b) => {
-      const priorityA = rolePriority[a.role] || 99;
-      const priorityB = rolePriority[b.role] || 99;
-      return priorityA - priorityB;
-    });
-
-    return NextResponse.json({
-      users,
-      count: users.length,
-    });
-  } catch (error: any) {
-    console.error(
-      "Error fetching users from Firestore:",
-      error.code,
-      error.message,
-      error.stack,
-    );
-
-    return NextResponse.json(
-      {
-        error: "Failed to load users",
-        details: error.message || "Unknown error",
+    const users = await prisma.profile.findMany({
+      orderBy: {
+        role: "desc",
       },
+    });
+
+    return NextResponse.json(users);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: "Ошибка при получении игр" },
       { status: 500 },
     );
   }
 };
 
-const db = admin.firestore();
-const auth = admin.auth();
+// export const DELETE = async (req: NextRequest) => {
+//   try {
+//     const userId = req.nextUrl.searchParams.get("userId");
 
-export const DELETE = async (req: NextRequest) => {
-  try {
-    const userId = req.nextUrl.searchParams.get("userId");
+//     if (!userId) {
+//       return NextResponse.json(
+//         { message: "No user id provided" },
+//         { status: 400 },
+//       );
+//     }
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: "No user id provided" },
-        { status: 400 },
-      );
-    }
+//     await auth.deleteUser(userId);
 
-    await auth.deleteUser(userId);
+//     await db.collection("users").doc(userId).delete();
 
-    await db.collection("users").doc(userId).delete();
-
-    return NextResponse.json(
-      { message: "Пользователь успешно удалён" },
-      { status: 200 },
-    );
-  } catch (error: any) {
-    console.error("Ошибка при удалении:", error);
-    return NextResponse.json(
-      { message: "Ошибка сервера", error: error.message },
-      { status: 500 },
-    );
-  }
-};
+//     return NextResponse.json(
+//       { message: "Пользователь успешно удалён" },
+//       { status: 200 },
+//     );
+//   } catch (error: any) {
+//     console.error("Ошибка при удалении:", error);
+//     return NextResponse.json(
+//       { message: "Ошибка сервера", error: error.message },
+//       { status: 500 },
+//     );
+//   }
+// };

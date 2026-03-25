@@ -2,10 +2,12 @@ import { ChevronDown, X } from "lucide-react";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { IGame, setGames } from "@/app/utils/store/gamesSlice";
+import { setGames } from "@/app/utils/store/gamesSlice";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import { IGame } from "@/app/lib/types";
+import axios from "axios";
+import CustomSkeleton from "../Shared/CustomSkeleton/CustomSkeleton";
+import { cn } from "@/lib/utils";
 
 interface IMultipleGameSelectProps {
   value: IGame[];
@@ -13,7 +15,7 @@ interface IMultipleGameSelectProps {
   triggerClassName?: string;
   onChange: (value: IGame) => void;
   handleDelete: (gameId: string) => void;
-  required?: boolean;
+  isLoading?: boolean;
   error?: boolean;
 }
 
@@ -50,7 +52,7 @@ const MultipleGameSelect = ({
   containerClassName,
   onChange,
   handleDelete,
-  required = false,
+  isLoading,
   error = false,
 }: IMultipleGameSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,11 +68,7 @@ const MultipleGameSelect = ({
 
   const handleLoadGames = async () => {
     try {
-      const q = query(collection(db, "games"));
-      const snap = getDocs(q);
-      const data = (await snap).docs.map((doc) => ({
-        ...(doc.data() as IGame),
-      }));
+      const { data } = await axios.get("/api/games");
       dispatch(setGames(data));
     } catch (err: any) {
       console.error(err);
@@ -84,7 +82,11 @@ const MultipleGameSelect = ({
   const borderClass = error
     ? "border-red-500 focus:border-red-500"
     : "border-border";
-  console.log(games);
+
+  if (isLoading) {
+    return <CustomSkeleton height={46} />;
+  }
+
   return (
     <motion.div
       ref={containerRef}
@@ -92,21 +94,25 @@ const MultipleGameSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block border relative bg-muted rounded-lg ${borderClass} ${containerClassName}`}
+      className={cn(
+        "block border relative bg-background rounded-lg cursor-pointer",
+        containerClassName,
+        borderClass,
+      )}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center p-1.5 justify-between text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          {value.length ? (
+          {value?.length ? (
             value?.map((game) => (
               <div
                 key={game.id}
-                className="flex bg-background/50 p-1.5 rounded-lg items-center gap-2"
+                className="flex bg-card p-1.5 rounded-lg items-center gap-2"
               >
-                {game?.image && (
+                {game?.image_url && (
                   <Image
                     className="rounded object-cover h-4 w-4"
-                    src={game.image}
+                    src={game.image_url}
                     width={16}
                     height={16}
                     alt="Game image"
@@ -128,7 +134,7 @@ const MultipleGameSelect = ({
               </div>
             ))
           ) : (
-            <div className="flex items-center p-1">Выберите игры</div>
+            <div className="flex items-center p-1.75">Выберите игры</div>
           )}
         </div>
         <motion.div
@@ -144,7 +150,7 @@ const MultipleGameSelect = ({
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            className="w-full box-border text-sm absolute top-full right-0 bg-muted rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none max-h-60 overflow-y-auto"
+            className="border-b border-x w-full text-sm absolute top-full bg-card rounded-bl-lg rounded-br-lg overflow-hidden z-10 shadow-2xl select-none max-h-60 overflow-y-auto"
             variants={contentVariants}
             initial="collapsed"
             animate="expanded"
@@ -176,7 +182,7 @@ const MultipleGameSelect = ({
                   >
                     <Image
                       className="rounded h-4 w-4 object-cover"
-                      src={game.image}
+                      src={game.image_url}
                       width={16}
                       height={16}
                       alt={game.name}

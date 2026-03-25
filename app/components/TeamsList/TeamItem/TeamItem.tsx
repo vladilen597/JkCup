@@ -1,9 +1,11 @@
-import { useAppSelector } from "@/app/utils/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import JoinTeamButton from "../JoinTeamButton/JoinTeamButton";
-import { doc, updateDoc } from "firebase/firestore";
-import { ITeam } from "@/app/utils/store/tournamentsSlice";
-import { Lock, Trash2 } from "lucide-react";
-import { db } from "@/app/utils/firebase";
+import {
+  addTeamParticipant,
+  removeTeam,
+  removeTeamParticipant,
+} from "@/app/utils/store/tournamentsSlice";
+import { Lock, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import CustomModal from "../../Shared/CustomModal/CustomModal";
 import UserAddList from "./UserAddList/UserAddList";
@@ -12,6 +14,9 @@ import CustomButton, {
   BUTTON_TYPES,
 } from "../../Shared/CustomButton/CustomButton";
 import TeamUserList from "../TeamUserList/TeamUserList";
+import { ITeam } from "@/app/lib/types";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 interface ITeamItemProps extends ITeam {
   filled: number;
@@ -23,22 +28,23 @@ interface ITeamItemProps extends ITeam {
 }
 
 const TeamItem = ({
-  uid,
+  id,
   name,
   is_private,
   filled,
   players_per_team,
-  usersIds,
-  creator_uid,
+  members,
+  creator_id,
   canJoin,
   tournament_status,
-  teams,
   occupiedUserIds,
 }: ITeamItemProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const { id: tournamentId }: { id: string } = useParams();
   const [isAddTeammateModalOpen, setIsAddTeammateModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   const handleOpenAddTeammateModal = () => {
     setIsAddTeammateModalOpen(true);
@@ -50,94 +56,91 @@ const TeamItem = ({
 
   const isEnoughRole =
     currentUser.role === "admin" || currentUser.role === "superadmin";
-  const isMyTeam = usersIds.includes(currentUser.uid);
+  const isMyTeam = members.some(
+    (member) => member.profile_id === currentUser.id,
+  );
 
   const handleDeleteTeam = async (teamId: string) => {
+    setIsDeleteLoading(true);
     try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-      const teamToDelete = teams.find((team) => team.uid === teamId);
+      await axios.delete(`/api/tournaments/${tournamentId}/teams/${teamId}`);
 
-      if (teamToDelete) {
-        await updateDoc(tournamentRef, {
-          teams: teams.filter((team) => team.uid !== teamId),
-        });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+      dispatch(removeTeam({ tournamentId, teamId }));
 
-  const handleLeaveTeam = async (clickedUserUid: string) => {
-    try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-
-      const updatedTeams = teams.map((team) => {
-        if (team.uid === uid) {
-          return {
-            ...team,
-            usersIds: team.usersIds.filter(
-              (userId) => userId !== clickedUserUid,
-            ),
-          };
-        } else {
-          return team;
-        }
-      });
-
-      await updateDoc(tournamentRef, {
-        teams: updatedTeams,
-      });
-    } catch (error) {
-      console.log(error);
+      toast.success("Команда удалена");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Ошибка при удалении команды");
+    } finally {
+      setIsDeleteLoading(false);
     }
   };
 
   const handleJoinTeam = async () => {
     setIsLoading(true);
     try {
-      const tournamentRef = doc(db, "tournaments", tournamentId);
-
-      await updateDoc(tournamentRef, {
-        teams: teams.map((team) => {
-          if (team.uid === uid) {
-            return {
-              ...team,
-              usersIds: [...team.usersIds, currentUser.uid],
-            };
-          }
-          return team;
-        }),
+      const { data: newMember } = await axios.post(`/api/teams/${id}/members`, {
+        userId: currentUser.id,
       });
+
+      dispatch(
+        addTeamParticipant({
+          tournamentId,
+          teamId: id,
+          member: newMember,
+        }),
+      );
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLeaveTeam = async (
+    teamMemberRecordId: string,
+    profileId: string,
+  ) => {
+    try {
+      await axios.delete(`/api/tournaments/${tournamentId}/teams/members`, {
+        data: { teamMemberRecordId },
+      });
+
+      dispatch(
+        removeTeamParticipant({
+          tournamentId,
+          teamId: id,
+          userId: profileId,
+        }),
+      );
+    } catch (error) {
+      console.error(error);
     }
   };
 
   return (
     <>
       <li
-        key={uid}
-        className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 hover:border-primary/50 transition-all"
+        key={id}
+        className="bg-gray-800/50 rounded-xl p-5 hover:border-primary/50 transition-all"
       >
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-bold text-lg">
-            {name || `Команда ${uid.slice(0, 6)}`}
+            {name || `Команда ${id.slice(0, 6)}`}
           </h3>
           <div className="flex items-center gap-2">
             {is_private && <Lock className="w-4 h-4 text-neutral-500" />}
             <span className="text-sm text-gray-400">
               {filled} / {players_per_team}
             </span>
-            {((creator_uid === currentUser.uid &&
-              tournament_status === "open") ||
+            {((creator_id === currentUser.id && tournament_status === "open") ||
               isEnoughRole) && (
               <CustomButton
                 className="p-1 rounded-sm bg-red-600/20 border border-red-600!"
                 buttonType={BUTTON_TYPES.DANGER}
-                icon={<Trash2 className="w-4 h-4 text-red-600" />}
-                onClick={() => handleDeleteTeam(uid)}
+                isLoading={isDeleteLoading}
+                icon={<X className="w-4 h-4 text-red-600" />}
+                onClick={() => handleDeleteTeam(id)}
               />
             )}
           </div>
@@ -145,22 +148,24 @@ const TeamItem = ({
 
         <div className="space-y-2">
           <TeamUserList
-            usersIds={usersIds}
+            members={members}
+            isMyTeam={isMyTeam}
             isLoading={isLoading}
-            isCurrentUserCreator={currentUser.uid === creator_uid}
+            creator_id={creator_id}
+            isCurrentUserCreator={currentUser.id === creator_id}
             onLeaveClick={handleLeaveTeam}
             canLeave={tournament_status === "open"}
           />
           {tournament_status === "open" && (
             <JoinTeamButton
               isTeamPrivate={is_private}
-              isCurrentUserCreator={currentUser.uid === creator_uid}
+              isCurrentUserCreator={currentUser.id === creator_id}
               isLoading={isLoading}
               onJoinClick={handleJoinTeam}
               handleClickInvite={handleOpenAddTeammateModal}
               isMyTeam={isMyTeam}
               canJoin={canJoin}
-              isTeamFull={players_per_team === usersIds.length}
+              isTeamFull={players_per_team === members.length}
             />
           )}
         </div>
@@ -170,7 +175,7 @@ const TeamItem = ({
         onClose={handleCloseAddTeammateModal}
       >
         <UserAddList
-          teamId={uid}
+          teamId={id}
           handleClose={handleCloseAddTeammateModal}
           occupiedUserIds={occupiedUserIds}
         />

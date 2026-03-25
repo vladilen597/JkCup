@@ -1,11 +1,5 @@
+import { IGame } from "@/app/lib/types";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-export interface IGame {
-  uid: string;
-  id: string;
-  name: string;
-  image: string;
-}
 
 const initialState: { games: IGame[] } = {
   games: [],
@@ -19,7 +13,7 @@ const gamesSlice = createSlice({
       state.games = action.payload;
     },
     addGame: (state, action: PayloadAction<IGame>) => {
-      state.games = [...state.games, action.payload];
+      state.games = [action.payload, ...state.games];
     },
     deleteGame: (state, action: PayloadAction<string>) => {
       state.games = state.games.filter((game) => game.id !== action.payload);

@@ -1,78 +1,83 @@
 import AddJudgeModalContent from "./AddJudgeModalContent/AddJudgeModalContent";
-import { ITeam } from "@/app/utils/store/tournamentsSlice";
 import CustomModal from "../CustomModal/CustomModal";
 import { Plus, ShieldUser } from "lucide-react";
 import { useState } from "react";
-import { IUser } from "@/app/utils/store/userSlice";
-import JudgeItem from "./JudgeItem/JudgeItem";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import CustomButton from "../CustomButton/CustomButton";
 import JudgeList from "./JudgeList/JudgeList";
+import { IUser } from "@/app/lib/types";
+
+import {
+  ITournament,
+  ITeam,
+  ITournamentRegistration,
+  ITournamentJudge,
+} from "@/app/lib/types";
 
 const AddJudgeBlock = ({
   isTeamTournament,
   tournamentStatus,
-  judgesIds,
-  teams,
-  usersIds,
+  judges = [],
+  teams = [],
+  registrations = [],
 }: {
   isTeamTournament: boolean;
   tournamentStatus: string;
-  judgesIds: string[];
+  judges: ITournamentJudge[];
   teams: ITeam[];
-  usersIds: string[];
+  registrations: ITournamentRegistration[];
 }) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const [isAddJudgeModalOpen, setIsAddJudgeModalOpen] = useState(false);
 
-  const occupiedUserIds = new Set(
-    isTeamTournament
-      ? teams.flatMap((team) => {
-          return team.usersIds;
-        })
-      : usersIds.concat(judgesIds),
-  );
+  const occupiedUserIds = new Set<string>();
 
-  const handleOpenAddJudgeModal = () => {
-    setIsAddJudgeModalOpen(true);
-  };
+  if (isTeamTournament) {
+    teams.forEach((team) => {
+      team.members?.forEach((member) => occupiedUserIds.add(member.profile_id));
+    });
+  } else {
+    registrations.forEach((reg) => occupiedUserIds.add(reg.profile_id));
+  }
 
-  const handleCloseAddJudgeModal = () => {
-    setIsAddJudgeModalOpen(false);
-  };
-
-  console.log(judgesIds);
+  judges.forEach((j) => occupiedUserIds.add(j.profile_id));
 
   return (
     <>
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <ShieldUser className="h-5 w-5 text-primary" />
-            Судьи ({judgesIds.length})
-          </h2>
-          {(currentUser.role === "superadmin" ||
-            currentUser.role === "admin") &&
+          <div className="flex items-center gap-2">
+            <ShieldUser className="w-5 h-5 text-primary" />
+            <span className="text-sm font-mono ">Судьи</span>
+            <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {judges.length}
+            </span>
+          </div>
+          {(currentUser?.role === "superadmin" ||
+            currentUser?.role === "admin") &&
             (tournamentStatus === "open" ||
               tournamentStatus === "about_to_start") && (
               <CustomButton
                 label="Добавить"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={handleOpenAddJudgeModal}
+                onClick={() => setIsAddJudgeModalOpen(true)}
               />
             )}
         </div>
       </section>
-      {!!judgesIds.length && <JudgeList judgesIds={judgesIds} />}
-      {(currentUser.role === "superadmin" || currentUser.role === "admin") && (
+
+      {judges.length > 0 && <JudgeList judges={judges} />}
+
+      {(currentUser?.role === "superadmin" ||
+        currentUser?.role === "admin") && (
         <CustomModal
           containerClassName="max-h-[80vh]"
           isOpen={isAddJudgeModalOpen}
-          onClose={handleCloseAddJudgeModal}
+          onClose={() => setIsAddJudgeModalOpen(false)}
         >
           <AddJudgeModalContent
             occupiedUserIds={occupiedUserIds}
-            onClose={handleCloseAddJudgeModal}
+            onClose={() => setIsAddJudgeModalOpen(false)}
           />
         </CustomModal>
       )}

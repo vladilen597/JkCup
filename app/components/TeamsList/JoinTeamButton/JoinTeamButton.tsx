@@ -22,7 +22,7 @@ const JoinTeamButton = ({
   onJoinClick,
   handleClickInvite,
 }: IJoinTeamButtonProps) => {
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
 
   if (isTeamPrivate) {
     if (isCurrentUserCreator && !isTeamFull) {
@@ -54,7 +54,7 @@ const JoinTeamButton = ({
   if (
     !isMyTeam &&
     !isTeamFull &&
-    currentUser.uid &&
+    currentUser.id &&
     currentUser.role !== "guest" &&
     !isTeamPrivate &&
     canJoin

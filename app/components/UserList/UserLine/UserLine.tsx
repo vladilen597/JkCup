@@ -1,18 +1,17 @@
 "use client";
 
 import UserInfoBlock from "../../Shared/UserInfoBlock/UserInfoBlock";
-import { roleColors, roles } from "@/app/(app)/users/[id]/page";
 import RoleSelect from "../../Shared/RoleSelect/RoleSelect";
 import { useAppSelector } from "@/app/utils/store/hooks";
+import RoleBadge from "../../Shared/RoleBadge/RoleBadge";
 import React, { useEffect, useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
-import { motion } from "motion/react";
-import { Lock, X } from "lucide-react";
-import { IUser } from "@/app/utils/store/userSlice";
 import { useRouter } from "next/navigation";
+import { IUser } from "@/app/lib/types";
+import { Lock, X } from "lucide-react";
+import { motion } from "motion/react";
+import axios from "axios";
 
-const roleSelectOptions = [
+export const roleSelectOptions = [
   {
     id: 1,
     value: "guest",
@@ -39,16 +38,17 @@ interface UserLineProps extends IUser {
 }
 
 const UserLine: React.FC<UserLineProps> = ({
-  uid,
-  displayName,
-  photoUrl,
+  id,
+  full_name,
+  image_url,
   index = 0,
-  discord,
+  discord_id,
+  discord_full_name,
   role,
   showRoles,
   hideDelete,
-  steamDisplayName,
-  steamLink,
+  steam_name,
+  steam_profile_url,
   status,
   onDeleteClick,
   onBlockClick,
@@ -62,12 +62,12 @@ const UserLine: React.FC<UserLineProps> = ({
     value: "guest",
     label: "Гость",
   });
-  const { user: currentUser } = useAppSelector((state) => state.user);
+  const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
-  const isSuperAdmin = currentUser.role === "superadmin";
+  const isSuperAdmin = currentUser?.role === "superadmin";
 
   const handleClickLine = () => {
-    router.push("/users/" + uid);
+    router.push("/users/" + id);
   };
 
   const handleUpdateRole = async (value: {
@@ -75,14 +75,16 @@ const UserLine: React.FC<UserLineProps> = ({
     value: string;
     label: string;
   }) => {
+    const oldRole = userRole;
     setUserRole(value);
     try {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, {
-        role: value.value,
+      await axios.post("/api/users/user/update/role", {
+        userId: id,
+        newRole: value.value,
       });
     } catch (error) {
       console.log(error);
+      setUserRole(oldRole);
     }
   };
 
@@ -101,40 +103,22 @@ const UserLine: React.FC<UserLineProps> = ({
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className={`flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 border border-border/50 transition-all duration-200 group ${
+        className={`flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition-all duration-200 group ${
           role === "superadmin" ? "border-neon" : ""
         }`}
       >
         <UserInfoBlock
-          uid={uid}
-          discord={discord}
-          displayName={displayName}
-          photoUrl={photoUrl || ""}
-          steamDisplayName={steamDisplayName}
-          steamLink={steamLink}
+          id={id}
+          discord_full_name={discord_full_name}
+          discord_id={discord_id}
+          full_name={full_name}
+          image_url={image_url || ""}
+          steam_name={steam_name}
+          steam_profile_url={steam_profile_url}
         />
 
-        {showRoles && (
-          <>
-            {isSuperAdmin &&
-            currentUser.uid !== uid &&
-            role !== "superadmin" ? (
-              <RoleSelect
-                value={userRole}
-                onChange={handleUpdateRole}
-                options={roleSelectOptions}
-              />
-            ) : (
-              <div
-                className={`text-right text-xs text-muted-foreground font-mono ${roleColors[role as keyof typeof roleColors]}`}
-              >
-                {roles[role as keyof typeof roles]}
-              </div>
-            )}
-          </>
-        )}
         {onBlockClick &&
-          currentUser.role === "superadmin" &&
+          currentUser?.role === "superadmin" &&
           role !== "superadmin" && (
             <button
               type="button"
@@ -155,9 +139,9 @@ const UserLine: React.FC<UserLineProps> = ({
             </button>
           )}
         {!hideDelete &&
-          currentUser.role === "superadmin" &&
+          currentUser?.role === "superadmin" &&
           role !== "superadmin" &&
-          currentUser.uid !== uid &&
+          currentUser?.id !== id &&
           onDeleteClick && (
             <button
               className="cursor-pointer hover:bg-background/60 rounded-full p-1 transition-colors"
@@ -171,6 +155,19 @@ const UserLine: React.FC<UserLineProps> = ({
               <X className="w-5 h-5 text-neutral-400" />
             </button>
           )}
+        {showRoles && (
+          <>
+            {isSuperAdmin && currentUser?.id !== id && role !== "superadmin" ? (
+              <RoleSelect
+                value={userRole}
+                onChange={handleUpdateRole}
+                options={roleSelectOptions}
+              />
+            ) : (
+              <RoleBadge role={role} />
+            )}
+          </>
+        )}
       </motion.li>
     </div>
   );

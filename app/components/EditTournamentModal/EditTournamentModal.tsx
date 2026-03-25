@@ -13,20 +13,16 @@ import CustomButton, {
 import DarkDateTimePicker from "../Shared/DateTimePicker/DateTimePicker";
 import DurationPicker from "../Shared/DurationPicker/DurationPicker";
 import dynamic from "next/dynamic";
-import { ITag } from "@/app/lib/types";
+import { IGame, ITag, ITournament } from "@/app/lib/types";
 import { v4 as uuidv4 } from "uuid";
 import TagSelect, { TAG_PALETTE } from "../Shared/TagEdit/TagEdit";
 import GameSelect from "../Shared/GameSelect/GameSelect";
-import { IGame } from "@/app/utils/store/gamesSlice";
 import CustomInput from "../Shared/CustomInput/CustomInput";
 import CustomCheckbox from "../Shared/CustomCheckbox/CustomCheckbox";
-import {
-  ITournament,
-  updateTournament,
-} from "@/app/utils/store/tournamentsSlice";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/app/utils/firebase";
+import { updateTournament } from "@/app/utils/store/tournamentsSlice";
 import { useAppDispatch } from "@/app/utils/store/hooks";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Tiptap = dynamic(
   () => import("@/app/components/Shared/RichEditor/RichEditor"),
@@ -36,61 +32,71 @@ const Tiptap = dynamic(
   },
 );
 
-type FirestoreTournamentData = {
-  [K in keyof ITournament]: ITournament[K] extends object
-    ? ITournament[K] | null
-    : ITournament[K];
-};
-
 interface IEditTournamentModalProps {
   tournament: ITournament;
   onClose: () => void;
 }
 
+type TournamentFormData = Omit<ITournament, "type"> & {
+  type: ISelectOption;
+};
+
 const EditTournamentModal = ({
   tournament,
   onClose,
 }: IEditTournamentModalProps) => {
-  const [tournamentData, setTournamentData] = useState<ITournament>(tournament);
+  const [tournamentData, setTournamentData] = useState<TournamentFormData>({
+    ...tournament,
+    type:
+      typeof tournament.type === "string"
+        ? selectTypeOptions.find((opt) => opt.value === tournament.type) ||
+          selectTypeOptions[0]
+        : tournament.type,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
-  const onTagsChange = (newTags) => {
-    setTournamentData({ ...tournamentData, tags: newTags });
-  };
-
   const handleTagChange = (id: string, newValue: string) => {
-    onTagsChange(
-      tournamentData.tags?.map((tag) =>
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: (prev.tags || []).map((tag: ITag) =>
         tag.id === id ? { ...tag, value: newValue } : tag,
       ),
-    );
+    }));
   };
 
   const removeTag = (id: string) => {
-    onTagsChange(tournamentData.tags?.filter((tag) => tag.id !== id));
-  };
-
-  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
-    onTagsChange(
-      tournamentData.tags?.map((tag) =>
-        tag.id === id ? { ...tag, bgColor, textColor } : tag,
-      ),
-    );
+    setTournamentData((prevState: any) => ({
+      ...prevState,
+      tags: (prevState.tags || []).filter((tag: any) => tag.id !== id),
+    }));
   };
 
   const addNewTag = () => {
     const randomColor =
       TAG_PALETTE[Math.floor(Math.random() * TAG_PALETTE.length)];
-    onTagsChange([
-      ...tournamentData.tags,
-      {
-        id: uuidv4(),
-        value: "",
-        bgColor: randomColor.bg,
-        textColor: randomColor.text,
-      },
-    ]);
+
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: [
+        ...(prev.tags || []),
+        {
+          id: uuidv4(),
+          value: "",
+          bgColor: randomColor.bg,
+          textColor: randomColor.text,
+        },
+      ],
+    }));
+  };
+
+  const updateTagColor = (id: string, bgColor: string, textColor: string) => {
+    setTournamentData((prev: any) => ({
+      ...prev,
+      tags: (prev.tags || []).map((tag: ITag) =>
+        tag.id === id ? { ...tag, bgColor, textColor } : tag,
+      ),
+    }));
   };
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +139,7 @@ const EditTournamentModal = ({
   const handleAddReward = () => {
     setTournamentData((prevState) => ({
       ...prevState,
-      rewards: [...prevState.rewards, { id: uuidv4(), value: "" }],
+      rewards: [...(prevState.rewards || []), { id: uuidv4(), value: "" }],
     }));
   };
 
@@ -164,16 +170,28 @@ const EditTournamentModal = ({
 
     setIsLoading(true);
 
-    const tournamentRef = doc(db, "tournaments", tournament.id);
-
     try {
-      await updateDoc(tournamentRef, tournamentData as FirestoreTournamentData);
+      const payload = {
+        ...tournamentData,
+        type: (tournamentData.type as any).value || tournamentData.type,
+        game_id: tournamentData.game?.id || null,
+        max_players: Number(tournamentData.max_players),
+        max_teams: Number(tournamentData.max_teams),
+        players_per_team: Number(tournamentData.players_per_team),
+      };
 
-      dispatch(updateTournament(tournamentData));
+      const { data } = await axios.put(`/api/tournaments`, payload, {
+        params: {
+          id: tournament.id,
+        },
+      });
 
+      toast.success(`Турнир ${tournamentData.name} успешно обновлен`);
+      dispatch(updateTournament(data));
       onClose();
     } catch (error: any) {
-      console.log(error);
+      console.error("Update Error:", error);
+      toast.error(error.message || "Произошла ошибка при сохранении");
     } finally {
       setIsLoading(false);
     }
@@ -258,9 +276,9 @@ const EditTournamentModal = ({
         </div>
 
         <CustomCheckbox
-          name="useBracket"
+          name="is_bracket"
           label="Использовать сетку"
-          checked={tournamentData.useBracket}
+          checked={tournamentData.is_bracket}
           onChange={handleInputChange}
         />
 
@@ -333,13 +351,13 @@ const EditTournamentModal = ({
               Добавить награду
             </button>
           </div>
-          {tournamentData.rewards.length === 0 ? (
+          {tournamentData.rewards?.length === 0 ? (
             <p className="text-sm text-muted-foreground py-2">
               Награды не добавлены
             </p>
           ) : (
             <div className="space-y-2 pr-1">
-              {tournamentData.rewards.map((reward, index) => (
+              {tournamentData.rewards?.map((reward, index) => (
                 <motion.div
                   key={reward.id}
                   initial={{ opacity: 0, y: -10 }}

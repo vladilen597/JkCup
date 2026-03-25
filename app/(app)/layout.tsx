@@ -6,6 +6,9 @@ import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import CustomButton from "../components/Shared/CustomButton/CustomButton";
 import { useAppDispatch } from "../utils/store/hooks";
 import { setTournaments } from "../utils/store/tournamentsSlice";
+import { Slide, ToastContainer } from "react-toastify";
+import { Check, Info, X } from "lucide-react";
+import PollWidget from "../components/PollWidget/PollWidget";
 
 type Props = {
   children: ReactNode;
@@ -70,6 +73,31 @@ const Layout = ({ children }: Props) => {
     <div className="font-inter">
       <Header />
       <ErrorBoundary errorComponent={ErrorComponent}>{children}</ErrorBoundary>
+      <PollWidget />
+      <ToastContainer
+        position="bottom-left"
+        transition={Slide}
+        toastClassName="relative flex p-1 min-h-10 rounded-lg bg-card! font-inter! text-white!"
+        progressClassName="bg-neon!"
+        closeButton={({ closeToast }) => (
+          <button
+            onClick={closeToast}
+            className="absolute right-1 top-1 text-white! opacity-100 hover:text-gray-300 transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
+        )}
+        icon={({ type }) => {
+          switch (type) {
+            case "success":
+              return <Check className="text-neon!" />;
+            case "error":
+              return <X className="text-red-500!" />;
+            default:
+              return <Info className="text-primary!" />;
+          }
+        }}
+      />
     </div>
   );
 };
