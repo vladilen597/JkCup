@@ -8,7 +8,6 @@ import {
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
 import SelectWinnerTeamModal from "@/app/components/SelectWinnerTeamModal/SelectWinnerTeamModal";
 import SelectWinnerUserModal from "@/app/components/SelectWinnerUserModal/SelectWinnerUserModal";
-import BracketTournamentView from "@/app/components/BracketTournamentView/BracketTournamentView";
 import JoinTournamentButton from "@/app/components/JoinTournamentButton/JoinTournamentButton";
 import TournamentHero from "@/app/components/TournamentPage/TournamentHero/TournamentHero";
 import EditTournamentModal from "@/app/components/EditTournamentModal/EditTournamentModal";
@@ -93,21 +92,21 @@ const TournamentItemPage = () => {
 
       if (isJoined) {
         await axios.delete(url, {
-          data: { userId: currentUser.id },
+          data: { userId: currentUser?.id },
         });
 
         const updatedTournament = {
           ...tournament,
           registrations:
             tournament.registrations?.filter(
-              (reg) => reg.profile_id !== currentUser.id,
+              (reg) => reg.profile_id !== currentUser?.id,
             ) || [],
         };
 
         dispatch(updateTournament(updatedTournament));
       } else {
         const { data: newRegistration } = await axios.post(url, {
-          userId: currentUser.id,
+          userId: currentUser?.id,
         });
 
         const updatedTournament = {
@@ -211,7 +210,7 @@ const TournamentItemPage = () => {
       : tournament.registrations?.length === tournament.max_players;
 
   const isCurrentUserJudge = tournament.judges?.some(
-    (judge) => judge.profile_id === currentUser.id,
+    (judge) => judge.profile_id === currentUser?.id,
   );
   const isUserHasTeam = tournament.teams?.some((team) =>
     team.members?.some((member) => member.profile_id === currentUser?.id),
@@ -358,14 +357,14 @@ const TournamentItemPage = () => {
                   canCreateTeam={isUserCanCreateTeam}
                   canJoinSingleTournament={
                     !tournament.judges?.some(
-                      (judge) => currentUser.id === judge.profile_id,
+                      (judge) => currentUser?.id === judge.profile_id,
                     )
                   }
                   isJoinedSingleTournament={
                     !isTeamMode
                       ? tournament.registrations.some(
                           (registration) =>
-                            registration.profile_id === currentUser.id,
+                            registration.profile_id === currentUser?.id,
                         )
                       : undefined
                   }

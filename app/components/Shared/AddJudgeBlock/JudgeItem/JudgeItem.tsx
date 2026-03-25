@@ -67,7 +67,8 @@ const JudgeLine: React.FC<{
         <div className="flex items-center gap-3">
           <UserInfoBlock {...user} />
         </div>
-        {(currentUser.role === "superadmin" || currentUser.role === "admin") &&
+        {(currentUser?.role === "superadmin" ||
+          currentUser?.role === "admin") &&
           !hideDelete && (
             <div className="flex items-center justify-center w-10">
               {isLoading ? (

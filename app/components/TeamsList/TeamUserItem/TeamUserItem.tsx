@@ -35,7 +35,7 @@ const TeamUserItem = ({
   const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
 
-  const isCurrentUser = currentUser.id === id;
+  const isCurrentUser = currentUser?.id === id;
 
   const handleClickLine = () => {
     router.push("/users/" + id);

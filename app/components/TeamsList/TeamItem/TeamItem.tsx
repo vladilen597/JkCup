@@ -55,9 +55,9 @@ const TeamItem = ({
   };
 
   const isEnoughRole =
-    currentUser.role === "admin" || currentUser.role === "superadmin";
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
   const isMyTeam = members.some(
-    (member) => member.profile_id === currentUser.id,
+    (member) => member.profile_id === currentUser?.id,
   );
 
   const handleDeleteTeam = async (teamId: string) => {
@@ -133,7 +133,8 @@ const TeamItem = ({
             <span className="text-sm text-gray-400">
               {filled} / {players_per_team}
             </span>
-            {((creator_id === currentUser.id && tournament_status === "open") ||
+            {((creator_id === currentUser?.id &&
+              tournament_status === "open") ||
               isEnoughRole) && (
               <CustomButton
                 className="p-1 rounded-sm bg-red-600/20 border border-red-600!"
@@ -152,14 +153,14 @@ const TeamItem = ({
             isMyTeam={isMyTeam}
             isLoading={isLoading}
             creator_id={creator_id}
-            isCurrentUserCreator={currentUser.id === creator_id}
+            isCurrentUserCreator={currentUser?.id === creator_id}
             onLeaveClick={handleLeaveTeam}
             canLeave={tournament_status === "open"}
           />
           {tournament_status === "open" && (
             <JoinTeamButton
               isTeamPrivate={is_private}
-              isCurrentUserCreator={currentUser.id === creator_id}
+              isCurrentUserCreator={currentUser?.id === creator_id}
               isLoading={isLoading}
               onJoinClick={handleJoinTeam}
               handleClickInvite={handleOpenAddTeammateModal}
