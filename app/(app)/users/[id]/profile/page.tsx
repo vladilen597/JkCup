@@ -141,7 +141,7 @@ const page = () => {
                 name="full_name"
                 value={userInfo.full_name}
                 onChange={handleUpdateInput}
-                disabled={!currentUser}
+                disabled={currentUser?.id !== params.id}
                 isLoading={!userInfo.id}
                 placeholder="JohnDoe"
               />
