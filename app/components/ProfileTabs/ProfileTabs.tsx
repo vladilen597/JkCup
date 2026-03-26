@@ -52,7 +52,7 @@ const ProfileTabs = () => {
 
   return (
     <motion.nav initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <ul className="flex items-center gap-2 font-inter">
+      <ul className="flex items-center gap-2 font-inter max-w-screen overflow-x-auto">
         {tabLinks.map((tab) => {
           const isActive = pathname.includes(tab.slug);
           return (
@@ -65,21 +65,23 @@ const ProfileTabs = () => {
             >
               <Link
                 href={tab.link}
-                className="flex items-center gap-2 py-2 px-4"
+                className={cn(
+                  "relative flex items-center gap-2 py-2 px-4 transition-colors",
+                  isActive
+                    ? "text-white font-bold"
+                    : "text-neutral-400 hover:text-white",
+                )}
               >
                 <span>{tab.icon}</span>
-                <span className={cn("text-sm", isActive && "font-bold")}>
-                  {tab.name}
-                </span>
+                <span className="text-sm">{tab.name}</span>
+
+                {isActive && (
+                  <motion.div
+                    layoutId="profile-active-link-underline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                  />
+                )}
               </Link>
-              {isActive && (
-                <motion.div
-                  key={tab.id}
-                  layout="position"
-                  layoutId="profile-active-link-underline"
-                  className="absolute top-full h-1 w-full bg-primary"
-                />
-              )}
             </li>
           );
         })}

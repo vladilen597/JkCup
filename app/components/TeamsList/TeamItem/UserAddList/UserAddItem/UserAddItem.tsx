@@ -87,7 +87,7 @@ const UserAddItem = ({ user, index, teamId, onClose }: IUserAddItemProps) => {
           )}
         </div>
       </div>
-      {currentUser.id !== user.id && (
+      {currentUser?.id !== user.id && (
         <button
           type="button"
           className="flex items-center gap-2 border border-neon p-2 rounded-lg text-sm cursor-pointer hover:bg-primary/5"

@@ -53,7 +53,7 @@ const Notifications = ({
     setIsLoading(true);
     try {
       const { data } = await axios.get(
-        `/api/users/${currentUser.id}/notifications`,
+        `/api/users/${currentUser?.id}/notifications`,
       );
       setUserNotifications(data);
     } catch (error) {
@@ -119,7 +119,7 @@ const Notifications = ({
 
   return (
     <section className="overflow-y-auto h-[90vh] p-6 pt-0">
-      {!isNotificationAddOpen && currentUser.role === "superadmin" && (
+      {!isNotificationAddOpen && currentUser?.role === "superadmin" && (
         <CustomButton
           className="ml-auto mr-0"
           buttonStyle={BUTTON_STYLES.OUTLINE}

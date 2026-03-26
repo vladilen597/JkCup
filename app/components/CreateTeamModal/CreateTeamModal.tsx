@@ -37,7 +37,7 @@ const CreateTeamModal = ({ tournamentId, onClose }: ICreateTeamModalProps) => {
         {
           name: teamData.name,
           is_private: teamData.is_private,
-          creatorId: currentUser.id,
+          creatorId: currentUser?.id,
         },
       );
 

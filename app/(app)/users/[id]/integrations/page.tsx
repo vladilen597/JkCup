@@ -24,7 +24,7 @@ const page = () => {
         Все интеграции пользователя
       </motion.p>
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
         <DiscordIntegrationWidget />
         <SteamIntegrationWidget />
       </div>

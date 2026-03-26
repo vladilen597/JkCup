@@ -54,8 +54,8 @@ const JoinTeamButton = ({
   if (
     !isMyTeam &&
     !isTeamFull &&
-    currentUser.id &&
-    currentUser.role !== "guest" &&
+    currentUser?.id &&
+    currentUser?.role !== "guest" &&
     !isTeamPrivate &&
     canJoin
   ) {

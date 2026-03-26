@@ -106,7 +106,7 @@ const Tournament = ({
                 )}
               </div>
               {currentUser &&
-                currentUser.games?.some(
+                currentUser?.games?.some(
                   (userGame) => userGame.id === game?.id,
                 ) && (
                   <span className="text-xs text-primary">

@@ -88,7 +88,7 @@ const DiscordIntegrationWidget = () => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full h-full max-h-55"
+      className="w-full"
     >
       <div className="rounded-t-xl bg-[#6266ec] px-5 py-4 flex items-center gap-3">
         <Discord className="w-6 h-6" fill="white" />
@@ -102,7 +102,7 @@ const DiscordIntegrationWidget = () => {
           <CustomSkeleton className="h-full" borderRadius={0} height={220} />
         </div>
       ) : (
-        <div className="rounded-b-xl border border-t-0 border-border bg-card p-5 h-full">
+        <div className="rounded-b-xl border border-t-0 border-border bg-card p-5">
           <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
             {isOwnProfile
               ? isConnected
@@ -184,7 +184,7 @@ const DiscordIntegrationWidget = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.4 }}
                 >
-                  <ConnectDiscord user_id={currentUser.id} />
+                  <ConnectDiscord user_id={currentUser?.id} />
                 </motion.div>
               )}
             </div>

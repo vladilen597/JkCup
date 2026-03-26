@@ -101,7 +101,7 @@ const ArchivedTournament = ({
                 )}
               </div>
               {currentUser &&
-                currentUser.games?.some(
+                currentUser?.games?.some(
                   (userGame) => userGame.id === game_snapshot?.id,
                 ) && (
                   <span className="text-xs text-primary">

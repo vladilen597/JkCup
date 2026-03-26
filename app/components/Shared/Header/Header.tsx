@@ -215,7 +215,7 @@ const Header = () => {
 
   const handleLoadUser = async () => {
     try {
-      const { data } = await axios.get<IUser>("/api/users/" + currentUser.id);
+      const { data } = await axios.get<IUser>("/api/users/" + currentUser?.id);
 
       if (data) {
         dispatch(setCurrentUser(data));
@@ -335,26 +335,26 @@ const Header = () => {
               >
                 <div className="text-right">
                   <span className="block max-w-34 truncate text-sm text-right font-inter text-foreground font-bold">
-                    {currentUser.full_name}
+                    {currentUser?.full_name}
                   </span>
                   <RoleBadge
-                    role={currentUser.role}
+                    role={currentUser?.role}
                     type="small"
                     withAnimation={false}
                   />
                 </div>
-                {currentUser.image_url ? (
+                {currentUser?.image_url ? (
                   <Image
                     width={32}
                     height={32}
                     className="h-8 w-8 rounded-full ring-2 ring-primary/30 object-cover"
-                    src={currentUser.image_url}
-                    alt={currentUser.full_name}
+                    src={currentUser?.image_url}
+                    alt={currentUser?.full_name}
                     referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="flex items-center justify-center text-neon h-8 w-8 rounded-full ring-2 ring-primary/30">
-                    {currentUser.full_name?.[0]}
+                    {currentUser?.full_name?.[0]}
                   </div>
                 )}
                 <ChevronDown
@@ -365,7 +365,7 @@ const Header = () => {
               <AnimatePresence>
                 {isProfileOpen && (
                   <ProfileDropdown
-                    userId={currentUser.id}
+                    userId={currentUser?.id}
                     handleClickLogout={handleLogout}
                     onClose={handleCloseProfileDropdown}
                   />

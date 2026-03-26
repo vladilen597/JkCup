@@ -17,6 +17,7 @@ import {
   setUserInfo,
   updateUserInfoField,
 } from "@/app/utils/store/userSlice";
+import UserDiscordServer from "@/app/components/UserDiscordServer/UserDiscordServer";
 
 const page = () => {
   const { userInfo } = useAppSelector((state) => state.user);
@@ -120,18 +121,18 @@ const page = () => {
         Здесь можно посмотреть информацию о пользователе
       </motion.p>
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 ">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full bg-background border border-border rounded-lg "
+          className="w-full bg-background border border-border rounded-lg overflow-hidden"
         >
           <p className="flex items-center gap-2 p-5">
             <User /> Основная информация
           </p>
           <motion.form
-            className="border-t space-y-2 p-5 bg-card"
+            className="border-t space-y-2 p-5 bg-card h-full"
             onSubmit={handleSubmit}
           >
             <div className="space-y-4 w-full">
@@ -228,6 +229,8 @@ const page = () => {
                 }
                 disabled
               />
+
+              <UserDiscordServer user_id={params.id as string} />
             </div>
           </motion.div>
         )}

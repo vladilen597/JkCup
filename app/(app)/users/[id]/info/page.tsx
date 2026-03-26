@@ -112,7 +112,7 @@ const page = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <span></span>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
           {userInfo.id ? (
             <div className="flex flex-col justify-between bg-card p-3 h-24 rounded-lg">
               <motion.span

@@ -80,7 +80,7 @@ const TeamItem = ({
     setIsLoading(true);
     try {
       const { data: newMember } = await axios.post(`/api/teams/${id}/members`, {
-        userId: currentUser.id,
+        userId: currentUser?.id,
       });
 
       dispatch(

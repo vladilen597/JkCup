@@ -18,7 +18,7 @@ const PlayersSelectBlock = ({
   const { currentUser } = useAppSelector((state) => state.user);
 
   const isAdmin =
-    currentUser.role === "admin" || currentUser.role === "superadmin";
+    currentUser?.role === "admin" || currentUser?.role === "superadmin";
 
   if (!isAdmin) return null;
 

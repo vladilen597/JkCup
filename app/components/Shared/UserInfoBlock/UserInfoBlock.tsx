@@ -1,10 +1,11 @@
+import ExpandableSocialLink from "../ExpandableSocialLink/ExpandableSocialLink";
 import { useAppSelector } from "@/app/utils/store/hooks";
-import Image from "next/image";
 import Discord from "../../Icons/Discord";
+import { IUser } from "@/app/lib/types";
 import Steam from "../../Icons/Steam";
 import { MouseEvent } from "react";
-import { IUser } from "@/app/lib/types";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const UserInfoBlock = ({
   id,
@@ -68,42 +69,24 @@ const UserInfoBlock = ({
               <span className="ml-2 text-xs leading-0 text-orange-400">Вы</span>
             )}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {discord_full_name && (
-              <a
+              <ExpandableSocialLink
                 href={`discord://-/users/${discord_id}`}
-                className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 underline hover:text-white transition-colors"
+                label={discord_full_name}
                 onClick={handleClickDiscordLink}
-              >
-                <Discord
-                  className={cn(
-                    "w-4 h-4",
-                    size === "default" && "w-4 h-4",
-                    size === "small" && "w-3 h-3",
-                  )}
-                />
-                {discord_full_name}
-              </a>
+                size="small"
+                icon={<Discord className="w-full h-full" />}
+              />
             )}
             {!!steam_name && !!steam_profile_url && (
-              <p className="flex shrink-0 items-center gap-1 font-semibold text-xs truncate leading-5 text-neutral-400 hover:text-white transition-colors">
-                <Steam
-                  className={cn(
-                    "w-4 h-4",
-                    size === "default" && "w-4 h-4",
-                    size === "small" && "w-3 h-3",
-                  )}
-                />
-                <a
-                  onClick={handleClickSteamLink}
-                  className="underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={steam_profile_url}
-                >
-                  {steam_name}
-                </a>
-              </p>
+              <ExpandableSocialLink
+                href={steam_profile_url}
+                label={steam_name}
+                onClick={handleClickSteamLink}
+                size="small"
+                icon={<Steam className="w-full h-full" />}
+              />
             )}
           </div>
         </div>

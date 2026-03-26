@@ -159,7 +159,7 @@ const CreateTournamentModal = ({
         players_per_team: Number(formData.players_per_team) || 1,
         description: formData.description || "",
         is_bracket: formData.is_bracket,
-        creator_id: currentUser.id,
+        creator_id: currentUser?.id,
         duration: formData.duration,
         status: "open",
         rules: "",

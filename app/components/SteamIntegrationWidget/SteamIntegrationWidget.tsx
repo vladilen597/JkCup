@@ -72,7 +72,7 @@ const SteamIntegrationWidget = () => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full h-full max-h-55"
+      className="w-full h-full"
     >
       <div className="rounded-t-xl bg-[#171a21] px-5 py-4 flex items-center gap-3 border border-border border-b-0">
         <Steam className="w-6 h-6 text-[#66c0f4]" />
@@ -86,7 +86,7 @@ const SteamIntegrationWidget = () => {
           <CustomSkeleton className="h-full" borderRadius={0} height={220} />
         </div>
       ) : (
-        <div className="rounded-b-xl border border-border bg-card p-5 shadow-sm h-full">
+        <div className="rounded-b-xl border border-border bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
             {isOwnProfile
               ? isConnected

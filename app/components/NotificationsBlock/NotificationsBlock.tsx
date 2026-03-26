@@ -15,7 +15,7 @@ const NotificationsBlock = () => {
     if (!currentUser?.id) return;
     try {
       const { data } = await axios.get(
-        `/api/users/${currentUser.id}/notifications/check`,
+        `/api/users/${currentUser?.id}/notifications/check`,
       );
       setUnreadCount(data.count);
     } catch (e) {
