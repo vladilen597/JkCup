@@ -102,8 +102,10 @@ const FaceitInfoBlock = () => {
   });
   const { userInfo } = useAppSelector((state) => state.user);
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLoadFaceitCsStats = async () => {
+    setIsLoading(true);
     try {
       const { data } = await axios.post(`/api/users/faceit`, {
         steam_id: userInfo.steam_id,
@@ -112,6 +114,8 @@ const FaceitInfoBlock = () => {
     } catch (error) {
       console.log(error);
       setError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -135,7 +139,9 @@ const FaceitInfoBlock = () => {
         transition={{ duration: 0.5 }}
         className="font-mono flex items-center gap-2"
       >
-        {error ? (
+        {isLoading ? (
+          <CustomSkeleton height={24} width={60} />
+        ) : error ? (
           "-"
         ) : (
           <>
@@ -144,14 +150,18 @@ const FaceitInfoBlock = () => {
           </>
         )}
       </motion.div>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-xs font-mono tracking-widest text-muted-foreground"
-      >
-        {error ? "FaceIT не подключен" : faceitInfo.nickname}
-      </motion.p>
+      {isLoading ? (
+        <CustomSkeleton height={16} width={60} />
+      ) : (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-xs font-mono tracking-widest text-muted-foreground"
+        >
+          {error ? "FaceIT не подключен" : faceitInfo.nickname}
+        </motion.p>
+      )}
     </div>
   );
 };
