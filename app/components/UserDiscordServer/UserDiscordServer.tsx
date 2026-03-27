@@ -41,19 +41,13 @@ const UserDiscordServer = ({ user_id }: { user_id: string }) => {
   return (
     <div className="group relative overflow-hidden rounded-xl border bg-background p-4 transition-all hover:bg-background-500/50 shadow-lg">
       <div className="flex items-center gap-4">
-        {isLoading ? (
-          <CustomSkeleton className="rounded-xl" width={48} height={48} />
-        ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Image
-              src={"/jk-cup.jpg"}
-              width={48}
-              height={48}
-              alt="Server"
-              className="w-12 h-12 object-cover rounded-xl"
-            />
-          </motion.div>
-        )}
+        <Image
+          src={"/logo.svg"}
+          width={48}
+          height={48}
+          alt="Server"
+          className="w-12 h-12 object-cover rounded-xl"
+        />
 
         <div className="flex flex-col gap-1 leading-0">
           {isLoading ? (

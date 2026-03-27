@@ -64,7 +64,7 @@ const links: {
   },
   {
     id: 3,
-    title: "Discord",
+    title: "Наш Discord",
     href: "https://discord.gg/S6QMcETh4d",
     icon: <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />,
     target: "_blank",
@@ -252,78 +252,91 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/90 backdrop-blur-xl">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <button
-          className="block lg:hidden"
-          type="button"
-          onClick={handleOpenNavDrawer}
-        >
-          <Menu />
-        </button>
-        <AnimatePresence>
-          {isNavigationDrawerOpen && (
-            <CustomDrawer
-              className="min-w-auto w-fit"
-              title="Навигация"
-              position="left"
-              onClose={handleCloseNavDrawer}
-            >
-              <div className="flex flex-col gap-8 px-6 w-fit">
-                {mobileLinks.map((mobileLink) => (
-                  <Link
-                    key={mobileLink.id}
-                    href={mobileLink.href}
-                    target={mobileLink.target}
-                    referrerPolicy={mobileLink.referrerPolicy}
-                    onClick={
-                      mobileLink.target
-                        ? undefined
-                        : () => handleCloseNavDrawer()
-                    }
-                    className="flex items-center gap-2 group"
-                  >
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                      {mobileLink.icon}
-                    </div>
-                    <span className="font-extrabold text-lg tracking-tight text-foreground">
-                      {mobileLink.title}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </CustomDrawer>
-          )}
-        </AnimatePresence>
-        <div className="lg:flex hidden items-center gap-8">
-          {links.map((link) => (
-            <Link
-              key={link.id}
-              href={link.href}
-              target={link.target}
-              referrerPolicy={link.referrerPolicy}
-              className="select-none flex items-center gap-2 group"
-            >
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                {link.icon}
-              </div>
-              <span className="font-extrabold text-lg tracking-tight text-foreground">
-                {link.title}
-              </span>
-            </Link>
-          ))}
-          <CustomNodeSelect
-            titleNode={
-              <div className="select-none flex items-center gap-2 group cursor-pointer">
+      <div className="max-w-360 mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <div className="hidden lg:block">
+            <Image
+              title="JkCup"
+              src="/logo.svg"
+              height={60}
+              width={60}
+              alt="JkCup Logo"
+            />
+          </div>
+          <button
+            className="flex items-center gap-2 lg:hidden"
+            type="button"
+            onClick={handleOpenNavDrawer}
+          >
+            <Menu />
+
+            <Image src="/logo.svg" height={60} width={60} alt="Logo" />
+          </button>
+          <AnimatePresence>
+            {isNavigationDrawerOpen && (
+              <CustomDrawer
+                className="min-w-auto w-fit"
+                title="Навигация"
+                position="left"
+                onClose={handleCloseNavDrawer}
+              >
+                <div className="flex flex-col gap-8 px-6 w-fit">
+                  {mobileLinks.map((mobileLink) => (
+                    <Link
+                      key={mobileLink.id}
+                      href={mobileLink.href}
+                      target={mobileLink.target}
+                      referrerPolicy={mobileLink.referrerPolicy}
+                      onClick={
+                        mobileLink.target
+                          ? undefined
+                          : () => handleCloseNavDrawer()
+                      }
+                      className="flex items-center gap-2 group"
+                    >
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                        {mobileLink.icon}
+                      </div>
+                      <span className="font-extrabold text-lg tracking-tight text-foreground">
+                        {mobileLink.title}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </CustomDrawer>
+            )}
+          </AnimatePresence>
+          <div className="lg:flex hidden items-center gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.id}
+                href={link.href}
+                target={link.target}
+                referrerPolicy={link.referrerPolicy}
+                className="select-none flex items-center gap-2 group"
+              >
                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
-                  <Ellipsis className="h-4 w-4 text-primary" />
+                  {link.icon}
                 </div>
                 <span className="font-extrabold text-lg tracking-tight text-foreground">
-                  Дополнительно
+                  {link.title}
                 </span>
-              </div>
-            }
-            options={additionalOptions}
-          />
+              </Link>
+            ))}
+            <CustomNodeSelect
+              titleNode={
+                <div className="select-none flex items-center gap-2 group">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center neon-border group-hover:neon-glow transition-shadow duration-300">
+                    <Ellipsis className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="font-extrabold text-lg tracking-tight text-foreground">
+                    Дополнительно
+                  </span>
+                </div>
+              }
+              options={additionalOptions}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

@@ -88,7 +88,7 @@ const CustomNodeSelect = ({
       initial="collapsed"
       animate={isOpen ? "expanded" : "collapsed"}
       exit="collapsed"
-      className={`block relative rounded-lg ${containerClassName}`}
+      className={`block relative rounded-lg ${containerClassName} cursor-pointer`}
       onClick={handleToggleIsOpen}
     >
       <motion.div className="flex items-center gap-3 p-3 justify-between">
