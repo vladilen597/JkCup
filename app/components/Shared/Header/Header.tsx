@@ -64,7 +64,7 @@ const links: {
   },
   {
     id: 3,
-    title: "Наш Discord",
+    title: "Discord",
     href: "https://discord.gg/S6QMcETh4d",
     icon: <Discord fill="#19e6d4" className="h-4 w-4 text-primary" />,
     target: "_blank",
