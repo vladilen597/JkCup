@@ -211,7 +211,7 @@ const PollWidget = () => {
 
             <div className="px-5 py-3 border-t border-zinc-800 flex justify-between items-center bg-zinc-900/50">
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">
-                Всего голосов:
+                Проголосовавших:
               </span>
               <span className="text-xs font-mono font-bold text-zinc-300">
                 {pollData.totalVotes}
