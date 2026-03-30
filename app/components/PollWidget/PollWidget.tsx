@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Vote, X, Users } from "lucide-react";
+import { Vote, X, Users, Undo2, Loader2 } from "lucide-react";
 import axios from "axios";
 import { supabase } from "@/app/utils/supabase";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
 
 const PollWidget = () => {
   const { currentUser } = useAppSelector((state) => state.user);
@@ -16,6 +17,7 @@ const PollWidget = () => {
   const [pollData, setPollData] = useState<any>(null);
   const [userVoted, setUserVoted] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -89,6 +91,55 @@ const PollWidget = () => {
       setSelectedGameId(null);
       fetchData();
       console.error(e);
+    }
+  };
+
+  const handleRevoke = async () => {
+    if (!currentUser?.id) return;
+
+    setIsRevoking(true);
+    setUserVoted(false);
+    try {
+      await axios.delete("/api/polls/active/revoke", {
+        data: {
+          pollId: pollData.poll.id,
+          userId: currentUser.id,
+        },
+      });
+
+      setPollData((prev: any) => {
+        if (!prev) return prev;
+
+        const userVote = prev.poll.votes.find(
+          (v: any) => v.profile_id === currentUser.id,
+        );
+        const votedGameId = userVote?.game_id;
+
+        return {
+          ...prev,
+          poll: {
+            ...prev.poll,
+            votes: prev.poll.votes.filter(
+              (v: any) => v.profile_id !== currentUser.id,
+            ),
+          },
+          totalVotes: Math.max(0, prev.totalVotes - 1),
+          stats: votedGameId
+            ? {
+                ...prev.stats,
+                [votedGameId]: Math.max(0, (prev.stats[votedGameId] || 0) - 1),
+              }
+            : prev.stats,
+        };
+      });
+
+      toast.success("Голос отозван");
+    } catch (error) {
+      console.error(error);
+      toast.error("Ошибка при отмене");
+      setUserVoted(true);
+    } finally {
+      setIsRevoking(false);
     }
   };
 
@@ -216,6 +267,20 @@ const PollWidget = () => {
               <span className="text-xs font-mono font-bold text-zinc-300">
                 {pollData.totalVotes}
               </span>
+              {userVoted && (
+                <button
+                  title="Отменить голос"
+                  onClick={handleRevoke}
+                  disabled={isRevoking}
+                  className="flex items-center gap-1.5 px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isRevoking ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Undo2 className="w-3 h-3" />
+                  )}
+                </button>
+              )}
             </div>
           </motion.div>
         )}
