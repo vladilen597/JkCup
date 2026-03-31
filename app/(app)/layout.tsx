@@ -9,7 +9,7 @@ export default async function RootLayout({ children }) {
   });
 
   const initialData = JSON.parse(JSON.stringify(messages));
-  console.log(initialData);
+
   return (
     <html>
       <body>
