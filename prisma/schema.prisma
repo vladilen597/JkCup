@@ -46,6 +46,8 @@ model Profile {
   global_vote     GlobalVote[]
   notifications   UserNotification[]
 
+  messages Message[]
+
   @@map("profiles")
 }
 
@@ -355,4 +357,14 @@ model GlobalVote {
 
   @@id([poll_id, profile_id])
   @@map("global_votes")
+}
+
+model Message {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @map("created_at")
+  content    String
+  profile_id String   @db.Uuid
+  profile    Profile  @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
 }
