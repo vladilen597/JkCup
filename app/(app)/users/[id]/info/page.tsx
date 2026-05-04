@@ -2,17 +2,21 @@
 
 import FaceitInfoBlock from "@/app/components/FaceitInfoBlock/FaceitInfoBlock";
 import CustomSkeleton from "@/app/components/Shared/CustomSkeleton/CustomSkeleton";
+import { IArchivedTournament, ITournament } from "@/app/lib/types";
 import { useAppSelector } from "@/app/utils/store/hooks";
 import axios from "axios";
 import { format } from "date-fns";
+import { User, Users } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const declOfNum = (n, titles) => {
   n = Math.abs(n) % 100;
-  var n1 = n % 10;
+  const n1 = n % 10;
 
   if (n > 10 && n < 20) {
     return titles[2];
@@ -59,7 +63,7 @@ const getMembershipTime = (
   return "меньше минуты";
 };
 
-const page = () => {
+const Page = () => {
   const { userInfo } = useAppSelector((state) => state.user);
   const [stats, setStats] = useState<{
     registrations: number;
@@ -70,22 +74,37 @@ const page = () => {
     won_archives: number;
     won_tournaments: number;
   }>();
+  const [userTournaments, setUserTournaments] = useState([]);
   const { id } = useParams();
 
   const handleLoadUserStats = async () => {
+    if (!id) return;
     try {
       const { data } = await axios.get(`/api/users/${id}/stats`);
       setStats(data);
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
-          "Ошибка загрузки статистики пользователя",
+        error.response?.data?.message || "Ошибка загрузки статистики",
       );
     }
   };
+
+  const handleLoadParticipationHistory = async () => {
+    if (!id) return;
+    try {
+      const { data } = await axios.get(`/api/users/${id}/participations`);
+      setUserTournaments(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     handleLoadUserStats();
-  }, []);
+    handleLoadParticipationHistory();
+  }, [id]);
+
+  console.log(userTournaments);
 
   return (
     <section>
@@ -214,8 +233,88 @@ const page = () => {
           )}
         </div>
       </motion.section>
+
+      {!!userTournaments.length && (
+        <motion.section
+          className="mt-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-2xl font-bold"
+          >
+            Турниры
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="text-sm text-neutral-400"
+          >
+            Все турниры, в которых пользователь участвовал
+          </motion.p>
+          <ul className="mt-2">
+            {userTournaments.map((tournament: any) => (
+              <motion.li
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={tournament.id}
+                className="bg-card rounded-lg hover:shadow-(--neon-shadow) transition-all duration-300"
+              >
+                <Link
+                  className="block p-3"
+                  href={
+                    tournament.status === "archived"
+                      ? `/archive/${tournament.id}`
+                      : `/tournaments/${tournament.id}`
+                  }
+                >
+                  <div className="block text-lg font-bold tracking-wide">
+                    {tournament.name}
+                  </div>
+                  <div className="mt-1 flex items-center gap-2 font-mono text-sm">
+                    <Image
+                      className="rounded-xs"
+                      src={
+                        tournament.game?.image_url ||
+                        tournament.game_snapshot?.image_url
+                      }
+                      width={20}
+                      height={20}
+                      alt="Game image"
+                    />
+                    {tournament.game
+                      ? tournament.game?.name
+                      : tournament.game_snapshot?.name}
+                  </div>
+                  <div className="mt-1 flex gap-2 items-center text-neutral-400 text-sm">
+                    <div className="flex items-center gap-2">
+                      {tournament.type === "team" ? (
+                        <Users className="w-4 h-4" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                      {tournament.type === "team" ? "Командный" : "Одиночный"}
+                    </div>
+                    |
+                    <div className="font-bold">
+                      {tournament.type === "team"
+                        ? `${tournament.teams?.length} / ${tournament?.max_teams}`
+                        : `${tournament.registrations?.length} / ${tournament?.max_players}`}
+                    </div>
+                  </div>
+                </Link>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.section>
+      )}
     </section>
   );
 };
 
-export default page;
+export default Page;

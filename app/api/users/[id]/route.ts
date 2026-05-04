@@ -16,6 +16,11 @@ export const GET = async (
             tournament: true,
           },
         },
+        won_archives: {
+          include: {
+            winner_team: true,
+          },
+        },
         games: true,
       },
     });
