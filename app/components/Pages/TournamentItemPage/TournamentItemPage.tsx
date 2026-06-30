@@ -3,6 +3,7 @@
 import TournamentStatBlocks from "@/app/components/TournamentPage/TournamentStatBlocks/TournamentStatBlocks";
 import {
   removeTournament,
+  setTournaments,
   updateTournament,
 } from "@/app/utils/store/tournamentsSlice";
 import DeleteTournamentModal from "@/app/components/DeleteTournamentModal/DeleteTournamentModal";
@@ -28,6 +29,7 @@ import { motion } from "motion/react";
 import Script from "next/script";
 import Link from "next/link";
 import axios from "axios";
+import { deleteData, getData } from "@/app/utils/requestHandler";
 
 export const statuses = {
   open: "Открыт",
@@ -88,7 +90,7 @@ const TournamentItemPage = () => {
     setErrorMsg("");
 
     try {
-      const url = `/api/tournaments/${tournament.id}/single`;
+      const url = `/api/tournaments/${tournament?.id}/single`;
 
       if (isJoined) {
         await axios.delete(url, {
@@ -98,7 +100,7 @@ const TournamentItemPage = () => {
         const updatedTournament = {
           ...tournament,
           registrations:
-            tournament.registrations?.filter(
+            tournament?.registrations?.filter(
               (reg) => reg.profile_id !== currentUser?.id,
             ) || [],
         };
@@ -111,7 +113,10 @@ const TournamentItemPage = () => {
 
         const updatedTournament = {
           ...tournament,
-          registrations: [...(tournament.registrations || []), newRegistration],
+          registrations: [
+            ...(tournament?.registrations || []),
+            newRegistration,
+          ],
         };
 
         dispatch(updateTournament(updatedTournament));
@@ -142,15 +147,15 @@ const TournamentItemPage = () => {
 
   const handleLoadTournament = async () => {
     setIsTournamentLoading(true);
-    try {
-      const { data } = await axios.get(`/api/tournaments/${tournamentId}`);
-      handleUpdateTournament(data);
-    } catch (error) {
-      toast.error("Ошибка загрузки турнира " + tournamentId);
-      console.log(error);
-    } finally {
-      setIsTournamentLoading(false);
+    const fetchTournament = await getData<ITournament>(
+      `/tournaments/${tournamentId}`,
+    );
+    if (tournament) {
+      handleUpdateTournament(fetchTournament);
+    } else {
+      dispatch(setTournaments([...tournaments, fetchTournament]));
     }
+    setIsTournamentLoading(false);
   };
 
   useEffect(() => {
@@ -162,33 +167,22 @@ const TournamentItemPage = () => {
 
     setIsLoading(true);
     setErrorMsg("");
-
-    try {
-      await axios.delete(`/api/tournaments/${tournament.id}`);
-
-      toast.success("Турнир удален");
-      dispatch(removeTournament({ tournamentId: tournament.id }));
-      router.replace("/tournaments");
-    } catch (err: any) {
-      console.error("Delete error:", err.response?.data || err.message);
-      const errorText =
-        err.response?.data?.error || "Не удалось удалить турнир";
-      toast.error(errorText);
-      setErrorMsg(errorText);
-    } finally {
-      setIsLoading(false);
-      setShowDeleteConfirm(false);
-    }
+    await deleteData(`/api/tournaments/${tournament.id}`);
+    toast.success("Турнир удален");
+    dispatch(removeTournament({ tournamentId: tournament.id }));
+    router.replace("/tournaments");
+    setIsLoading(false);
+    setShowDeleteConfirm(false);
   };
 
-  if (isTournamentLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] gap-2">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        Загрузка турнира...
-      </div>
-    );
-  }
+  // if (isTournamentLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-[60vh] gap-2">
+  //       <Loader2 className="h-8 w-8 animate-spin" />
+  //       Загрузка турнира...
+  //     </div>
+  //   );
+  // }
 
   if (!tournament && !isTournamentLoading) {
     return (
@@ -199,20 +193,20 @@ const TournamentItemPage = () => {
     );
   }
 
-  const isTeamMode = tournament.type === "team";
+  const isTeamMode = tournament?.type === "team";
   const filledSlots = isTeamMode
-    ? tournament.teams?.length || 0
-    : tournament.registrations?.length || 0;
+    ? tournament?.teams?.length || 0
+    : tournament?.registrations?.length || 0;
 
   const isFull =
-    tournament.type === "team"
-      ? tournament.teams.length === tournament.max_teams
-      : tournament.registrations?.length === tournament.max_players;
+    tournament?.type === "team"
+      ? tournament.teams?.length === tournament.max_teams
+      : tournament?.registrations?.length === tournament?.max_players;
 
-  const isCurrentUserJudge = tournament.judges?.some(
+  const isCurrentUserJudge = tournament?.judges?.some(
     (judge) => judge.profile_id === currentUser?.id,
   );
-  const isUserHasTeam = tournament.teams?.some((team) =>
+  const isUserHasTeam = tournament?.teams?.some((team) =>
     team.members?.some((member) => member.profile_id === currentUser?.id),
   );
 
@@ -236,16 +230,16 @@ const TournamentItemPage = () => {
         handleClickEdit={handleOpenEditModal}
       />
 
-      {tournament.status === "finished" && (
+      {tournament?.status === "finished" && (
         <WinnerBlock
-          winner_team={tournament.winner_team}
-          winner_user={tournament.winner_user}
+          winner_team={tournament?.winner_team}
+          winner_users={tournament?.winner_users}
         />
       )}
 
       <TournamentStatBlocks tournament={tournament} />
 
-      {tournament.status === "finished" && (
+      {tournament?.status === "finished" && (
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -261,7 +255,7 @@ const TournamentItemPage = () => {
         </motion.section>
       )}
 
-      {tournament.status === "in_progress" && tournament.stream_link?.[0] && (
+      {tournament?.status === "in_progress" && tournament?.stream_link?.[0] && (
         <div className="mx-auto max-w-7xl mb-12 border border-border">
           <Script
             src="https://embed.twitch.tv/embed/v1.js"
@@ -278,8 +272,8 @@ const TournamentItemPage = () => {
         </div>
       )} */}
 
-      {(tournament.status === "open" ||
-        tournament.status === "about_to_start") && (
+      {(tournament?.status === "open" ||
+        tournament?.status === "about_to_start") && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -293,8 +287,9 @@ const TournamentItemPage = () => {
             <span className="text-xs font-mono text-primary">
               {Math.round(
                 isTeamMode
-                  ? (tournament.teams.length / tournament.max_teams) * 100
-                  : (tournament.registrations.length / tournament.max_players) *
+                  ? (tournament?.teams?.length / tournament?.max_teams) * 100
+                  : (tournament?.registrations?.length /
+                      tournament?.max_players) *
                       100,
               )}
               %
@@ -305,7 +300,7 @@ const TournamentItemPage = () => {
               className="h-full rounded-full bg-linear-to-r from-primary to-primary/60"
               initial={{ width: 0 }}
               animate={{
-                width: `${((filledSlots || 0) / (tournament.type === "team" ? tournament.max_teams : tournament.max_players || 1)) * 100}%`,
+                width: `${((filledSlots || 0) / (tournament?.type === "team" ? tournament?.max_teams : tournament?.max_players || 1)) * 100}%`,
               }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             />
@@ -319,11 +314,11 @@ const TournamentItemPage = () => {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <AddJudgeBlock
-          tournamentStatus={tournament.status}
-          judges={tournament.judges}
-          isTeamTournament={tournament.type === "team"}
-          teams={tournament.teams}
-          registrations={tournament.registrations}
+          tournamentStatus={tournament?.status}
+          judges={tournament?.judges}
+          isTeamTournament={tournament?.type === "team"}
+          teams={tournament?.teams}
+          registrations={tournament?.registrations}
         />
       </motion.section>
 
@@ -334,7 +329,7 @@ const TournamentItemPage = () => {
         transition={{ duration: 0.4, delay: 0.3 }}
       >
         <div className="flex items-center justify-between mb-4">
-          {tournament.type !== "bracket" && (
+          {tournament?.type !== "bracket" && (
             <>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
@@ -343,11 +338,11 @@ const TournamentItemPage = () => {
                 </span>
                 <span className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   {filledSlots} /{" "}
-                  {isTeamMode ? tournament.max_teams : tournament.max_players}
+                  {isTeamMode ? tournament?.max_teams : tournament?.max_players}
                 </span>
               </div>
 
-              {tournament.status === "open" && (
+              {tournament?.status === "open" && (
                 <JoinTournamentButton
                   isFull={isFull}
                   handleOpenCreateTeamModal={handleOpenCreateTeamModal}
@@ -362,7 +357,7 @@ const TournamentItemPage = () => {
                   }
                   isJoinedSingleTournament={
                     !isTeamMode
-                      ? tournament.registrations.some(
+                      ? tournament?.registrations?.some(
                           (registration) =>
                             registration.profile_id === currentUser?.id,
                         )
@@ -383,15 +378,15 @@ const TournamentItemPage = () => {
 
         {isTeamMode ? (
           <TeamList
-            teams={tournament.teams || []}
-            tournamentId={tournament.id}
-            judges={tournament.judges}
-            maxPlayersPerTeam={tournament.players_per_team}
+            teams={tournament?.teams || []}
+            tournamentId={tournament?.id}
+            judges={tournament?.judges}
+            maxPlayersPerTeam={tournament?.players_per_team}
             isLoading={isLoading}
-            tournament_status={tournament.status}
+            tournament_status={tournament?.status}
           />
         ) : (
-          <UserList registrations={tournament.registrations} />
+          <UserList registrations={tournament?.registrations} />
         )}
       </motion.section>
 
@@ -415,7 +410,7 @@ const TournamentItemPage = () => {
         onClose={handleCloseCreateTeamModal}
       >
         <CreateTeamModal
-          tournamentId={tournament.id}
+          tournamentId={tournament?.id}
           onClose={handleCloseCreateTeamModal}
         />
       </CustomModal>
@@ -426,12 +421,14 @@ const TournamentItemPage = () => {
       >
         {isTeamMode ? (
           <SelectWinnerTeamModal
-            teams={tournament.teams}
+            availableRewards={tournament?.rewards}
+            teams={tournament?.teams}
             onClose={handleCloseSelectWinnerModal}
           />
         ) : (
           <SelectWinnerUserModal
-            registrations={tournament.registrations}
+            registrations={tournament?.registrations}
+            availableRewards={tournament?.rewards}
             onClose={handleCloseSelectWinnerModal}
           />
         )}

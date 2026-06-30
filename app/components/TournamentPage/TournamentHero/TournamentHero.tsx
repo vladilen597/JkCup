@@ -15,12 +15,12 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import TournamentDurationDisplay from "../../Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import { useAppDispatch, useAppSelector } from "@/app/utils/store/hooks";
 import { format } from "date-fns";
 import { useParams, useRouter } from "next/navigation";
 import Tag from "../../Shared/Tag/Tag";
 import Title from "../../Title/Title";
-import TournamentDurationDisplay from "../../Shared/TournamentDurationDisplay/TournamentDurationDisplay";
 import CleanHtml from "../../Shared/CleanHtml/CleanHtml";
 import Badge from "../../Shared/Badge/Badge";
 import { ITournament } from "@/app/lib/types";
@@ -28,11 +28,11 @@ import axios from "axios";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import GameLine from "../../Shared/GameLine/GameLine";
-import StatCard from "../../Shared/StatCard/StatCard";
 import { ru } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { statuses } from "../../Pages/TournamentItemPage/TournamentItemPage";
+import Skeleton from "react-loading-skeleton";
+import CustomSkeleton from "../../Shared/CustomSkeleton/CustomSkeleton";
 
 interface ITournamentHeroProps {
   tournament: ITournament;
@@ -49,7 +49,7 @@ const TournamentHero = ({
 }: ITournamentHeroProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { currentUser } = useAppSelector((state) => state.user);
-  const isTeamMode = tournament.type === "team";
+  const isTeamMode = tournament?.type === "team";
   const { id }: { id: string } = useParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -60,7 +60,7 @@ const TournamentHero = ({
   const handleCloseRegistration = async () => {
     setIsLoading(true);
     try {
-      await axios.put(`/api/tournaments/${tournament.id}/status`, {
+      await axios.put(`/api/tournaments/${tournament?.id}/status`, {
         status: "about_to_start",
         started_at: null,
       });
@@ -78,7 +78,7 @@ const TournamentHero = ({
     setIsLoading(true);
     try {
       const { data } = await axios.put(
-        `/api/tournaments/${tournament.id}/status`,
+        `/api/tournaments/${tournament?.id}/status`,
         {
           status: "in_progress",
           started_at: new Date().toISOString(),
@@ -107,11 +107,11 @@ const TournamentHero = ({
     if (!isConfirmed) return;
 
     try {
-      await axios.post(`/api/tournaments/${tournament.id}/archive`);
+      await axios.post(`/api/tournaments/${tournament?.id}/archive`);
 
       toast.success("Турнир успешно архивирован!");
 
-      router.push("/tournaments");
+      router.replace("/archive");
       router.refresh();
     } catch (error: any) {
       console.error("Ошибка архивации:", error);
@@ -122,8 +122,8 @@ const TournamentHero = ({
   };
 
   const filledSlots = isTeamMode
-    ? tournament.teams?.length || 0
-    : tournament.registrations?.length || 0;
+    ? tournament?.teams?.length || 0
+    : tournament?.registrations?.length || 0;
 
   return (
     <motion.div
@@ -137,11 +137,11 @@ const TournamentHero = ({
         <div className="flex px-8 py-4 flex-col md:flex-row gap-2 md:gap-0 items-start md:items-center justify-between border-b">
           <div>
             <div className="flex items-center gap-4">
-              {tournament.creator && (
+              {tournament?.creator && (
                 <div className="flex flex-col justify-between">
                   <span className="text-xs font-mono">Создатель</span>
                   <Link
-                    href={`/users/${tournament.creator_id}`}
+                    href={`/users/${tournament?.creator_id}`}
                     className="cursor-pointer group"
                   >
                     <div className="mt-1 flex gap-2 items-center">
@@ -170,7 +170,7 @@ const TournamentHero = ({
             </div>
           </div>
           <div className="flex gap-3">
-            {tournament.status === "open" && (
+            {tournament?.status === "open" && (
               <CustomButton
                 icon={<Album className="h-4 w-4" />}
                 label="Закрыть регистрацию"
@@ -178,7 +178,7 @@ const TournamentHero = ({
                 onClick={handleCloseRegistration}
               />
             )}
-            {tournament.status === "about_to_start" && (
+            {tournament?.status === "about_to_start" && (
               <CustomButton
                 icon={<Trophy className="h-4 w-4" />}
                 label="Начать турнир"
@@ -186,21 +186,21 @@ const TournamentHero = ({
                 onClick={handleStartTournament}
               />
             )}
-            {tournament.status === "in_progress" && (
+            {tournament?.status === "in_progress" && (
               <CustomButton
                 icon={<Trophy className="h-4 w-4" />}
                 label="Закончить и выбрать победителя"
                 onClick={handleClickDeleteWinner}
               />
             )}
-            {tournament.status === "finished" && (
+            {tournament?.status === "finished" && (
               <CustomButton
                 icon={<Archive className="h-4 w-4" />}
                 label="Архивировать"
                 onClick={handleArhiveTournament}
               />
             )}
-            {tournament.status !== "finished" && handleClickEdit && (
+            {tournament?.status !== "finished" && handleClickEdit && (
               <CustomButton
                 icon={<Edit className="h-4 w-4 text-amber-600" />}
                 className="py-1.5 px-2.5 bg-amber-600/20 hover:bg-amber-600/40 text-white border border-amber-600!"
@@ -224,27 +224,40 @@ const TournamentHero = ({
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Badge
-              className="bg-primary/10 text-primary font-bold tracking-wider"
-              text={statuses[tournament.status as keyof typeof statuses]}
-            />
-            <span className="px-3 py-1 font-mono rounded-full text-xs font-medium bg-muted text-muted-foreground">
-              {isTeamMode ? "Командный" : "Одиночный"}
-            </span>
+            {tournament ? (
+              <Badge
+                className="bg-primary/10 text-primary font-bold tracking-wider"
+                text={statuses[tournament?.status as keyof typeof statuses]}
+              />
+            ) : (
+              <CustomSkeleton width={67} height={24} />
+            )}
 
-            {tournament.hidden && (
+            {tournament ? (
+              <span className="px-3 py-1 font-mono rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                {isTeamMode ? "Командный" : "Одиночный"}
+              </span>
+            ) : (
+              <CustomSkeleton width={67} height={24} />
+            )}
+
+            {tournament?.hidden && (
               <Badge
                 text="Скрыт"
                 className="bg-amber-400 text-black border border-destructive/20"
               />
             )}
-            {tournament.tags?.map((tag) => (
+            {tournament?.tags?.map((tag) => (
               <Tag key={tag.id} {...tag} />
             ))}
           </div>
         </div>
 
-        <Title title={tournament.name} className="mt-2" />
+        <Title
+          isLoading={!tournament?.name}
+          title={tournament?.name}
+          className="mt-2"
+        />
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -252,54 +265,81 @@ const TournamentHero = ({
           className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2 max-w-5xl mx-auto py-4 border-b border-border"
         >
           <div className="flex items-center gap-2">
-            <Image
-              src={tournament.game?.image_url}
-              width={24}
-              height={24}
-              className="w-6 h-6 object-cover rounded-xs"
-              alt="Game image"
-            />
-            <div className="text-xs text-foreground/75 font-mono">
-              {tournament?.game?.name}
-            </div>
+            {tournament ? (
+              <Image
+                src={tournament?.game?.image_url}
+                width={24}
+                height={24}
+                className="w-6 h-6 object-cover rounded-xs"
+                alt="Game image"
+              />
+            ) : (
+              <CustomSkeleton width={24} height={24} borderRadius={4} />
+            )}
+            {tournament ? (
+              <div className="text-xs text-foreground/75 font-mono">
+                {tournament?.game?.name}
+              </div>
+            ) : (
+              <CustomSkeleton width={64} height={12} />
+            )}
           </div>
           <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
             <Users className="h-4 w-4" />
-            <div className="text-xs text-foreground/75 font-mono">
-              {isTeamMode
-                ? `${tournament.players_per_team}v${tournament.players_per_team}`
-                : "1v1"}
-            </div>
+            {tournament ? (
+              <div className="text-xs text-foreground/75 font-mono">
+                {isTeamMode
+                  ? `${tournament?.players_per_team}v${tournament?.players_per_team}`
+                  : "1v1"}
+              </div>
+            ) : (
+              <CustomSkeleton width={21} height={16} />
+            )}
           </div>
           <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
             <Hash className="h-4 w-4" />
-            <div className="text-xs text-foreground/75 font-mono">
-              {filledSlots} /{" "}
-              {isTeamMode ? tournament.max_teams : tournament.max_players}
-            </div>
+            {tournament ? (
+              <div className="text-xs text-foreground/75 font-mono">
+                {filledSlots} /{" "}
+                {isTeamMode ? tournament?.max_teams : tournament?.max_players}
+              </div>
+            ) : (
+              <CustomSkeleton width={43} height={16} />
+            )}
           </div>
-          {!!tournament.duration && (
+          {!!tournament?.duration && (
             <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
               <Clock className="h-4 w-4" />
-              <TournamentDurationDisplay
-                duration={tournament.duration}
-                status={tournament.status}
-                plain
-              />
+              {tournament ? (
+                <TournamentDurationDisplay
+                  duration={tournament?.duration}
+                  status={tournament?.status}
+                  plain
+                />
+              ) : (
+                <CustomSkeleton width={60} height={16} />
+              )}
             </div>
           )}
+
           <div className="flex items-center gap-2 text-foreground/75 font-mono text-xs">
             <Calendar className="h-4 w-4" />
-            {tournament.start_date
-              ? format(new Date(tournament.start_date), "dd MMMM yyyy HH:mm", {
+            {tournament ? (
+              tournament?.start_date ? (
+                format(new Date(tournament?.start_date), "dd MMMM yyyy HH:mm", {
                   locale: ru,
                 })
-              : "Скоро"}
+              ) : (
+                "Скоро"
+              )
+            ) : (
+              <CustomSkeleton width={120} height={16} />
+            )}
           </div>
         </motion.div>
 
         <div className="mt-2 whitespace-pre-wrap">
-          <CleanHtml html={tournament.description} />
+          <CleanHtml html={tournament?.description} />
         </div>
       </div>
     </motion.div>

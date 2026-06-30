@@ -29,7 +29,7 @@ model Profile {
   steam_profile_url String?
 
   created_tournaments      Tournament[]             @relation("TournamentCreator")
-  won_tournaments          Tournament[]             @relation("TournamentWinnerUser")
+  won_tournaments TournamentWinner[] @relation("TournamentWinnerUser")
   judged_tournaments       TournamentJudge[]        @relation("ProfileAsJudge")
   team_memberships         TeamMember[]             @relation("TeamMembership")
   tournament_registrations TournamentRegistration[] @relation("UserTournamentRegistrations")
@@ -52,43 +52,58 @@ model Profile {
 }
 
 model Tournament {
-  id               String  @id @default(cuid())
+  id               String    @id @default(cuid())
   name             String
   game_id          String?
-  type             String  @default("single")
+  type             String    @default("single")
   max_players      Int?
   max_teams        Int?
-  players_per_team Int     @default(1)
+  players_per_team Int       @default(1)
+  description      String?
+  start_date       DateTime?
+  status           String    @default("open")
+  duration         Int?
+  creator_id       String    @db.Uuid
+  hidden           Boolean   @default(false)
+  is_bracket       Boolean   @default(false)
+  rules            String?
+  stream_link      String?
+  rewards          Json?     // Массив [{id, value}]
+  tags             Json?
 
-  description String?
-  start_date  DateTime?
-  status      String    @default("open")
-  duration    Int?
-  creator_id  String    @db.Uuid
-  hidden      Boolean   @default(false)
-  is_bracket  Boolean   @default(false)
-  rules       String?
-  stream_link String?
-  rewards     Json?
-  tags        Json?
-
-  winner_user_id String?   @db.Uuid
   winner_team_id String?   @unique
   started_at     DateTime?
   created_at     DateTime  @default(now()) @map("created_at")
 
   game        Game?           @relation(fields: [game_id], references: [id])
   creator     Profile         @relation("TournamentCreator", fields: [creator_id], references: [id], onDelete: Cascade)
-  winner_user Profile?        @relation("TournamentWinnerUser", fields: [winner_user_id], references: [id], onDelete: SetNull)
-  winner_team TournamentTeam? @relation("TournamentWinnerTeam", fields: [winner_team_id], references: [id], onDelete: SetNull)
 
   teams         TournamentTeam[]         @relation("TournamentTeams")
   registrations TournamentRegistration[] @relation("TournamentRegistrations")
   judges        TournamentJudge[]        @relation("TournamentJudges")
   rounds        Round[]                  @relation("TournamentRounds")
 
+  winner_users  TournamentWinner[]       @relation("TournamentWinnerUsers")
+
   @@map("tournaments")
 }
+
+model TournamentWinner {
+  id            String   @id @default(cuid())
+  tournament_id String
+  user_id       String   @db.Uuid
+  reward_id     String 
+  reward_value  String   
+  created_at    DateTime @default(now())  
+  team_name     String?
+
+  tournament    Tournament @relation("TournamentWinnerUsers", fields: [tournament_id], references: [id], onDelete: Cascade)
+  user          Profile    @relation("TournamentWinnerUser", fields: [user_id], references: [id], onDelete: Cascade)
+
+
+  @@map("tournament_winners")
+}
+
 
 model ArchivedTournament {
   id               String    @id
@@ -119,51 +134,57 @@ model ArchivedTournament {
   archived_at DateTime  @default(now()) @map("archived_at")
   creator_id  String    @db.Uuid
 
-  winner_team_id String?       @unique // @unique если одна команда на турнир
+  winner_team_id String?       @unique 
   winner_team    ArchivedTeam? @relation("ArchivedWinnerTeam", fields: [winner_team_id], references: [id])
 
-  winner_user_id String?  @db.Uuid
-  winner_user    Profile? @relation("ArchivedWinner", fields: [winner_user_id], references: [id])
+  // Связь с победителем, соответствующая won_archives в Profile
+  winner_user_id String?   @db.Uuid
+  winner_user    Profile?  @relation("ArchivedWinner", fields: [winner_user_id], references: [id])
 
   @@map("archived_tournaments")
 }
 
 model ArchivedJudge {
-  id            String @id @default(cuid())
+  id            String             @id @default(cuid())
   tournament_id String
-  user_id       String @db.Uuid
+  tournament    ArchivedTournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  
+  user_id       String             @db.Uuid
+  user          Profile            @relation("UserJudgeHistory", fields: [user_id], references: [id], onDelete: Cascade)
 
-  tournament ArchivedTournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
-  profile    Profile            @relation("UserJudgeHistory", fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([tournament_id, user_id])
   @@map("archived_tournament_judges")
 }
 
 model ArchivedTeam {
-  id            String  @id @default(cuid())
+  id            String              @id @default(cuid())
   tournament_id String
-  name          String?
-
-  tournament     ArchivedTournament  @relation("ArchivedTournamentTeams", fields: [tournament_id], references: [id], onDelete: Cascade)
-  won_tournament ArchivedTournament? @relation("ArchivedWinnerTeam")
-
-  members ArchivedParticipant[]
+  tournament    ArchivedTournament  @relation("ArchivedTournamentTeams", fields: [tournament_id], references: [id], onDelete: Cascade)
+  name          String
+  
+  members       ArchivedParticipant[]
+  winner_of     ArchivedTournament?   @relation("ArchivedWinnerTeam")
 
   @@map("archived_tournament_teams")
 }
 
 model ArchivedParticipant {
-  id            String  @id @default(cuid())
+  id            String             @id @default(cuid())
   tournament_id String
-  user_id       String  @db.Uuid
-  team_id       String?
-  team_name     String?
-  is_winner     Boolean @default(false)
-
   tournament    ArchivedTournament @relation("ArchivedTournamentRegistrations", fields: [tournament_id], references: [id], onDelete: Cascade)
-  profile       Profile            @relation("UserHistory", fields: [user_id], references: [id], onDelete: Cascade)
-  archived_team ArchivedTeam?      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  
+  user_id       String             @db.Uuid
+  user          Profile            @relation("UserHistory", fields: [user_id], references: [id], onDelete: Cascade)
+  
+  team_id       String?
+  team          ArchivedTeam?      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  team_name     String?           
+
+  is_winner     Boolean            @default(false)
+  
+  reward_id     String?
+  reward_value  String?
+
+  created_at    DateTime           @default(now())
 
   @@map("archived_tournament_participants")
 }
@@ -193,8 +214,6 @@ model TournamentTeam {
   members    TeamMember[] @relation("TournamentTeamMembers")
 
   match_participations MatchParticipant[]
-
-  won_tournament Tournament? @relation("TournamentWinnerTeam")
 
   @@map("tournament_teams")
 }

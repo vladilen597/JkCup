@@ -5,6 +5,7 @@ import {
   ITeamMember,
   ITournament,
   ITournamentJudge,
+  ITournamentWinner,
   IUser,
 } from "@/app/lib/types";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
@@ -191,26 +192,30 @@ const tournamentsSlice = createSlice({
     },
     selectWinnerTeam: (
       state,
-      action: PayloadAction<{ team: ITeam; tournamentId: string }>,
+      action: PayloadAction<{ tournamentId: string; winners: any[] }>,
     ) => {
-      const tournament = state.tournaments.find(
-        (t) => t.id === action.payload.tournamentId,
-      );
+      const { tournamentId, winners } = action.payload;
+
+      const tournament = state.tournaments.find((t) => t.id === tournamentId);
       if (tournament) {
-        tournament.winner_team = action.payload.team;
         tournament.status = "finished";
+        tournament.winner_users = winners;
       }
     },
     selectWinnerUser: (
       state,
-      action: PayloadAction<{ user: IUser; tournamentId: string }>,
+      action: PayloadAction<{
+        tournamentId: string;
+        winners: ITournamentWinner[];
+      }>,
     ) => {
       const tournament = state.tournaments.find(
         (t) => t.id === action.payload.tournamentId,
       );
+
       if (tournament) {
-        tournament.winner_user = action.payload.user;
         tournament.status = "finished";
+        tournament.winner_users = action.payload.winners;
       }
     },
     removeTeam: (

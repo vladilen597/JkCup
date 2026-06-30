@@ -15,14 +15,15 @@ import Tournament from "@/app/utils/Tournament";
 import { ITournament } from "@/app/lib/types";
 import { Trophy, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import axios from "axios";
 import PageHero from "@/app/components/Shared/PageHero/PageHero";
 import EmptyListPlaceholder from "../../Shared/EmptyListPlaceholder/EmptyListPlaceholder";
+import { getData } from "@/app/utils/requestHandler";
 
 const TournamentsPage = () => {
   const { tournaments } = useAppSelector((state) => state.tournaments);
-  const { currentUser } = useAppSelector((state) => state.user);
+  const currentUserRole = useAppSelector(
+    (state) => state.user.currentUser?.role,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -30,18 +31,13 @@ const TournamentsPage = () => {
     useState(false);
 
   const canCreateTournament =
-    currentUser?.role === "admin" || currentUser?.role === "superadmin";
+    currentUserRole === "admin" || currentUserRole === "superadmin";
 
   const handleLoadTournaments = async () => {
     setIsLoading(true);
-    try {
-      const { data } = await axios.get("/api/tournaments");
-      dispatch(setTournaments(data));
-    } catch (error) {
-      toast.error("Ошибка загрузки турниров");
-    } finally {
-      setIsLoading(false);
-    }
+    const tournaments = await getData<ITournament[]>("/tournaments");
+    dispatch(setTournaments(tournaments));
+    setIsLoading(false);
   };
 
   const handleCreateTournament = (data: ITournament) => {
@@ -59,7 +55,7 @@ const TournamentsPage = () => {
   const filteredTournaments = tournaments?.filter((tournament: ITournament) => {
     if (!tournament.hidden) return true;
 
-    return currentUser?.role !== "user";
+    return currentUserRole !== "user";
   });
 
   return (
@@ -81,7 +77,7 @@ const TournamentsPage = () => {
         }
         bottomContent={<TournamentStats />}
       />
-      {filteredTournaments.length ? (
+      {filteredTournaments?.length ? (
         <ul className="space-y-3">
           {filteredTournaments?.map((tournament, index) => {
             const isTeam = tournament.type === "team";

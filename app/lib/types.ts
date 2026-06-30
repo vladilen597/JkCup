@@ -97,6 +97,16 @@ export interface ITournamentJudge {
   profile?: IUser;
 }
 
+export interface ITournamentWinner {
+  id: string;
+  tournament_id: string;
+  user_id: string;
+  reward_id: string;
+  reward_value: string;
+  created_at: string;
+  user: IUser;
+}
+
 export interface ITournament {
   id: string;
   name: string;
@@ -116,7 +126,7 @@ export interface ITournament {
   teams?: ITeam[];
   judges?: ITournamentJudge[];
   winner_user_id: string | null;
-  winner_user?: IUser | null;
+  winner_users?: ITournamentWinner[];
   winner_team_id: string | null;
   winner_team?: ITeam | null;
 
@@ -179,14 +189,13 @@ export interface IArchivedJudge {
   id: string;
   tournament_id: string;
   user_id: string;
-  profile: IUser;
+  user: IUser;
 }
 
 export interface IArchivedTeam {
   id: string;
   tournament_id: string;
   name: string;
-
   members: IArchivedParticipant[];
 }
 
@@ -194,11 +203,15 @@ export interface IArchivedParticipant {
   id: string;
   tournament_id: string;
   user_id: string;
-  team_id?: string | null;
-  team_name?: string | null;
+  user: IUser;
+
+  team_id: string | null;
+  team_name: string | null;
   is_winner: boolean;
 
-  profile: IUser;
+  reward_id: string | null;
+  reward_value: string | null;
+  created_at: string | Date;
 }
 
 export interface IRound {

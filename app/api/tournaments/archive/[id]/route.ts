@@ -16,14 +16,14 @@ export const GET = async (
         winner_team: {
           include: {
             members: {
-              include: { profile: true },
+              include: { user: true },
             },
           },
         },
 
         judges: {
           include: {
-            profile: true,
+            user: true,
           },
         },
 
@@ -31,7 +31,7 @@ export const GET = async (
           include: {
             members: {
               include: {
-                profile: true,
+                user: true,
               },
             },
           },
@@ -39,11 +39,9 @@ export const GET = async (
 
         registrations: {
           include: {
-            profile: true,
+            user: true,
           },
-          orderBy: {
-            is_winner: "desc",
-          },
+          orderBy: [{ reward_id: "desc" }, { is_winner: "desc" }],
         },
       },
     });
@@ -57,6 +55,7 @@ export const GET = async (
 
     return NextResponse.json(tournament);
   } catch (error: any) {
+    console.error("GET Archive Error:", error);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 };
@@ -72,8 +71,9 @@ export const DELETE = async (
       where: { id },
     });
 
-    return NextResponse.json({ status: 200, message: "Успешно удалено" });
+    return NextResponse.json({ message: "Успешно удалено" }, { status: 200 }); // ИСПРАВЛЕНО: правильный синтаксис статуса для NextResponse
   } catch (error: any) {
+    console.error("DELETE Archive Error:", error);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 };

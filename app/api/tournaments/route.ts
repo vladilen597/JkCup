@@ -7,8 +7,11 @@ export const GET = async () => {
       include: {
         game: true,
         creator: true,
-        winner_user: true,
-        winner_team: true,
+        winner_users: {
+          include: {
+            user: true,
+          },
+        },
 
         judges: {
           include: {
@@ -140,12 +143,7 @@ export const PUT = async (req: Request) => {
       include: {
         game: true,
         creator: true,
-        winner_user: true,
-        winner_team: {
-          include: {
-            members: { include: { profile: true } },
-          },
-        },
+        winner_users: true,
         registrations: { include: { profile: true } },
         teams: {
           include: {

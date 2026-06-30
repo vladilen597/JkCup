@@ -1,5 +1,5 @@
 import { useTournamentStats } from "@/app/utils/useTournamentUsersRealtime";
-import { Loader2, Sword, Swords, User, Users } from "lucide-react";
+import { User, Users } from "lucide-react";
 import React from "react";
 import CountUp from "react-countup";
 

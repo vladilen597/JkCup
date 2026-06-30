@@ -68,6 +68,7 @@ const trophyStyles = {
 
 const ArchiveTournamentPage = () => {
   const [tournament, setTournament] = useState<IArchivedTournament>();
+  const [normalizedTeams, setNormalizedTeams] = useState<any[]>([]);
   const params = useParams();
   const dispatch = useAppDispatch();
   const { currentUser } = useAppSelector((state) => state.user);
@@ -77,20 +78,7 @@ const ArchiveTournamentPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const router = useRouter();
-
-  const handleOpenSelectWinnerModal = () => {
-    setIsWinnerModalOpen(true);
-  };
-
-  const handleCloseSelectWinnerModal = () => {
-    setIsWinnerModalOpen(false);
-  };
-
-  const handleOpenDeleteModal = () => {
-    setShowDeleteConfirm(true);
-  };
 
   const handleCloseDeleteModal = () => {
     setShowDeleteConfirm(false);
@@ -103,9 +91,23 @@ const ArchiveTournamentPage = () => {
         `/api/tournaments/archive/${tournamentId}`,
       );
       setTournament(data);
+
+      if (data?.teams) {
+        const teamsWithProfiles = data.teams.map((team: any) => {
+          const updatedMembers = (team.members || []).map((m: any) => ({
+            ...m,
+            profile: m.user,
+          }));
+
+          return {
+            ...team,
+            members: updatedMembers,
+          };
+        });
+        setNormalizedTeams(teamsWithProfiles);
+      }
     } catch (error) {
       toast.error("Ошибка загрузки турнира из архива " + tournamentId);
-      console.log(error);
     } finally {
       setIsTournamentLoading(false);
     }
@@ -127,10 +129,19 @@ const ArchiveTournamentPage = () => {
       toast.success("Турнир удален из архива");
       dispatch(removeTournament({ tournamentId: tournament.id }));
       router.replace("/archive");
-    } catch (err: any) {
-      console.error("Delete error:", err.response?.data || err.message);
-      const errorText =
-        err.response?.data?.error || "Не удалось удалить турнир";
+    } catch (err: unknown) {
+      let errorText = "Не удалось удалить турнир";
+
+      if (axios.isAxiosError<{ error: string }>(err)) {
+        console.error("Delete error:", err.response?.data || err.message);
+        errorText = err.response?.data?.error || err.message;
+      } else if (err instanceof Error) {
+        console.error("Generic error:", err.message);
+        errorText = err.message;
+      } else {
+        console.error("Unexpected error:", err);
+      }
+
       toast.error(errorText);
       setErrorMsg(errorText);
     } finally {
@@ -162,8 +173,6 @@ const ArchiveTournamentPage = () => {
     ? tournament.teams.length || 0
     : tournament.registrations.length || 0;
 
-  // const isBracketMode = tournament?.is_bracket === true;
-
   const canEdit =
     currentUser?.role === "superadmin" || currentUser?.role === "admin";
 
@@ -173,6 +182,19 @@ const ArchiveTournamentPage = () => {
 
   const canEditTournament =
     currentUser?.role === "admin" || currentUser?.role === "superadmin";
+
+  const winnerUsers = (tournament.registrations || [])
+    .filter((p) => !!p.reward_id)
+    .map((p) => ({
+      id: p.id,
+      tournament_id: tournament.id,
+      user_id: p.user_id,
+      reward_id: p.reward_id!,
+      reward_value: p.reward_value!,
+      created_at: String(tournament.created_at),
+      team_name: p.team_name || "",
+      user: p.user,
+    }));
 
   return (
     <main className="w-full px-4 py-8">
@@ -270,11 +292,13 @@ const ArchiveTournamentPage = () => {
         </div>
       </motion.div>
 
-      {tournament.status === "archived" && (
-        <WinnerBlock
-          winner_team={tournament.winner_team}
-          winner_user={winner.profile}
-        />
+      {winnerUsers.length > 0 && (
+        <div className="max-w-5xl mx-auto mb-8">
+          <WinnerBlock
+            winner_users={winnerUsers}
+            winner_team={tournament.winner_team as any}
+          />
+        </div>
       )}
 
       <section>
@@ -291,8 +315,8 @@ const ArchiveTournamentPage = () => {
             </div>
             <ul className="mt-1.5 space-y-2">
               {tournament.rewards?.map((reward, index) => (
-                <div className="flex items-center gap-2" key={reward.id}>
-                  {index < 2 ? (
+                <div className="flex items-center gap-2" key={reward?.id}>
+                  {index < 3 ? (
                     <div
                       className={cn(
                         "flex p-2 items-center justify-center rounded-xl bg-linear-to-br border",
@@ -345,9 +369,14 @@ const ArchiveTournamentPage = () => {
             {tournament.judges.length}
           </span>
         </div>
-        {tournament.judges.length > 0 && (
-          <JudgeList judges={tournament.judges} hideDelete />
-        )}
+        <JudgeList
+          judges={
+            (tournament.judges || []).map((judge) => ({
+              ...judge,
+              profile: judge.user,
+            })) as any
+          }
+        />
       </motion.section>
 
       <motion.section
@@ -377,15 +406,24 @@ const ArchiveTournamentPage = () => {
         <div className="mt-2">
           {isTeamMode ? (
             <TeamList
-              teams={tournament.teams || []}
               tournamentId={tournament.id}
-              judges={tournament.judges}
-              maxPlayersPerTeam={tournament.players_per_team}
-              isLoading={isLoading}
               tournament_status={tournament.status}
+              maxPlayersPerTeam={tournament.players_per_team}
+              judges={
+                (tournament.judges || []).map((j) => ({
+                  ...j,
+                  profile: j.user,
+                })) as any
+              }
+              teams={normalizedTeams}
             />
           ) : (
-            <UserList registrations={tournament.registrations} />
+            <UserList
+              registrations={tournament.registrations.map((reg) => ({
+                ...reg,
+                profile: reg.user,
+              }))}
+            />
           )}
         </div>
       </motion.section>
@@ -396,23 +434,6 @@ const ArchiveTournamentPage = () => {
           onClose={handleCloseDeleteModal}
           onSubmit={handleDelete}
         />
-      </CustomModal>
-
-      <CustomModal
-        isOpen={isWinnerModalOpen}
-        onClose={handleCloseSelectWinnerModal}
-      >
-        {isTeamMode ? (
-          <SelectWinnerTeamModal
-            teams={tournament.teams}
-            onClose={handleCloseSelectWinnerModal}
-          />
-        ) : (
-          <SelectWinnerUserModal
-            registrations={tournament.registrations}
-            onClose={handleCloseSelectWinnerModal}
-          />
-        )}
       </CustomModal>
     </main>
   );

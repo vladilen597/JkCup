@@ -7,7 +7,6 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    console.log(id);
 
     const userTournaments = await prisma.tournament.findMany({
       where: {

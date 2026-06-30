@@ -17,10 +17,9 @@ export const GET = async (
       include: {
         game: true,
         creator: true,
-        winner_user: true,
-        winner_team: {
+        winner_users: {
           include: {
-            members: { include: { profile: true } },
+            user: true,
           },
         },
         registrations: {

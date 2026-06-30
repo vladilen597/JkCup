@@ -86,7 +86,7 @@ const ContactPage = () => {
           ) : (
             <div className="border-dashed border rounded-lg p-4">
               <p className="text-neutral-400 text-center">
-                Вам нужно войти в ваш аккаунт чтобы оставить отзыв
+                Войдите в аккаунт чтобы оставить отзыв
               </p>
             </div>
           )}

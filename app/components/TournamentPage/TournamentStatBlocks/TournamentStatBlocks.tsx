@@ -24,15 +24,15 @@ const trophyStyles = {
 };
 
 const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
-  const isTeamMode = tournament.type === "team";
+  const isTeamMode = tournament?.type === "team";
 
-  const filledSlots = isTeamMode
-    ? tournament.teams?.length || 0
-    : tournament.registrations?.length || 0;
+  // const filledSlots = isTeamMode
+  //   ? tournament.teams?.length || 0
+  //   : tournament.registrations?.length || 0;
 
   return (
     <section>
-      {!!tournament.rewards?.length && (
+      {!!tournament?.rewards?.length && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,7 +44,7 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
             Награды
           </div>
           <ul className="mt-1.5 space-y-2">
-            {tournament.rewards?.map((reward, index) => (
+            {tournament?.rewards?.map((reward, index) => (
               <div className="flex items-center gap-2" key={reward.id}>
                 {index < 3 ? (
                   <div
@@ -75,9 +75,9 @@ const TournamentStatBlocks = ({ tournament }: ITournamentStatBlocksProps) => {
           </ul>
         </motion.div>
       )}
-      {!!tournament.rules && tournament?.rules !== "<p></p>" && (
+      {!!tournament?.rules && tournament?.rules !== "<p></p>" && (
         <div className="mt-2 max-w-5xl mx-auto">
-          <RulesExpandableBlock html={tournament.rules} />
+          <RulesExpandableBlock html={tournament?.rules} />
         </div>
       )}
     </section>
