@@ -112,7 +112,7 @@ export const PUT = async (req: Request) => {
       teams,
       judges,
       rounds,
-      winner_user,
+      winner_users,
       winner_user_id,
       winner_team,
       winner_team_id,
