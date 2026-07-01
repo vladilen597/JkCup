@@ -1,23 +1,33 @@
-import { NextResponse } from "next/server";
-
 import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async () => {
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) => {
   try {
+    const { searchParams } = new URL(req.url);
+    const sortParam = searchParams.get("sort") || "any";
+
+    let orderBy: any = { role: "asc" };
+
+    if (sortParam !== "any") {
+      orderBy = {
+        [sortParam]: sortParam === "created_at" ? "desc" : "asc",
+      };
+    }
+
     const users = await prisma.profile.findMany({
-      orderBy: {
-        role: "asc",
-      },
+      orderBy,
     });
 
     return NextResponse.json(users);
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.error("Users GET Error:", error);
+    const status = error?.response?.status || 500;
     return NextResponse.json(
-      {
-        error: error || "Ошибка при получении пользователей",
-      },
-      { status: error.response.status },
+      { error: "Ошибка при получении пользователей" },
+      { status },
     );
   }
 };

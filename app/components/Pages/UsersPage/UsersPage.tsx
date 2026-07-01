@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 import CountUp from "react-countup";
 import axios from "axios";
+import { getData } from "@/app/utils/requestHandler";
 
 const roles = [
   {
@@ -43,6 +44,24 @@ const roles = [
   },
 ];
 
+const sortByOptions = [
+  {
+    id: 1,
+    label: "По умолчанию",
+    value: "any",
+  },
+  {
+    id: 2,
+    label: "По дате рег.",
+    value: "created_at",
+  },
+  {
+    id: 3,
+    label: "По роли",
+    value: "role",
+  },
+];
+
 const UsersPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,6 +69,7 @@ const UsersPage = () => {
   const [userId, setUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const [sortBy, setSortBy] = useState(sortByOptions[0]);
 
   const handleChangeQuery = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -62,11 +82,14 @@ const UsersPage = () => {
   const handleLoadUsers = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get("/api/users");
-      setUsers(data || []);
+      const url = `/users?sort=${sortBy.value}&_t=${Date.now()}`;
+
+      const users = await getData<IUser[]>(url, {});
+
+      setUsers(users || []);
     } catch (err: any) {
       console.error(err);
-      setError(err.respose?.data?.message || "Ошибка загрузки пользователей");
+      setError(err.response?.data?.message || "Ошибка загрузки пользователей");
     } finally {
       setLoading(false);
     }
@@ -104,7 +127,7 @@ const UsersPage = () => {
 
   useEffect(() => {
     handleLoadUsers();
-  }, []);
+  }, [sortBy.value]);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -148,6 +171,12 @@ const UsersPage = () => {
         </h2>
         <div className="mt-2 flex items-stretch gap-2">
           <SearchInput value={searchQuery} onChange={handleChangeQuery} />
+          <CustomSelect
+            containerClassName="min-w-40 border"
+            options={sortByOptions}
+            value={sortBy}
+            onChange={setSortBy}
+          />
           <CustomSelect
             containerClassName="min-w-40 border"
             options={roles}
